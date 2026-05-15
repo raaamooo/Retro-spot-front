@@ -9,7 +9,7 @@ import {
   LayoutDashboard, DollarSign, Users, Package, Bell,
   TrendingUp, TrendingDown, QrCode, Clock, MapPin,
   ShoppingCart, CheckCircle2, AlertTriangle, User,
-  Plus, Edit, Trash2, Printer, X
+  Plus, Edit, Trash2, Printer, X, Archive, ArchiveRestore
 } from 'lucide-react';
 import { Button, Card, FormInput, Select } from '@/components';
 
@@ -20,8 +20,9 @@ interface Order {
   id: string;
   locationId: string;
   customerName: string;
-  status: string;
-  total: number;
+  status        : string;
+  archived      : boolean;
+  total         : number;
   tipAmount: number;
   paymentMethod: string;
   createdAt: string;
@@ -69,6 +70,7 @@ export default function ManagerPage() {
   const [loading, setLoading] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Workers CRUD state
   const [isAddingWorker, setIsAddingWorker] = useState(false);
@@ -91,7 +93,7 @@ export default function ManagerPage() {
   // --- FETCH INITIAL DATA ---
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/api/orders`).then(r => r.json()).catch(() => []),
+      fetch(`${API_URL}/api/orders?archived=all`).then(r => r.json()).catch(() => []),
       fetch(`${API_URL}/api/accounting`).then(r => r.json()).catch(() => []),
       fetch(`${API_URL}/api/workers`).then(r => r.json()).catch(() => []),
       fetch(`${API_URL}/api/waitercalls`).then(r => r.json()).catch(() => []),
@@ -142,8 +144,13 @@ export default function ManagerPage() {
   }, [todayOrders]);
 
   const activeOrders = useMemo(() => {
-    return orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
+    return orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled' && !o.archived);
   }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    if (showArchived) return orders;
+    return orders.filter(o => !o.archived);
+  }, [orders, showArchived]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { barista: 0, waiter: 0, cashier: 0, completed: 0 };
@@ -335,6 +342,21 @@ export default function ManagerPage() {
     printWindow.document.close();
   };
 
+  const toggleArchive = async (id: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${id}/archive`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archived: !currentStatus })
+      });
+      if (!res.ok) throw new Error('Failed to archive order');
+      const updated = await res.json();
+      setOrders(prev => prev.map(o => o.id === id ? updated : o));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // --- TABS ---
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -436,7 +458,20 @@ export default function ManagerPage() {
       {/* ═══════════ ORDERS TAB ═══════════ */}
       {activeTab === 'orders' && (
         <div className="space-y-4 animate-in fade-in">
-          <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div className="flex justify-between items-center bg-surface border border-border border-b-0 rounded-t-2xl p-4">
+            <h3 className="font-bold">Recent Orders</h3>
+            <button 
+              onClick={() => setShowArchived(!showArchived)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                showArchived ? 'bg-primary text-white' : 'bg-surface border border-border text-muted-foreground'
+              }`}
+            >
+              {showArchived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+              {showArchived ? 'Showing All' : 'Hide Archived'}
+            </button>
+          </div>
+
+          <div className="bg-surface rounded-b-2xl border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-surface-elevated border-b border-border">
@@ -448,10 +483,11 @@ export default function ManagerPage() {
                     <th className="text-left p-4 font-bold text-muted-foreground uppercase tracking-wider text-xs">Total</th>
                     <th className="text-left p-4 font-bold text-muted-foreground uppercase tracking-wider text-xs">Status</th>
                     <th className="text-left p-4 font-bold text-muted-foreground uppercase tracking-wider text-xs">Time</th>
+                    <th className="text-right p-4 font-bold text-muted-foreground uppercase tracking-wider text-xs">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.slice(0, 50).map(order => {
+                  {filteredOrders.slice(0, 100).map(order => {
                     const statusColor = {
                       barista: 'bg-info/20 text-info',
                       waiter: 'bg-warning/20 text-warning',
@@ -478,6 +514,19 @@ export default function ManagerPage() {
                           </span>
                         </td>
                         <td className="p-4 text-muted-foreground">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td className="p-4 text-right">
+                          <button 
+                            onClick={() => toggleArchive(order.id, order.archived)}
+                            className={`p-2 rounded-lg transition-all ${
+                              order.archived 
+                                ? 'bg-success/10 text-success hover:bg-success/20' 
+                                : 'bg-muted/10 text-muted-foreground hover:bg-muted/20'
+                            }`}
+                            title={order.archived ? 'Restore' : 'Archive'}
+                          >
+                            {order.archived ? <ArchiveRestore size={18} /> : <Archive size={18} />}
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
