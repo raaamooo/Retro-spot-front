@@ -4,69 +4,71 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
-import { EVENTS } from '@/lib/socket';
-import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, ChevronRight, ChevronLeft, CreditCard, Smartphone, Copy, Check } from 'lucide-react';
-import { Button, Card, FormInput, Textarea, Select, UploadInput } from '@/components';
+import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid } from 'lucide-react';
+import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
-
 import { API_URL } from '@/lib/constants';
 
 // --- Types ---
-type EventType = 'Birthday' | 'Room booking' | 'Table booking' | 'Workspace booking' | 'Custom event';
-type PaymentMethod = 'Card' | 'Instapay' | 'Mobile wallet';
+type BookingType = 'table' | 'room';
+type EventPurpose = 'birthday_party' | 'work_meeting' | 'study_session' | 'hangout';
+type PaymentMethod = 'Instapay' | 'Mobile wallet';
 
 interface BookingFormData {
-  eventType: EventType | '';
+  bookingType: BookingType | '';
+  eventPurpose: EventPurpose | '';
+  tableCount: number;
+  peopleCount: number;
+  name: string;
+  contactNumber: string;
   date: string;
   startTime: string;
   endTime: string;
-  name: string;
-  peopleCount: number;
   notes: string;
   paymentMethod: PaymentMethod | '';
   transactionImage: File | null;
 }
 
-const EVENT_TYPES: { id: EventType; icon: any; translationKey: string }[] = [
-  { id: 'Birthday', icon: Calendar, translationKey: 'birthday' },
-  { id: 'Room booking', icon: MapPin, translationKey: 'room_booking' },
-  { id: 'Table booking', icon: MapPin, translationKey: 'table_booking' },
-  { id: 'Workspace booking', icon: Users, translationKey: 'workspace_booking' },
-  { id: 'Custom event', icon: Calendar, translationKey: 'custom_event' },
+const EVENT_PURPOSES: { id: EventPurpose; icon: any; translationKey: string }[] = [
+  { id: 'birthday_party', icon: PartyPopper, translationKey: 'birthday_party' },
+  { id: 'work_meeting', icon: Briefcase, translationKey: 'work_meeting' },
+  { id: 'study_session', icon: BookOpen, translationKey: 'study_session' },
+  { id: 'hangout', icon: Coffee, translationKey: 'hangout' },
 ];
 
+const TOTAL_STEPS = 4;
+
 export default function BookingPage() {
-  const { t, language, toggleLanguage, isRtl } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const { addToast } = useToast();
   const [mounted, setMounted] = useState(false);
-  
-  // Wizard state
+
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [config, setConfig] = useState({
     instapayPhone: '01012345678',
     mobileWalletPhone: '01012345678',
-    paymentProvider: 'instapay'
+    paymentProvider: 'instapay',
   });
-  
-  // Form state
+
   const [formData, setFormData] = useState<BookingFormData>({
-    eventType: '',
+    bookingType: '',
+    eventPurpose: '',
+    tableCount: 1,
+    peopleCount: 1,
+    name: '',
+    contactNumber: '',
     date: '',
     startTime: '',
     endTime: '',
-    name: '',
-    peopleCount: 1,
     notes: '',
     paymentMethod: '',
     transactionImage: null,
   });
 
-  // UI state
   const [copied, setCopied] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
     fetch(`${API_URL}/api/config`)
@@ -78,22 +80,14 @@ export default function BookingPage() {
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => setStep(prev => prev - 1);
 
-  // --- Validation Logic ---
+  // --- Validation ---
   const validateStep2 = () => {
-    if (!formData.date || !formData.startTime || !formData.endTime) {
-      addToast('Please fill all date and time fields', 'warning');
+    if (formData.peopleCount < 1) {
+      addToast(language === 'ar' ? 'عدد الأشخاص لازم يكون 1 على الأقل' : 'Number of people must be at least 1', 'warning');
       return false;
     }
-    const start = new Date(`${formData.date}T${formData.startTime}`);
-    const end = new Date(`${formData.date}T${formData.endTime}`);
-    const now = new Date();
-    
-    if (start < new Date(now.getTime() + 30 * 60000)) {
-      addToast('Start time must be at least 30 minutes from now', 'error');
-      return false;
-    }
-    if (end <= start) {
-      addToast('End time must be after start time', 'error');
+    if (!formData.eventPurpose) {
+      addToast(language === 'ar' ? 'اختار الغرض من الحجز' : 'Please select an event purpose', 'warning');
       return false;
     }
     return true;
@@ -101,11 +95,26 @@ export default function BookingPage() {
 
   const validateStep3 = () => {
     if (!formData.name.trim()) {
-      addToast('Please enter your name', 'warning');
+      addToast(language === 'ar' ? 'اكتب اسمك' : 'Please enter your name', 'warning');
       return false;
     }
-    if (formData.peopleCount < 1) {
-      addToast('Number of people must be at least 1', 'warning');
+    if (!formData.contactNumber.trim()) {
+      addToast(language === 'ar' ? 'اكتب رقم التواصل' : 'Please enter your contact number', 'warning');
+      return false;
+    }
+    if (!formData.date || !formData.startTime || !formData.endTime) {
+      addToast(language === 'ar' ? 'املأ كل حقول التاريخ والوقت' : 'Please fill all date and time fields', 'warning');
+      return false;
+    }
+    const start = new Date(`${formData.date}T${formData.startTime}`);
+    const end = new Date(`${formData.date}T${formData.endTime}`);
+    const now = new Date();
+    if (start < new Date(now.getTime() + 30 * 60000)) {
+      addToast(language === 'ar' ? 'وقت البداية لازم يكون بعد 30 دقيقة على الأقل' : 'Start time must be at least 30 minutes from now', 'error');
+      return false;
+    }
+    if (end <= start) {
+      addToast(language === 'ar' ? 'وقت النهاية لازم يكون بعد وقت البداية' : 'End time must be after start time', 'error');
       return false;
     }
     return true;
@@ -113,29 +122,37 @@ export default function BookingPage() {
 
   const submitBooking = async () => {
     if (!formData.paymentMethod) {
-      addToast('Please select a payment method', 'warning');
+      addToast(language === 'ar' ? 'اختار طريقة الدفع' : 'Please select a payment method', 'warning');
       return;
     }
-    if (formData.paymentMethod !== 'Card' && !formData.transactionImage) {
-      addToast('Please upload the transaction screenshot', 'warning');
+    if (!formData.transactionImage) {
+      addToast(language === 'ar' ? 'ارفع صورة التحويل' : 'Please upload the transaction screenshot', 'warning');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const purposeLabel = t(formData.eventPurpose);
+      const eventType = formData.bookingType === 'table'
+        ? `Table booking – ${purposeLabel}`
+        : `Room booking – ${purposeLabel}`;
+
       const data = new FormData();
-      data.append('eventType', formData.eventType);
+      data.append('eventType', eventType);
       data.append('date', formData.date);
       data.append('startTime', formData.startTime);
       data.append('endTime', formData.endTime);
       data.append('name', formData.name);
       data.append('peopleCount', formData.peopleCount.toString());
-      data.append('notes', formData.notes);
+      const noteParts = [];
+      if (formData.bookingType === 'table') noteParts.push(`Tables: ${formData.tableCount}`);
+      noteParts.push(`Contact: ${formData.contactNumber}`);
+      if (formData.notes.trim()) noteParts.push(formData.notes);
+      data.append('notes', noteParts.join(' | '));
       data.append('paymentMethod', formData.paymentMethod);
       data.append('status', 'pending');
-      data.append('paymentStatus', formData.paymentMethod === 'Card' ? 'pending' : 'pending_verification');
+      data.append('paymentStatus', 'pending_verification');
       data.append('totalPrice', '0');
-      
       if (formData.transactionImage) {
         data.append('screenshot', formData.transactionImage);
       }
@@ -148,8 +165,7 @@ export default function BookingPage() {
         const errData = await res.json();
         throw new Error(errData.error || 'Failed to submit booking');
       }
-
-      setStep(5); // Success step
+      setStep(5);
     } catch (err: any) {
       addToast(err.message || 'Failed to submit booking', 'error');
     } finally {
@@ -164,22 +180,23 @@ export default function BookingPage() {
   };
 
   const generatePDF = () => {
-    // We generate a simple text blob representation as a fallback 
-    // since we cannot rely on external PDF libraries in this environment.
+    const purposeLabel = t(formData.eventPurpose);
     const content = `
       RETRO SPOT BOOKING SUMMARY
       --------------------------
-      Event: ${formData.eventType}
+      Type: ${formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
+      Purpose: ${purposeLabel}
       Name: ${formData.name}
+      Contact: ${formData.contactNumber}${formData.bookingType === 'table' ? `\n      Tables: ${formData.tableCount}` : ''}
       People: ${formData.peopleCount}
       Date: ${formData.date}
       Time: ${formData.startTime} to ${formData.endTime}
       Payment Method: ${formData.paymentMethod}
-      Status: Confirmed / Pending Verification
-      
+      Status: Pending Verification
+
       Thank you for choosing Retro Spot!
     `;
-    const blob = new Blob([content], { type: 'text/plain' }); // Using txt for simplicity
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -188,13 +205,14 @@ export default function BookingPage() {
     URL.revokeObjectURL(url);
   };
 
+  const anim = { initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 } };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* --- TOP BAR --- */}
+      {/* TOP BAR */}
       <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="px-4 h-16 flex items-center justify-between max-w-3xl mx-auto">
           <span className="font-black text-xl text-primary tracking-tight">Retro Spot</span>
-          
           <div className="flex items-center gap-2">
             {mounted && (
               <>
@@ -216,174 +234,221 @@ export default function BookingPage() {
         </div>
       </header>
 
-      {/* --- MAIN WIZARD --- */}
+      {/* MAIN */}
       <main className="flex-1 flex flex-col items-center p-4 sm:p-8">
         <div className="w-full max-w-2xl">
-          
-          {/* Progress Bar */}
+
+          {/* Progress */}
           {step < 5 && (
             <div className="mb-8">
               <div className="flex justify-between mb-2">
-                {[1, 2, 3, 4].map(i => (
+                {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(i => (
                   <div key={i} className={`text-xs font-bold ${step >= i ? 'text-primary' : 'text-muted-foreground'}`}>
-                    Step {i}
+                    {t('step') || 'Step'} {i}
                   </div>
                 ))}
               </div>
               <div className="h-2 bg-surface-elevated rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-primary transition-all duration-500 ease-out"
-                  style={{ width: `${(step / 4) * 100}%` }}
+                  style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
                 />
               </div>
             </div>
           )}
 
           <AnimatePresence mode="wait">
-            {/* STEP 1: EVENT TYPE */}
+            {/* ═══ STEP 1: TABLE or ROOM ═══ */}
             {step === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <h1 className="text-3xl font-bold mb-2">What are you booking?</h1>
-                <p className="text-muted-foreground mb-8">Select the type of event or space you need.</p>
-                
+              <motion.div key="step1" {...anim} className="space-y-6">
+                <h1 className="text-3xl font-bold mb-2">{t('what_are_you_booking')}</h1>
+                <p className="text-muted-foreground mb-8">{t('select_booking_type')}</p>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {EVENT_TYPES.map(type => {
-                    const Icon = type.icon;
-                    return (
-                      <Card
-                        key={type.id}
-                        hoverable
-                        onClick={() => {
-                          setFormData({ ...formData, eventType: type.id });
-                          handleNext();
-                        }}
-                        className={`p-6 cursor-pointer border-2 transition-all ${
-                          formData.eventType === type.id ? 'border-primary bg-primary/5' : 'border-border-subtle'
-                        }`}
-                      >
-                        <Icon size={32} className={`mb-4 ${formData.eventType === type.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                        <h3 className="font-bold text-lg">{t(type.translationKey)}</h3>
-                      </Card>
-                    );
-                  })}
+                  {/* Table Booking */}
+                  <Card
+                    hoverable
+                    onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
+                    className="p-8 cursor-pointer border-2 transition-all border-border-subtle hover:border-primary hover:bg-primary/5 group"
+                  >
+                    <div className="flex flex-col items-center text-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <LayoutGrid size={32} className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">{t('table_booking')}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{t('table_booking_desc')}</p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Room Booking */}
+                  <Card
+                    hoverable
+                    onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
+                    className="p-8 cursor-pointer border-2 transition-all border-border-subtle hover:border-primary hover:bg-primary/5 group"
+                  >
+                    <div className="flex flex-col items-center text-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <MapPin size={32} className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">{t('room_booking')}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{t('room_booking_desc')}</p>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
               </motion.div>
             )}
 
-            {/* STEP 2: DATE & TIME */}
+            {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
             {step === 2 && (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <h1 className="text-3xl font-bold mb-2">When do you need it?</h1>
-                <p className="text-muted-foreground mb-8">Choose your date and duration.</p>
-                
+              <motion.div key="step2" {...anim} className="space-y-6">
+                <h1 className="text-3xl font-bold mb-2">{t('booking_details')}</h1>
+                <p className="text-muted-foreground mb-8">{t('tell_us_more')}</p>
+
+                <Card className="p-6 space-y-6">
+                  {/* Table count — only for table booking */}
+                  {formData.bookingType === 'table' && (
+                    <FormInput
+                      label={t('how_many_tables')}
+                      type="number"
+                      value={formData.tableCount.toString()}
+                      onChange={(e) => setFormData({ ...formData, tableCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                      required
+                      min={1}
+                    />
+                  )}
+
+                  <FormInput
+                    label={t('how_many_people')}
+                    type="number"
+                    value={formData.peopleCount.toString()}
+                    onChange={(e) => setFormData({ ...formData, peopleCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                    required
+                    min={1}
+                  />
+
+                  {/* Event Purpose */}
+                  <div>
+                    <label className="block text-sm font-bold text-muted-foreground mb-3">{t('event_purpose')}</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {EVENT_PURPOSES.map(purpose => {
+                        const Icon = purpose.icon;
+                        const selected = formData.eventPurpose === purpose.id;
+                        return (
+                          <button
+                            key={purpose.id}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, eventPurpose: purpose.id })}
+                            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-start ${
+                              selected
+                                ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                                : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                            }`}
+                          >
+                            <Icon size={22} className={selected ? 'text-primary' : 'text-muted-foreground'} />
+                            <span className="font-semibold text-sm">{t(purpose.translationKey)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </Card>
+
+                <div className="flex gap-4 pt-4">
+                  <Button variant="outline" onClick={handleBack} className="flex-1">{t('back')}</Button>
+                  <Button onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1">{t('next')}</Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
+            {step === 3 && (
+              <motion.div key="step3" {...anim} className="space-y-6">
+                <h1 className="text-3xl font-bold mb-2">{t('contact_and_date')}</h1>
+                <p className="text-muted-foreground mb-8">{t('your_info_and_timing')}</p>
+
                 <Card className="p-6 space-y-6">
                   <FormInput
-                    label="Date"
+                    label={t('your_name')}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder={language === 'ar' ? 'محمد أحمد' : 'John Doe'}
+                  />
+
+                  <FormInput
+                    label={t('contact_number')}
+                    type="tel"
+                    value={formData.contactNumber}
+                    onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+                    required
+                    placeholder="01xxxxxxxxx"
+                  />
+
+                  <hr className="border-border" />
+
+                  <FormInput
+                    label={t('date')}
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
                   />
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <FormInput
-                      label="Start Time"
+                      label={t('start_time')}
                       type="time"
                       value={formData.startTime}
                       onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                       required
                     />
                     <FormInput
-                      label="End Time"
+                      label={t('end_time')}
                       type="time"
                       value={formData.endTime}
                       onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                       required
                     />
                   </div>
-                  
+
                   <div className="bg-info-bg/50 border border-info/20 text-info p-4 rounded-lg text-sm">
-                    <strong>Note:</strong> Start time must be at least 30 minutes from now. Available slots are synced with our backend automatically.
+                    <strong>{language === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {t('time_slot_note')}
                   </div>
-                </Card>
-
-                <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1">Back</Button>
-                  <Button onClick={() => { if(validateStep2()) handleNext(); }} className="flex-1">Next</Button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* STEP 3: EVENT DATA */}
-            {step === 3 && (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <h1 className="text-3xl font-bold mb-2">Details</h1>
-                <p className="text-muted-foreground mb-8">Tell us more about your booking.</p>
-                
-                <Card className="p-6 space-y-6">
-                  <FormInput
-                    label="Your Name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    placeholder="John Doe"
-                  />
-                  
-                  <FormInput
-                    label="Number of people attending"
-                    type="number"
-                    value={formData.peopleCount.toString()}
-                    onChange={(e) => setFormData({ ...formData, peopleCount: parseInt(e.target.value) || 1 })}
-                    required
-                    min={1}
-                  />
 
                   <Textarea
-                    label="Notes / Special Requests"
+                    label={t('notes_special_requests')}
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="E.g., We need a projector, or it's a surprise party!"
-                    rows={4}
+                    placeholder={language === 'ar' ? 'مثلاً: محتاجين بروجكتور، أو حفلة مفاجأة!' : 'E.g., We need a projector, or it\'s a surprise party!'}
+                    rows={3}
                   />
                 </Card>
 
                 <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1">Back</Button>
-                  <Button onClick={() => { if(validateStep3()) handleNext(); }} className="flex-1">Next</Button>
+                  <Button variant="outline" onClick={handleBack} className="flex-1">{t('back')}</Button>
+                  <Button onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1">{t('next')}</Button>
                 </div>
               </motion.div>
             )}
 
-            {/* STEP 4: PAYMENT */}
+            {/* ═══ STEP 4: PAYMENT ═══ */}
             {step === 4 && (
-              <motion.div
-                key="step4"
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <h1 className="text-3xl font-bold mb-2">Payment</h1>
-                <p className="text-muted-foreground mb-8">Secure your booking.</p>
-                
+              <motion.div key="step4" {...anim} className="space-y-6">
+                <h1 className="text-3xl font-bold mb-2">{t('payment')}</h1>
+                <p className="text-muted-foreground mb-8">{t('secure_your_booking')}</p>
+
                 <div className="flex bg-surface-elevated p-1 rounded-xl border border-border mb-6">
-                  {(['Card', 'Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
+                  {(['Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
                     <button
                       key={method}
                       onClick={() => setFormData({ ...formData, paymentMethod: method })}
                       className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                        formData.paymentMethod === method 
-                          ? 'bg-primary text-white shadow-md' 
+                        formData.paymentMethod === method
+                          ? 'bg-primary text-white shadow-md'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
@@ -393,31 +458,17 @@ export default function BookingPage() {
                 </div>
 
                 <Card className="p-6">
-                  {formData.paymentMethod === 'Card' && (
-                    <div className="space-y-4 animate-in fade-in">
-                      <div className="bg-warning/10 text-warning p-3 rounded-lg text-sm mb-4">
-                        <strong>Demo Mode:</strong> This is a placeholder for a real payment gateway (like Stripe or Paymob). Do not enter real card details.
-                      </div>
-                      <FormInput label="Card Number" placeholder="0000 0000 0000 0000" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormInput label="Expiry Date" placeholder="MM/YY" />
-                        <FormInput label="CVV" placeholder="123" />
-                      </div>
-                    </div>
-                  )}
-
                   {formData.paymentMethod === 'Instapay' && (
                     <div className="space-y-6 animate-in fade-in flex flex-col items-center">
-                      {/* TODO: Add QR code image here. Example: <img src="/instapay-qr.png" /> */}
                       <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center border-4 border-primary">
-                        <span className="text-black font-bold text-center p-4">QR Code Placeholder<br/><br/>@owner_username</span>
+                        <span className="text-black font-bold text-center p-4">QR Code Placeholder<br /><br />@owner_username</span>
                       </div>
-                      
+
                       <div className="w-full">
-                        <label className="block text-sm font-bold text-muted-foreground mb-2 text-center">Or transfer to this number</label>
+                        <label className="block text-sm font-bold text-muted-foreground mb-2 text-center">{t('or_transfer_to')}</label>
                         <div className="flex items-center justify-center gap-2">
                           <code className="text-xl font-mono bg-surface-elevated px-4 py-2 rounded-lg">{config.instapayPhone}</code>
-                          <button 
+                          <button
                             onClick={() => copyToClipboard(config.instapayPhone)}
                             className="p-2 bg-secondary text-foreground rounded-lg hover:bg-accent hover:text-white transition-colors"
                           >
@@ -427,9 +478,9 @@ export default function BookingPage() {
                       </div>
 
                       <div className="w-full pt-4 border-t border-border">
-                        <UploadInput 
-                          label="Upload Transaction Screenshot" 
-                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })} 
+                        <UploadInput
+                          label={t('upload_transaction')}
+                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
                         />
                       </div>
                     </div>
@@ -438,13 +489,13 @@ export default function BookingPage() {
                   {formData.paymentMethod === 'Mobile wallet' && (
                     <div className="space-y-6 animate-in fade-in">
                       <p className="text-center text-muted-foreground">
-                        Transfer via Vodafone Cash, Orange Cash, or e& Cash to the number below:
+                        {t('transfer_via_wallet')}
                       </p>
-                      
+
                       <div className="w-full">
                         <div className="flex items-center justify-center gap-2">
                           <code className="text-xl font-mono bg-surface-elevated px-4 py-2 rounded-lg">{config.mobileWalletPhone}</code>
-                          <button 
+                          <button
                             onClick={() => copyToClipboard(config.mobileWalletPhone)}
                             className="p-2 bg-secondary text-foreground rounded-lg hover:bg-accent hover:text-white transition-colors"
                           >
@@ -454,9 +505,9 @@ export default function BookingPage() {
                       </div>
 
                       <div className="w-full pt-4 border-t border-border">
-                        <UploadInput 
-                          label="Upload Transaction Screenshot" 
-                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })} 
+                        <UploadInput
+                          label={t('upload_transaction')}
+                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
                         />
                       </div>
                     </div>
@@ -464,26 +515,26 @@ export default function BookingPage() {
 
                   {!formData.paymentMethod && (
                     <div className="text-center py-8 text-muted-foreground">
-                      Please select a payment method above.
+                      {t('select_payment_method')}
                     </div>
                   )}
                 </Card>
 
                 <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1" disabled={isSubmitting}>Back</Button>
-                  <Button 
-                    onClick={submitBooking} 
-                    className="flex-1 bg-success hover:bg-success/90" 
+                  <Button variant="outline" onClick={handleBack} className="flex-1" disabled={isSubmitting}>{t('back')}</Button>
+                  <Button
+                    onClick={submitBooking}
+                    className="flex-1 bg-success hover:bg-success/90"
                     loading={isSubmitting}
                     disabled={!formData.paymentMethod}
                   >
-                    Confirm Booking
+                    {t('confirm_booking')}
                   </Button>
                 </div>
               </motion.div>
             )}
 
-            {/* STEP 5: SUCCESS */}
+            {/* ═══ STEP 5: SUCCESS ═══ */}
             {step === 5 && (
               <motion.div
                 key="step5"
@@ -495,24 +546,24 @@ export default function BookingPage() {
                 </div>
                 <h1 className="text-3xl font-black mb-4">{t('booking_success')}</h1>
                 <p className="text-xl text-muted-foreground mb-12">
-                  {t('enjoy_event')} <span className="text-primary font-bold">{formData.eventType}</span>!
+                  {t('enjoy_event')} <span className="text-primary font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
                 </p>
 
                 <div className="space-y-4 max-w-sm mx-auto">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full rounded-xl"
                     onClick={generatePDF}
                   >
-                    Download Summary
+                    {t('download_summary')}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
+                  <Button
+                    variant="outline"
+                    size="lg"
                     className="w-full rounded-xl"
                     onClick={() => window.location.href = '/'}
                   >
-                    Back to Home
+                    {t('back_to_home')}
                   </Button>
                 </div>
               </motion.div>
