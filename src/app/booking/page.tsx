@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid } from 'lucide-react';
+import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid, UserRound } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 import { API_URL } from '@/lib/constants';
@@ -69,6 +69,17 @@ export default function BookingPage() {
 
   const [copied, setCopied] = useState(false);
 
+  // Table selection: 2 tables for 4, 4 tables for 2
+  const TABLE_OPTIONS = [
+    { id: 'T4-1', label: 'table_for_4', seats: 4 },
+    { id: 'T4-2', label: 'table_for_4', seats: 4 },
+    { id: 'T2-1', label: 'table_for_2', seats: 2 },
+    { id: 'T2-2', label: 'table_for_2', seats: 2 },
+    { id: 'T2-3', label: 'table_for_2', seats: 2 },
+    { id: 'T2-4', label: 'table_for_2', seats: 2 },
+  ];
+  const [selectedTables, setSelectedTables] = useState<string[]>([]);
+
   useEffect(() => {
     setMounted(true);
     fetch(`${API_URL}/api/config`)
@@ -81,9 +92,22 @@ export default function BookingPage() {
   const handleBack = () => setStep(prev => prev - 1);
 
   // --- Validation ---
+  const toggleTable = (id: string) => {
+    setSelectedTables(prev => {
+      const next = prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id];
+      // Auto-calculate people count
+      const totalPeople = next.reduce((sum, tid) => {
+        const tbl = TABLE_OPTIONS.find(t => t.id === tid);
+        return sum + (tbl?.seats || 0);
+      }, 0);
+      setFormData(fd => ({ ...fd, tableCount: next.length, peopleCount: totalPeople || 1 }));
+      return next;
+    });
+  };
+
   const validateStep2 = () => {
-    if (formData.peopleCount < 1) {
-      addToast(language === 'ar' ? 'عدد الأشخاص لازم يكون 1 على الأقل' : 'Number of people must be at least 1', 'warning');
+    if (formData.bookingType === 'table' && selectedTables.length === 0) {
+      addToast(language === 'ar' ? 'اختار طاولة واحدة على الأقل' : 'Please select at least one table', 'warning');
       return false;
     }
     if (!formData.eventPurpose) {
@@ -309,27 +333,50 @@ export default function BookingPage() {
                 <p className="text-muted-foreground mb-8">{t('tell_us_more')}</p>
 
                 <Card className="p-6 space-y-6">
-                  {/* Table count — only for table booking */}
+                  {/* Table selection — only for table booking */}
                   {formData.bookingType === 'table' && (
-                    <FormInput
-                      label={t('how_many_tables')}
-                      type="number"
-                      value={formData.tableCount.toString()}
-                      onChange={(e) => setFormData({ ...formData, tableCount: Math.min(6, Math.max(1, parseInt(e.target.value) || 1)) })}
-                      required
-                      min={1}
-                      max={6}
-                    />
+                    <div>
+                      <label className="block text-sm font-bold text-muted-foreground mb-3">{t('select_your_tables')}</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {TABLE_OPTIONS.map((tbl) => {
+                          const isSelected = selectedTables.includes(tbl.id);
+                          return (
+                            <button
+                              key={tbl.id}
+                              type="button"
+                              onClick={() => toggleTable(tbl.id)}
+                              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                                isSelected
+                                  ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
+                                  : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="absolute top-2 right-2">
+                                  <CheckCircle2 size={16} className="text-primary" />
+                                </div>
+                              )}
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                isSelected ? 'bg-primary/20' : 'bg-surface-elevated'
+                              }`}>
+                                <UserRound size={20} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
+                              </div>
+                              <span className={`font-semibold text-sm ${
+                                isSelected ? 'text-primary' : 'text-foreground'
+                              }`}>
+                                {t(tbl.label)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {selectedTables.length > 0 && (
+                        <p className="mt-3 text-sm text-muted-foreground text-center">
+                          {selectedTables.length} {selectedTables.length === 1 ? 'table' : 'tables'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
+                        </p>
+                      )}
+                    </div>
                   )}
-
-                  <FormInput
-                    label={t('how_many_people')}
-                    type="number"
-                    value={formData.peopleCount.toString()}
-                    onChange={(e) => setFormData({ ...formData, peopleCount: Math.max(1, parseInt(e.target.value) || 1) })}
-                    required
-                    min={1}
-                  />
 
                   {/* Event Purpose */}
                   <div>
