@@ -315,9 +315,10 @@ export default function BookingPage() {
                       label={t('how_many_tables')}
                       type="number"
                       value={formData.tableCount.toString()}
-                      onChange={(e) => setFormData({ ...formData, tableCount: Math.max(1, parseInt(e.target.value) || 1) })}
+                      onChange={(e) => setFormData({ ...formData, tableCount: Math.min(6, Math.max(1, parseInt(e.target.value) || 1)) })}
                       required
                       min={1}
+                      max={6}
                     />
                   )}
 
