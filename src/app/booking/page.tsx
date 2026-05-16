@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
@@ -50,6 +50,9 @@ export default function BookingPage() {
     instapayPhone: '01012345678',
     mobileWalletPhone: '01012345678',
     paymentProvider: 'instapay',
+    table4Price: 0,
+    table2Price: 0,
+    room7Price: 0,
   });
 
   const [formData, setFormData] = useState<BookingFormData>({
@@ -96,6 +99,29 @@ export default function BookingPage() {
 
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => setStep(prev => prev - 1);
+
+  const calculatedPrices = useMemo(() => {
+    if (!formData.date || !formData.startTime || !formData.endTime) return { total: 0, deposit: 0 };
+    const start = new Date(`${formData.date}T${formData.startTime}`);
+    const end = new Date(`${formData.date}T${formData.endTime}`);
+    const diffHours = (end.getTime() - start.getTime()) / 3600000;
+    
+    if (diffHours <= 0) return { total: 0, deposit: 0 };
+
+    let hourlyRate = 0;
+    if (formData.bookingType === 'table') {
+      const t4Count = selectedTables.filter(t => t.startsWith('T4')).length;
+      const t2Count = selectedTables.filter(t => t.startsWith('T2')).length;
+      hourlyRate = (t4Count * (config.table4Price || 0)) + (t2Count * (config.table2Price || 0));
+    } else if (formData.bookingType === 'room') {
+      const r7Count = selectedRooms.filter(r => r.startsWith('R7')).length;
+      hourlyRate = (r7Count * (config.room7Price || 0));
+    }
+    
+    const total = diffHours * hourlyRate;
+    const deposit = total / 2;
+    return { total, deposit };
+  }, [formData.date, formData.startTime, formData.endTime, formData.bookingType, selectedTables, selectedRooms, config]);
 
   // --- Validation ---
   const toggleTable = (id: string) => {
@@ -196,11 +222,12 @@ export default function BookingPage() {
       if (formData.bookingType === 'table') noteParts.push(`Tables: ${formData.tableCount}`);
       noteParts.push(`Contact: ${formData.contactNumber}`);
       if (formData.notes.trim()) noteParts.push(formData.notes);
+      noteParts.push(`Deposit to pay: ${calculatedPrices.deposit} EGP`);
       data.append('notes', noteParts.join(' | '));
       data.append('paymentMethod', formData.paymentMethod);
       data.append('status', 'pending');
       data.append('paymentStatus', 'pending_verification');
-      data.append('totalPrice', '0');
+      data.append('totalPrice', calculatedPrices.total.toString());
       if (formData.transactionImage) {
         data.append('screenshot', formData.transactionImage);
       }
@@ -239,6 +266,8 @@ export default function BookingPage() {
       People: ${formData.peopleCount}
       Date: ${formData.date}
       Time: ${formData.startTime} to ${formData.endTime}
+      Total Price: ${calculatedPrices.total} EGP
+      Deposit Paid: ${calculatedPrices.deposit} EGP
       Payment Method: ${formData.paymentMethod}
       Status: Pending Verification
 
@@ -543,6 +572,23 @@ export default function BookingPage() {
                     placeholder={language === 'ar' ? 'مثلاً: محتاجين بروجكتور، أو حفلة مفاجأة!' : 'E.g., We need a projector, or it\'s a surprise party!'}
                     rows={3}
                   />
+
+                  {calculatedPrices.total > 0 && (
+                    <div className="bg-surface-elevated border border-border p-4 rounded-xl flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                          {language === 'ar' ? 'التكلفة الإجمالية' : 'Estimated Cost'}
+                        </p>
+                        <p className="text-2xl font-black">{calculatedPrices.total} EGP</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                          {language === 'ar' ? 'المقدم المطلوب (50%)' : 'Required Deposit (50%)'}
+                        </p>
+                        <p className="text-xl font-bold text-primary">{calculatedPrices.deposit} EGP</p>
+                      </div>
+                    </div>
+                  )}
                 </Card>
 
                 <div className="flex gap-4 pt-4">
@@ -575,6 +621,11 @@ export default function BookingPage() {
                 </div>
 
                 <Card className="p-6">
+                  {calculatedPrices.deposit > 0 && (
+                    <div className="w-full mb-6 text-center bg-primary/10 text-primary py-3 rounded-lg font-bold border border-primary/20">
+                      {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
+                    </div>
+                  )}
                   {formData.paymentMethod === 'Instapay' && (
                     <div className="space-y-6 animate-in fade-in flex flex-col items-center">
                       <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center border-4 border-primary">

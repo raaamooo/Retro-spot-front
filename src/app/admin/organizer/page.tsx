@@ -8,7 +8,7 @@ import { useSocketEvent } from '@/hooks/useSocket';
 import {
   Calendar, Heart, CheckCircle2, XCircle, Clock, User,
   Users, FileText, CreditCard, Image as ImageIcon, DollarSign,
-  Newspaper, Trash2, Plus
+  Newspaper, Trash2, Plus, Settings
 } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, Select } from '@/components';
 
@@ -67,13 +67,15 @@ interface News {
 
 export default function OrganizerPage() {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'bookings' | 'arts' | 'news'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'arts' | 'news' | 'settings'>('bookings');
 
   // Data state
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [arts, setArts] = useState<Art[]>([]);
   const [news, setNews] = useState<News[]>([]);
+  const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
 
   // News form
   const [isAddingNews, setIsAddingNews] = useState(false);
@@ -90,10 +92,12 @@ export default function OrganizerPage() {
       fetch(`${API_URL}/api/bookings`).then(r => r.json()).catch(() => []),
       fetch(`${API_URL}/api/arts`).then(r => r.json()).catch(() => []),
       fetch(`${API_URL}/api/news`).then(r => r.json()).catch(() => []),
-    ]).then(([bookingsData, artsData, newsData]) => {
+      fetch(`${API_URL}/api/config`).then(r => r.json()).catch(() => null),
+    ]).then(([bookingsData, artsData, newsData, configData]) => {
       setBookings(bookingsData);
       setArts(artsData);
       setNews(newsData);
+      setConfig(configData);
       setLoading(false);
     });
   }, []);
@@ -170,6 +174,26 @@ export default function OrganizerPage() {
     } catch (err) {
       console.error('Failed to delete news', err);
     }
+  };
+
+  const saveConfig = async () => {
+    setIsSavingConfig(true);
+    try {
+      const res = await fetch(`${API_URL}/api/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setConfig(updated);
+        alert('Settings saved successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to save settings', err);
+      alert('Failed to save settings');
+    }
+    setIsSavingConfig(false);
   };
 
   // --- HELPERS ---
@@ -249,6 +273,15 @@ export default function OrganizerPage() {
         >
           <Newspaper size={18} />
           <span className="hidden sm:inline">News</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+            activeTab === 'settings' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Settings size={18} />
+          <span className="hidden sm:inline">Settings</span>
         </button>
       </div>
 
@@ -468,6 +501,61 @@ export default function OrganizerPage() {
               )}
             </AnimatePresence>
           </div>
+        </div>
+      )}
+
+      {/* ═══════════ SETTINGS TAB ═══════════ */}
+      {activeTab === 'settings' && config && (
+        <div className="space-y-6 animate-in fade-in">
+          <Card className="p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Settings className="text-primary" size={24} /> General Settings
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-4">
+                <h4 className="font-bold text-lg border-b border-border pb-2">Pricing Settings (Hourly)</h4>
+                <FormInput 
+                  label="Table for 4 Price (EGP)" 
+                  type="number"
+                  value={config.table4Price || 0} 
+                  onChange={e => setConfig({...config, table4Price: parseFloat(e.target.value) || 0})} 
+                />
+                <FormInput 
+                  label="Table for 2 Price (EGP)" 
+                  type="number"
+                  value={config.table2Price || 0} 
+                  onChange={e => setConfig({...config, table2Price: parseFloat(e.target.value) || 0})} 
+                />
+                <FormInput 
+                  label="Room for 7 Price (EGP)" 
+                  type="number"
+                  value={config.room7Price || 0} 
+                  onChange={e => setConfig({...config, room7Price: parseFloat(e.target.value) || 0})} 
+                />
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-bold text-lg border-b border-border pb-2">Payment Details</h4>
+                <FormInput 
+                  label="Instapay Number/Address" 
+                  value={config.instapayPhone || ''} 
+                  onChange={e => setConfig({...config, instapayPhone: e.target.value})} 
+                />
+                <FormInput 
+                  label="Mobile Wallet Number" 
+                  value={config.mobileWalletPhone || ''} 
+                  onChange={e => setConfig({...config, mobileWalletPhone: e.target.value})} 
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-border">
+              <Button onClick={saveConfig} disabled={isSavingConfig} className="min-w-[150px]">
+                {isSavingConfig ? 'Saving...' : 'Save Settings'}
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
 
