@@ -80,6 +80,12 @@ export default function BookingPage() {
   ];
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
 
+  // Room selection: 1 room for 7
+  const ROOM_OPTIONS = [
+    { id: 'R7-1', label: 'room_for_7', seats: 7 },
+  ];
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+
   useEffect(() => {
     setMounted(true);
     fetch(`${API_URL}/api/config`)
@@ -105,9 +111,27 @@ export default function BookingPage() {
     });
   };
 
+  const toggleRoom = (id: string) => {
+    setSelectedRooms(prev => {
+      const next = prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id];
+      // Auto-calculate people count
+      const totalPeople = next.reduce((sum, rid) => {
+        const room = ROOM_OPTIONS.find(r => r.id === rid);
+        return sum + (room?.seats || 0);
+      }, 0);
+      // For rooms we don't necessarily update tableCount, but keeping it 0 or 1 is fine.
+      setFormData(fd => ({ ...fd, peopleCount: totalPeople || 1 }));
+      return next;
+    });
+  };
+
   const validateStep2 = () => {
     if (formData.bookingType === 'table' && selectedTables.length === 0) {
       addToast(language === 'ar' ? 'اختار طاولة واحدة على الأقل' : 'Please select at least one table', 'warning');
+      return false;
+    }
+    if (formData.bookingType === 'room' && selectedRooms.length === 0) {
+      addToast(language === 'ar' ? 'اختار غرفة واحدة على الأقل' : 'Please select at least one room', 'warning');
       return false;
     }
     if (!formData.eventPurpose) {
@@ -373,6 +397,51 @@ export default function BookingPage() {
                       {selectedTables.length > 0 && (
                         <p className="mt-3 text-sm text-muted-foreground text-center">
                           {selectedTables.length} {selectedTables.length === 1 ? 'table' : 'tables'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Room selection — only for room booking */}
+                  {formData.bookingType === 'room' && (
+                    <div>
+                      <label className="block text-sm font-bold text-muted-foreground mb-3">{t('select_your_room')}</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {ROOM_OPTIONS.map((room) => {
+                          const isSelected = selectedRooms.includes(room.id);
+                          return (
+                            <button
+                              key={room.id}
+                              type="button"
+                              onClick={() => toggleRoom(room.id)}
+                              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                                isSelected
+                                  ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
+                                  : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="absolute top-2 right-2">
+                                  <CheckCircle2 size={16} className="text-primary" />
+                                </div>
+                              )}
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                isSelected ? 'bg-primary/20' : 'bg-surface-elevated'
+                              }`}>
+                                <Users size={20} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
+                              </div>
+                              <span className={`font-semibold text-sm ${
+                                isSelected ? 'text-primary' : 'text-foreground'
+                              }`}>
+                                {t(room.label)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {selectedRooms.length > 0 && (
+                        <p className="mt-3 text-sm text-muted-foreground text-center">
+                          {selectedRooms.length} {selectedRooms.length === 1 ? 'room' : 'rooms'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
                         </p>
                       )}
                     </div>
