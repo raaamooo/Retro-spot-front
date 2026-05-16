@@ -179,7 +179,6 @@ const translations: Record<string, { en: string; ar: string }> = {
   hangout: { en: 'Hangout', ar: 'قعدة مع الصحاب ☕' },
   contact_and_date: { en: 'Contact & Date', ar: 'البيانات والميعاد' },
   your_info_and_timing: { en: 'Your info and preferred timing.', ar: 'بياناتك والوقت المفضل.' },
-  your_name: { en: 'Your Name', ar: 'اسمك' },
   contact_number: { en: 'Contact Number', ar: 'رقم التواصل' },
   notes_special_requests: { en: 'Notes / Special Requests', ar: 'ملاحظات / طلبات خاصة' },
   secure_your_booking: { en: 'Secure your booking.', ar: 'أكد حجزك.' },
