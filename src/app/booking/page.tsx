@@ -627,13 +627,12 @@ export default function BookingPage() {
                     </div>
                   )}
                   {formData.paymentMethod === 'Instapay' && (
-                    <div className="space-y-6 animate-in fade-in flex flex-col items-center">
-                      <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center border-4 border-primary">
-                        <span className="text-black font-bold text-center p-4">QR Code Placeholder<br /><br />@owner_username</span>
-                      </div>
+                    <div className="space-y-6 animate-in fade-in">
+                      <p className="text-center text-muted-foreground">
+                        {t('transfer_via_instapay')}
+                      </p>
 
                       <div className="w-full">
-                        <label className="block text-sm font-bold text-muted-foreground mb-2 text-center">{t('or_transfer_to')}</label>
                         <div className="flex items-center justify-center gap-2">
                           <code className="text-xl font-mono bg-surface-elevated px-4 py-2 rounded-lg">{config.instapayPhone}</code>
                           <button
