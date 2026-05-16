@@ -80,13 +80,21 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full relative z-10">
             <Link href="/menu" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+                <Coffee size={20} />
                 {t('menu')}
               </Button>
             </Link>
             <Link href="/booking" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl border-2 hover:bg-primary/5 transition-all duration-300">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+                <CalendarDays size={20} />
                 {t('booking')}
+              </Button>
+            </Link>
+            <Link href="/arts" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+                <Palette size={20} />
+                {isRtl ? 'المعرض' : 'Arts'}
               </Button>
             </Link>
           </div>
