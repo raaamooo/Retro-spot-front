@@ -231,11 +231,13 @@ function MenuContent() {
 
   const handleAddToCartClick = (item: MenuItem) => {
     if (item.category === 'Ice Cream') {
+      const is4Scoop = (item.nameEn || item.name).includes('4');
       const is3Scoop = (item.nameEn || item.name).includes('3');
       const is2Scoop = (item.nameEn || item.name).includes('2');
-      if (is3Scoop || is2Scoop) {
+      if (is4Scoop || is3Scoop || is2Scoop) {
         setFlavorModalItem(item);
-        setSelectedFlavors(new Array(is3Scoop ? 3 : 2).fill('Vanilla'));
+        const scoopCount = is4Scoop ? 4 : is3Scoop ? 3 : 2;
+        setSelectedFlavors(new Array(scoopCount).fill('Vanilla'));
         return;
       }
     }
@@ -248,7 +250,8 @@ function MenuContent() {
     const customizedItem = {
       ...flavorModalItem,
       name: `${flavorModalItem.name} (${flavorsText})`,
-      id: `${flavorModalItem.id}-${flavorsText.replace(/\s+/g, '-')}`
+      originalId: flavorModalItem.id,
+      id: `${flavorModalItem.id}_${flavorsText.replace(/\s+/g, '')}`
     };
     addToCart(customizedItem);
     setFlavorModalItem(null);
@@ -277,7 +280,7 @@ function MenuContent() {
     
     // Flatten additions into order items if backend requires it, or pass as structured
     const items = cart.flatMap(c => {
-      const base = { menuItemId: c.id, quantity: c.cartQuantity };
+      const base = { menuItemId: (c as any).originalId || c.id, quantity: c.cartQuantity };
       const adds = (c.selectedAdditions || []).map(a => ({ menuItemId: a.id, quantity: c.cartQuantity }));
       return [base, ...adds];
     });
