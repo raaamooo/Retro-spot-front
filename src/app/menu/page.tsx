@@ -62,6 +62,11 @@ function MenuContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Ice cream flavors state
+  const [flavorModalItem, setFlavorModalItem] = useState<MenuItem | null>(null);
+  const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
+  const ICE_CREAM_FLAVORS = ['Vanilla', 'Chocolate', 'Mango', 'Strawberry'];
+
   useEffect(() => {
     setMounted(true);
     const table = searchParams.get('locationId');
@@ -116,11 +121,7 @@ function MenuContent() {
             }, 400);
             // Remove highlight after 3.5 s
             setTimeout(() => setQuizHighlight(''), 3500);
-          } else if (categoryNames.length > 0) {
-            setExpandedCategories([categoryNames[0] as string]);
           }
-        } else if (categoryNames.length > 0) {
-          setExpandedCategories([categoryNames[0] as string]);
         }
         
         setIsLoading(false);
@@ -180,8 +181,6 @@ function MenuContent() {
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 400);
           setTimeout(() => setQuizHighlight(''), 3500);
-        } else {
-          setExpandedCategories(['Frappe']);
         }
         setIsLoading(false);
 
@@ -228,6 +227,31 @@ function MenuContent() {
       return [...prev, { ...item, cartQuantity: 1, selectedAdditions: additions }];
     });
     addToast(`${item.name} added to order`, 'success');
+  };
+
+  const handleAddToCartClick = (item: MenuItem) => {
+    if (item.category === 'Ice Cream') {
+      const is3Scoop = (item.nameEn || item.name).includes('3');
+      const is2Scoop = (item.nameEn || item.name).includes('2');
+      if (is3Scoop || is2Scoop) {
+        setFlavorModalItem(item);
+        setSelectedFlavors(new Array(is3Scoop ? 3 : 2).fill('Vanilla'));
+        return;
+      }
+    }
+    addToCart(item);
+  };
+
+  const confirmFlavors = () => {
+    if (!flavorModalItem) return;
+    const flavorsText = selectedFlavors.join(', ');
+    const customizedItem = {
+      ...flavorModalItem,
+      name: `${flavorModalItem.name} (${flavorsText})`,
+      id: `${flavorModalItem.id}-${flavorsText.replace(/\s+/g, '-')}`
+    };
+    addToCart(customizedItem);
+    setFlavorModalItem(null);
   };
 
   const removeFromCart = (index: number) => {
@@ -417,6 +441,8 @@ function MenuContent() {
                                               <img
                                                 src={imgSrc}
                                                 alt={item.name}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                 onError={(e) => {
                                                   const target = e.currentTarget;
@@ -451,7 +477,7 @@ function MenuContent() {
                                           <span className="font-bold text-primary">{item.price} EGP</span>
                                           <button
                                             disabled={!item.available}
-                                            onClick={() => addToCart(item)}
+                                            onClick={() => handleAddToCartClick(item)}
                                             className="w-8 h-8 rounded-full bg-surface-elevated hover:bg-primary hover:text-white flex items-center justify-center transition-colors disabled:opacity-50"
                                             aria-label="Add to order"
                                           >
@@ -658,6 +684,54 @@ function MenuContent() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Ice Cream Flavor Selection Modal */}
+      <AnimatePresence>
+        {flavorModalItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+            onClick={(e) => { if(e.target===e.currentTarget) setFlavorModalItem(null); }}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-surface border border-border w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="p-4 border-b border-border flex justify-between items-center bg-surface-elevated">
+                <h2 className="font-black text-xl text-primary">Choose Flavors</h2>
+                <button onClick={() => setFlavorModalItem(null)} className="p-2 bg-surface rounded-full hover:bg-primary hover:text-white transition-colors">
+                  ✕
+                </button>
+              </div>
+              <div className="p-4 overflow-y-auto space-y-4">
+                {selectedFlavors.map((flavor, index) => (
+                  <div key={index} className="space-y-2">
+                    <label className="block text-sm font-bold text-muted-foreground">Scoop {index + 1}</label>
+                    <Select
+                      value={flavor}
+                      onChange={(e) => {
+                        const newFlavors = [...selectedFlavors];
+                        newFlavors[index] = e.target.value;
+                        setSelectedFlavors(newFlavors);
+                      }}
+                      options={ICE_CREAM_FLAVORS.map(f => ({ value: f, label: f }))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="p-4 border-t border-border bg-surface-elevated">
+                <Button size="lg" className="w-full h-12 rounded-xl" onClick={confirmFlavors}>
+                  Confirm & Add
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
