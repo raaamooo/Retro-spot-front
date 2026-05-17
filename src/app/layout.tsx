@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Retro Spot | Cafe & Workspace",
   description:
     "Your cozy space for coffee, work, and art. A retro-themed cafe and workspace experience.",
+  icons: {
+    icon: "/logo.jpeg",
+  },
 };
 
 export default function RootLayout({

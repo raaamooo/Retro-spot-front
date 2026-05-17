@@ -289,7 +289,10 @@ export default function BookingPage() {
       {/* TOP BAR */}
       <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="px-4 h-16 flex items-center justify-between max-w-3xl mx-auto">
-          <span className="font-black text-xl text-primary tracking-tight">Retro Spot</span>
+          <div className="flex items-center gap-2">
+            <img src="/logo.jpeg" alt="Retro Spot Logo" className="w-8 h-8 rounded-full object-cover border border-border" />
+            <span className="font-black text-xl text-primary tracking-tight">Retro Spot</span>
+          </div>
           <div className="flex items-center gap-2">
             {mounted && (
               <>
