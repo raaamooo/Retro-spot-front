@@ -36,7 +36,7 @@
   --card-shadow: 0 2px 12px hsl(24 30% 40% / 0.15);
   --card-shadow-hover: 0 8px 30px hsl(24 30% 30% / 0.2);
   --glow: none;
-  --glow-hover: 0 0 20px hsl(41 55% 50% / 0.2);
+  --glow-hover: none;
   --header-blur: 16px;
 
   --radius-sm: 8px;
@@ -92,8 +92,8 @@
 
   --card-shadow: 0 2px 12px hsl(22 40% 4% / 0.6);
   --card-shadow-hover: 0 8px 30px hsl(22 40% 4% / 0.7);
-  --glow: 0 0 0px transparent;
-  --glow-hover: 0 0 24px hsl(41 55% 50% / 0.25);
+  --glow: none;
+  --glow-hover: none;
 }
 
 /* ---------- Tailwind v4 Theme Mapping ---------- */

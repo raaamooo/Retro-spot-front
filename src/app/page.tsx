@@ -44,10 +44,10 @@ export default function Home() {
       */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
         
-        {/* Animated Background Gradients */}
+        {/* Subtle Background Pattern */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-[20%] left-[20%] w-[40rem] h-[40rem] bg-accent/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }} />
-          <div className="absolute bottom-[20%] right-[10%] w-[35rem] h-[35rem] bg-primary/20 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+          <div className="absolute top-[20%] left-[20%] w-[40rem] h-[40rem] bg-accent/8 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[20%] right-[10%] w-[35rem] h-[35rem] bg-primary/8 rounded-full blur-[100px]" />
         </div>
         
         {/* Geometric Retro Elements */}
@@ -68,8 +68,8 @@ export default function Home() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="z-10 text-center max-w-4xl mt-12 glass p-10 md:p-16 rounded-[2rem] shadow-2xl relative overflow-hidden"
         >
-          {/* Subtle inner glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none" />
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
           
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground/90 to-primary tracking-tighter leading-tight relative z-10">
             Retro Spot
@@ -80,19 +80,19 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full relative z-10">
             <Link href="/menu" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
                 <Coffee size={20} />
                 {t('menu')}
               </Button>
             </Link>
             <Link href="/booking" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
                 <CalendarDays size={20} />
                 {t('booking')}
               </Button>
             </Link>
             <Link href="/arts" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
+              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
                 <Palette size={20} />
                 {isRtl ? 'المعرض' : 'Arts'}
               </Button>
