@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface PrintButtonProps {
   label?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
+  variant?: 'filled' | 'ghost' | 'outline';
   printTarget?: string; // CSS selector for element to print, or omit for full page
 }
 

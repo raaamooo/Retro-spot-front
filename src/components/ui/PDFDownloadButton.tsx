@@ -10,7 +10,7 @@ interface PDFDownloadButtonProps {
   filename?: string;
   label?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
+  variant?: 'filled' | 'ghost' | 'outline';
 }
 
 export default function PDFDownloadButton({
