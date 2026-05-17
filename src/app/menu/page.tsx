@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock } from 'lucide-react';
+import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button, Card, Tabs, ScrollReveal, FormInput, Textarea, Select, EmptyState, LoadingState } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -50,8 +50,8 @@ function MenuContent() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableId, setTableId] = useState<string>('');
   
-  // Tabs
-  const [activeCategory, setActiveCategory] = useState<string>('');
+  // Accordions
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [quizHighlight, setQuizHighlight] = useState<string>(''); // category deep-linked from quiz
   
   // Cart form state
@@ -107,20 +107,20 @@ function MenuContent() {
             c => (c as string).toLowerCase().startsWith(quizCategory.toLowerCase().split(' ')[0])
           );
           if (matched) {
-            setActiveCategory(matched as string);
+            setExpandedCategories([matched as string]);
             setQuizHighlight(matched as string);
-            // Scroll the category tab row into view smoothly
+            // Scroll the category accordion into view smoothly
             setTimeout(() => {
-              const el = document.getElementById(`cat-tab-${(matched as string).replace(/\s+/g, '-')}`);
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+              const el = document.getElementById(`cat-${(matched as string).replace(/\s+/g, '-')}`);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 400);
             // Remove highlight after 3.5 s
             setTimeout(() => setQuizHighlight(''), 3500);
           } else if (categoryNames.length > 0) {
-            setActiveCategory(categoryNames[0] as string);
+            setExpandedCategories([categoryNames[0] as string]);
           }
         } else if (categoryNames.length > 0) {
-          setActiveCategory(categoryNames[0] as string);
+          setExpandedCategories([categoryNames[0] as string]);
         }
         
         setIsLoading(false);
@@ -173,15 +173,15 @@ function MenuContent() {
           const matched = mockData.find(
             m => m.category.toLowerCase() === quizCategory.toLowerCase()
           )?.category || 'Frappe';
-          setActiveCategory(matched);
+          setExpandedCategories([matched]);
           setQuizHighlight(matched);
           setTimeout(() => {
-            const el = document.getElementById(`cat-tab-${matched.replace(/\s+/g, '-')}`);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            const el = document.getElementById(`cat-${matched.replace(/\s+/g, '-')}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 400);
           setTimeout(() => setQuizHighlight(''), 3500);
         } else {
-          setActiveCategory('Frappe');
+          setExpandedCategories(['Frappe']);
         }
         setIsLoading(false);
 
@@ -299,7 +299,12 @@ function MenuContent() {
   // --- Computed ---
   const categories = [...new Set(menuItems.filter(i => !i.isAddition).map(i => i.category))];
   const additions = menuItems.filter(i => i.isAddition);
-  const currentItems = menuItems.filter(i => i.category === activeCategory && !i.isAddition);
+
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
 
   const subtotal = cart.reduce((acc, item) => {
     const addsPrice = (item.selectedAdditions || []).reduce((sum, a) => sum + a.price, 0);
@@ -361,141 +366,144 @@ function MenuContent() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
 
 
-            {/* Category horizontal scroll */}
-            <div id="menu-category-tabs" className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 sticky top-[65px] z-30 bg-background/95 backdrop-blur">
-              {categories.map(cat => {
-                const isActive = activeCategory === cat;
+            {/* Accordion Categories */}
+            <div className="space-y-4">
+              {[...categories, 'Additions'].map(cat => {
+                const isExpanded = expandedCategories.includes(cat);
                 const isHighlighted = quizHighlight === cat;
+                const itemsForCat = cat === 'Additions' ? additions : menuItems.filter(i => i.category === cat && !i.isAddition);
+
                 return (
-                  <button
-                    key={cat}
-                    id={`cat-tab-${cat.replace(/\s+/g, '-')}`}
-                    onClick={() => { setActiveCategory(cat); setQuizHighlight(''); }}
-                    className={`relative whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 border ${
-                      isActive
-                        ? 'bg-primary/10 border-primary text-primary'
-                        : 'bg-surface border-border text-muted-foreground hover:bg-surface-elevated'
-                    } ${isHighlighted ? 'shadow-[0_0_0_3px_hsl(var(--color-accent)/0.5)] animate-pulse' : ''}`}
-                  >
-                    {isHighlighted && (
-                      <span className="absolute -top-1.5 -right-1 text-[10px] bg-accent text-white font-black px-1.5 py-0.5 rounded-full leading-tight shadow-sm">
-                        ✦ Pick
-                      </span>
-                    )}
-                    {cat}
-                  </button>
-                );
-              })}
-              <button
-                id="cat-tab-Additions"
-                onClick={() => { setActiveCategory('Additions'); setQuizHighlight(''); }}
-                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${
-                  activeCategory === 'Additions' 
-                    ? 'bg-primary/10 border-primary text-primary' 
-                    : 'bg-surface border-border text-muted-foreground hover:bg-surface-elevated'
-                }`}
-              >
-                Additions
-              </button>
-            </div>
+                  <div key={cat} id={`cat-${cat.replace(/\s+/g, '-')}`} className="flex flex-col">
+                    <button 
+                      onClick={() => toggleCategory(cat)}
+                      className={`flex items-center justify-between w-full p-4 rounded-xl font-bold text-lg transition-all duration-300 border ${
+                        isExpanded 
+                          ? 'bg-primary/10 text-primary border-primary' 
+                          : 'bg-surface text-foreground border-border hover:bg-surface-elevated'
+                      } ${isHighlighted ? 'shadow-[0_0_0_3px_hsl(var(--color-accent)/0.5)] animate-pulse' : ''}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {cat}
+                        {isHighlighted && (
+                          <span className="text-[10px] bg-accent text-white font-black px-1.5 py-0.5 rounded-full leading-tight shadow-sm">
+                            ✦ Pick
+                          </span>
+                        )}
+                      </div>
+                      {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-4">
+                            {cat !== 'Additions' ? (
+                              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                                {itemsForCat.map((item, idx) => (
+                                  <ScrollReveal key={item.id} delay={idx * 0.05} direction="up" distance={20}>
+                                    <Card className={`h-full flex flex-col overflow-hidden border group ${!item.available ? 'opacity-60 border-border' : 'border-border-subtle shadow-sm hover:border-primary/30'}`}>
+                                      {/* Item Image */}
+                                      {(() => {
+                                        const imgSrc = getItemImage(item.nameEn || item.name, item.image);
+                                        return (
+                                          <div className="aspect-square bg-surface-elevated border-b border-border-subtle relative overflow-hidden">
+                                            {imgSrc ? (
+                                              <img
+                                                src={imgSrc}
+                                                alt={item.name}
+                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                onError={(e) => {
+                                                  const target = e.currentTarget;
+                                                  target.style.display = 'none';
+                                                  const parent = target.parentElement;
+                                                  if (parent) {
+                                                    parent.style.background = 'linear-gradient(135deg, hsl(var(--color-primary)/0.15), hsl(var(--color-accent)/0.15))';
+                                                    parent.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><span style="font-size:10px;text-transform:uppercase;letter-spacing:0.15em;opacity:0.4">${item.name.slice(0,2).toUpperCase()}</span></div>`;
+                                                  }
+                                                }}
+                                              />
+                                            ) : (
+                                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+                                                <span className="text-2xl font-black text-primary/30 uppercase">
+                                                  {item.name.slice(0, 2)}
+                                                </span>
+                                              </div>
+                                            )}
+                                            {!item.available && (
+                                              <div className="absolute inset-0 bg-background/50 flex items-center justify-center backdrop-blur-[2px]">
+                                                <span className="bg-background text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-md">Sold Out</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
 
-            {/* Grid */}
-            {activeCategory !== 'Additions' ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-2">
-                {currentItems.map((item, idx) => (
-                  <ScrollReveal key={item.id} delay={idx * 0.05} direction="up" distance={20}>
-                    <Card className={`h-full flex flex-col overflow-hidden border group ${!item.available ? 'opacity-60 border-border' : 'border-border-subtle shadow-sm hover:border-primary/30'}`}>
-
-                      {/* Item Image */}
-                      {(() => {
-                        const imgSrc = getItemImage(item.nameEn || item.name, item.image);
-                        return (
-                          <div className="aspect-square bg-surface-elevated border-b border-border-subtle relative overflow-hidden">
-                            {imgSrc ? (
-                              <img
-                                src={imgSrc}
-                                alt={item.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                onError={(e) => {
-                                  // Fallback to gradient placeholder if image fails
-                                  const target = e.currentTarget;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    parent.style.background = 'linear-gradient(135deg, hsl(var(--color-primary)/0.15), hsl(var(--color-accent)/0.15))';
-                                    parent.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"><span style="font-size:10px;text-transform:uppercase;letter-spacing:0.15em;opacity:0.4">${item.name.slice(0,2).toUpperCase()}</span></div>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-                                <span className="text-2xl font-black text-primary/30 uppercase">
-                                  {item.name.slice(0, 2)}
-                                </span>
+                                      <div className="p-3 flex flex-col flex-1">
+                                        <h3 className="font-bold text-sm sm:text-base leading-tight mb-1">{item.name}</h3>
+                                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">{item.description}</p>
+                                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-border-subtle">
+                                          <span className="font-bold text-primary">{item.price} EGP</span>
+                                          <button
+                                            disabled={!item.available}
+                                            onClick={() => addToCart(item)}
+                                            className="w-8 h-8 rounded-full bg-surface-elevated hover:bg-primary hover:text-white flex items-center justify-center transition-colors disabled:opacity-50"
+                                            aria-label="Add to order"
+                                          >
+                                            +
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </Card>
+                                  </ScrollReveal>
+                                ))}
                               </div>
-                            )}
-                            {!item.available && (
-                              <div className="absolute inset-0 bg-background/50 flex items-center justify-center backdrop-blur-[2px]">
-                                <span className="bg-background text-foreground px-3 py-1 rounded-full text-xs font-bold shadow-md">Sold Out</span>
+                            ) : (
+                              <div className="space-y-4">
+                                <div className="bg-primary/10 text-primary p-4 rounded-xl text-sm font-medium border border-primary/20">
+                                  Select an addition below, then choose which item from your cart to add it to, or add it as a standalone extra.
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                  {itemsForCat.map((item, idx) => (
+                                    <ScrollReveal key={item.id} delay={idx * 0.05}>
+                                      <Card className={`p-4 flex flex-col h-full ${!item.available ? 'opacity-60' : ''}`}>
+                                        <h3 className="font-bold text-sm mb-1">{item.name}</h3>
+                                        <p className="text-xs text-muted-foreground mb-3 flex-1">{item.description}</p>
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-bold text-sm">{item.price} EGP</span>
+                                          <button
+                                            disabled={!item.available}
+                                            onClick={() => addToCart(item)}
+                                            className="px-3 py-1.5 rounded-lg bg-surface-elevated text-xs font-bold hover:bg-primary hover:text-white transition-colors"
+                                          >
+                                            Add
+                                          </button>
+                                        </div>
+                                      </Card>
+                                    </ScrollReveal>
+                                  ))}
+                                </div>
                               </div>
                             )}
                           </div>
-                        );
-                      })()}
-
-                      <div className="p-3 flex flex-col flex-1">
-                        <h3 className="font-bold text-sm sm:text-base leading-tight mb-1">{item.name}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">{item.description}</p>
-                        <div className="flex items-center justify-between mt-auto pt-2 border-t border-border-subtle">
-                          <span className="font-bold text-primary">{item.price} EGP</span>
-                          <button
-                            disabled={!item.available}
-                            onClick={() => addToCart(item)}
-                            className="w-8 h-8 rounded-full bg-surface-elevated hover:bg-primary hover:text-white flex items-center justify-center transition-colors disabled:opacity-50"
-                            aria-label="Add to order"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </Card>
-                  </ScrollReveal>
-                ))}
-              </div>
-            ) : (
-              /* Additions View */
-              <div className="space-y-4 mt-2">
-                <div className="bg-primary/10 text-primary p-4 rounded-xl text-sm font-medium border border-primary/20">
-                  Select an addition below, then choose which item from your cart to add it to, or add it as a standalone extra.
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {additions.map((item, idx) => (
-                    <ScrollReveal key={item.id} delay={idx * 0.05}>
-                      <Card className={`p-4 flex flex-col h-full ${!item.available ? 'opacity-60' : ''}`}>
-                        <h3 className="font-bold text-sm mb-1">{item.name}</h3>
-                        <p className="text-xs text-muted-foreground mb-3 flex-1">{item.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-sm">{item.price} EGP</span>
-                          <button
-                            disabled={!item.available}
-                            onClick={() => addToCart(item)}
-                            className="px-3 py-1.5 rounded-lg bg-surface-elevated text-xs font-bold hover:bg-primary hover:text-white transition-colors"
-                          >
-                            Add
-                          </button>
-                        </div>
-                      </Card>
-                    </ScrollReveal>
-                  ))}
-                </div>
-              </div>
-            )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
 
             {/* ── Quiz (Play with us) ── */}
             <div className="mt-12 mb-8">
               <DrinkQuiz
                 onSelectCategory={(cat) => {
-                  setActiveCategory(cat);
+                  setExpandedCategories(prev => prev.includes(cat) ? prev : [...prev, cat]);
                   setQuizHighlight(cat);
                   setTimeout(() => setQuizHighlight(''), 3500);
                 }}
