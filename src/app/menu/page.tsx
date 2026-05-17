@@ -360,16 +360,6 @@ function MenuContent() {
       <div className="px-4 py-4">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
 
-            {/* ── Quiz ── */}
-            <div className="mb-8">
-              <DrinkQuiz
-                onSelectCategory={(cat) => {
-                  setActiveCategory(cat);
-                  setQuizHighlight(cat);
-                  setTimeout(() => setQuizHighlight(''), 3500);
-                }}
-              />
-            </div>
 
             {/* Category horizontal scroll */}
             <div id="menu-category-tabs" className="flex overflow-x-auto pb-4 gap-2 scrollbar-hide -mx-4 px-4 sticky top-[65px] z-30 bg-background/95 backdrop-blur">
@@ -500,6 +490,17 @@ function MenuContent() {
                 </div>
               </div>
             )}
+
+            {/* ── Quiz (Play with us) ── */}
+            <div className="mt-12 mb-8">
+              <DrinkQuiz
+                onSelectCategory={(cat) => {
+                  setActiveCategory(cat);
+                  setQuizHighlight(cat);
+                  setTimeout(() => setQuizHighlight(''), 3500);
+                }}
+              />
+            </div>
           </div>
       </div>
 
