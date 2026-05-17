@@ -24,14 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <body
-        className="font-sans antialiased min-h-screen flex flex-col"
-      >
+      <body>
         <LanguageProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ToastProvider>
               <Header />
-              <main className="flex-1 flex flex-col">
+              <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <PageTransition>{children}</PageTransition>
               </main>
               <Footer />

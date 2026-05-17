@@ -1,305 +1,136 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-@import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════════════════
-   RETRO SPOT PREMIUM EDITORIAL DESIGN SYSTEM
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ---------- Light Theme ---------- */
 :root {
-  --background: #EDD9C0;
-  --surface: #F5E8D5;
-  --surface-elevated: #F9EFE2;
-  
-  --primary: #2C1A0E; /* Filled Button/Active Text */
-  --primary-hover: #4A2E1C;
-  --primary-foreground: #F5E8D5;
-  
-  --secondary: #6B4226;
-  --accent: #C4993F; /* Gold */
-  --accent-hover: #B08630;
-  --accent-glow: rgba(196, 153, 63, 0.2);
-  
-  --foreground: #2C1A0E; /* text-primary */
-  --muted: #6B4226; /* text-secondary */
-  
-  --border: rgba(61, 32, 16, 0.35); /* 35% opacity border */
-  --border-subtle: rgba(61, 32, 16, 0.15);
-  --ring: #C4993F;
+  /* Light Mode Palette */
+  --color-bg: #EDD9C0;
+  --color-surface: #F5E8D5;
+  --color-text-primary: #2C1A0E;
+  --color-text-secondary: #6B4226;
+  --color-accent: #C4993F;
+  --color-muted: #C4A882;
+  --color-border: #3D2010;
 
-  --success: #2C5E3B;
-  --success-bg: #EAF2EC;
-  --warning: #B36B1B;
-  --warning-bg: #FCF4EB;
-  --danger: #96281B;
-  --danger-bg: #FBECEB;
-  --info: #1F4E6B;
-  --info-bg: #EAF2F6;
-
-  --glow: none;
-  --glow-hover: none;
-  --header-blur: 20px;
-
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-
-  --transition-fast: 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-base: 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-slow: 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
-
-  --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Cormorant Garamond', 'Georgia', serif;
-
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-/* ---------- Dark Theme ---------- */
 .dark {
-  --background: #1C0E06;
-  --surface: #2C1A0E;
-  --surface-elevated: #3A2313;
-  
-  --primary: #EDD9C0;
-  --primary-hover: #F5E8D5;
-  --primary-foreground: #1C0E06;
-  
-  --secondary: #C4A882;
-  --accent: #C4993F;
-  --accent-hover: #D5AB50;
-  --accent-glow: rgba(196, 153, 63, 0.3);
-  
-  --foreground: #EDD9C0; /* text-primary */
-  --muted: #C4A882; /* text-secondary */
-  
-  --border: rgba(74, 46, 16, 0.35); /* 35% opacity border */
-  --border-subtle: rgba(74, 46, 16, 0.15);
-  --ring: #C4993F;
-
-  --success: #44B36B;
-  --success-bg: #1B3824;
-  --warning: #E68A22;
-  --warning-bg: #3B2411;
-  --danger: #E64C3C;
-  --danger-bg: #3B1612;
-  --info: #3498DB;
-  --info-bg: #122B3D;
+  /* Dark Mode Palette */
+  --color-bg: #1C0E06;
+  --color-surface: #2C1A0E;
+  --color-text-primary: #EDD9C0;
+  --color-text-secondary: #C4A882;
+  --color-accent: #C4993F;
+  --color-muted: #5C3D20;
+  --color-border: #4A2E10;
 }
 
-/* ---------- Tailwind v4 Theme Mapping ---------- */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-elevated: var(--surface-elevated);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --color-accent-glow: var(--accent-glow);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-border-subtle: var(--border-subtle);
-  --color-ring: var(--ring);
-  --color-success: var(--success);
-  --color-success-bg: var(--success-bg);
-  --color-warning: var(--warning);
-  --color-warning-bg: var(--warning-bg);
-  --color-danger: var(--danger);
-  --color-danger-bg: var(--danger-bg);
-  --color-info: var(--info);
-  --color-info-bg: var(--info-bg);
-
-  --font-sans: var(--font-body);
-  --font-heading: var(--font-display);
-  --font-serif: var(--font-display);
-}
-
-/* ---------- Base Resets & Global Styles ---------- */
-*,
-*::before,
-*::after {
-  border-color: var(--border);
+/* Base Reset & Setup */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-  scroll-behavior: smooth;
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Subtle editorial page noise texture overlay */
+/* Global Texture Overlay */
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.028;
-  pointer-events: none;
+  inset: 0;
   z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.028; /* Warm noise */
 }
 
-/* ---------- Typography & Spacing Rules ---------- */
-h1, .h1 {
+/* Typography System */
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-size: clamp(48px, 7vw, 96px);
-  line-height: 1.1;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-}
-
-h2, .h2 {
-  font-family: var(--font-display);
-  font-size: clamp(32px, 5vw, 64px);
-  line-height: 1.1;
-  font-weight: 300;
-  letter-spacing: -0.02em;
-}
-
-h3, .h3 {
-  font-family: var(--font-display);
-  font-size: 28px;
-  line-height: 1.2;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
 }
 
-p, .body-text {
-  font-family: var(--font-body);
-  line-height: 1.7;
-  color: var(--muted);
+h1 {
+  font-size: clamp(48px, 7vw, 96px);
 }
 
-/* ---------- Custom Visual Effects ---------- */
-
-/* Golden thin divider rules */
-.golden-divider {
-  width: 100%;
-  height: 1px;
-  background-color: var(--accent);
-  opacity: 0.4;
+h2 {
+  font-size: clamp(32px, 5vw, 64px);
 }
 
-/* Amber multiply image tint layer */
-.amber-tint-image {
+h3 {
+  font-size: 28px;
+}
+
+/* Links & Images */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Base Image overlay filter */
+.editorial-image {
   position: relative;
+  overflow: hidden;
 }
-.amber-tint-image::after {
+
+.editorial-image::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-color: rgba(196, 153, 63, 0.12); /* Light gold accent */
+  background-color: #C4993F; /* Amber tint */
   mix-blend-mode: multiply;
+  opacity: 0.15;
   pointer-events: none;
 }
 
-/* Editorial simple thin border cards (no drop shadows) */
-.editorial-card {
-  border: 1px solid var(--border);
-  background-color: var(--surface);
-  box-shadow: none;
-  transition: transform var(--transition-base), background-color var(--transition-base);
+/* Form resets */
+button, input, textarea, select {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
 }
 
-.editorial-card:hover {
-  transform: translateY(-4px);
-  background-color: var(--surface-elevated);
+button {
+  cursor: pointer;
 }
 
-/* Glassmorphism clean update */
-.glass {
-  background: rgba(var(--surface), 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-subtle);
-  box-shadow: none;
+/* Utilities for Layout */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-/* ---------- Reduced Motion ---------- */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
   }
-}
-
-/* ---------- Scrollbar Styling ---------- */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: var(--radius-full);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
-
-/* ---------- Focus Ring Utility ---------- */
-.focus-ring {
-  outline: none;
-}
-.focus-ring:focus-visible {
-  outline: 1.5px solid var(--ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-/* ---------- RTL Helpers ---------- */
-[dir="rtl"] .rtl\:flip {
-  transform: scaleX(-1);
-}
-
-/* ---------- Page Transition Base ---------- */
-.page-enter {
-  opacity: 0;
-  transform: translateY(8px);
-}
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity var(--transition-slow), transform var(--transition-slow);
-}
-
-/* ---------- Toast Container ---------- */
-.toast-container {
-  position: fixed;
-  bottom: var(--space-lg);
-  right: var(--space-lg);
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  pointer-events: none;
-}
-[dir="rtl"] .toast-container {
-  right: auto;
-  left: var(--space-lg);
-}
-.toast-container > * {
-  pointer-events: auto;
 }
