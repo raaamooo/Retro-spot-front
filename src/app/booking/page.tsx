@@ -104,7 +104,7 @@ export default function BookingPage() {
     if (!formData.date || !formData.startTime || !formData.endTime) return { total: 0, deposit: 0 };
     const start = new Date(`${formData.date}T${formData.startTime}`);
     const end = new Date(`${formData.date}T${formData.endTime}`);
-    const diffHours = (end.getTime() - start.getTime()) / 3600000;
+    const diffHours = Math.ceil((end.getTime() - start.getTime()) / 3600000);
     
     if (diffHours <= 0) return { total: 0, deposit: 0 };
 
@@ -118,8 +118,8 @@ export default function BookingPage() {
       hourlyRate = (r7Count * (config.room7Price || 0));
     }
     
-    const total = diffHours * hourlyRate;
-    const deposit = total / 2;
+    const total = Math.ceil(diffHours * hourlyRate);
+    const deposit = Math.ceil(total / 2);
     return { total, deposit };
   }, [formData.date, formData.startTime, formData.endTime, formData.bookingType, selectedTables, selectedRooms, config]);
 
