@@ -31,12 +31,12 @@ export default function FormInput({
         id={inputId}
         className={`
           w-full px-4 py-3 text-sm
-          bg-surface border border-border/60 rounded-xl
+          bg-surface border border-border rounded-sm
           text-foreground placeholder:text-muted-foreground
-          transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-          focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:bg-background
+          transition-all duration-250 ease-out
+          focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 focus:bg-surface-elevated
           disabled:opacity-50 disabled:cursor-not-allowed
-          ${error ? 'border-danger focus:border-danger focus:ring-danger/10 text-danger' : ''}
+          ${error ? 'border-danger focus:border-danger focus:ring-danger/20 text-danger' : ''}
           ${className}
         `}
         {...props}

@@ -3,9 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid, UserRound } from 'lucide-react';
+import { Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid, UserRound } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 import { API_URL } from '@/lib/constants';
@@ -40,8 +38,7 @@ const EVENT_PURPOSES: { id: EventPurpose; icon: any; translationKey: string }[] 
 const TOTAL_STEPS = 4;
 
 export default function BookingPage() {
-  const { t, language, toggleLanguage } = useLanguage();
-  const { theme, setTheme } = useTheme();
+  const { t, language, isRtl } = useLanguage();
   const { addToast } = useToast();
   const [mounted, setMounted] = useState(false);
 
@@ -146,7 +143,6 @@ export default function BookingPage() {
         const room = ROOM_OPTIONS.find(r => r.id === rid);
         return sum + (room?.seats || 0);
       }, 0);
-      // For rooms we don't necessarily update tableCount, but keeping it 0 or 1 is fine.
       setFormData(fd => ({ ...fd, peopleCount: totalPeople || 1 }));
       return next;
     });
@@ -178,57 +174,47 @@ export default function BookingPage() {
       return false;
     }
     if (!formData.date || !formData.startTime || !formData.endTime) {
-      addToast(language === 'ar' ? 'املأ كل حقول التاريخ والوقت' : 'Please fill all date and time fields', 'warning');
+      addToast(language === 'ar' ? 'الرجاء اختيار التاريخ والوقت بالكامل' : 'Please complete the date and time slots', 'warning');
       return false;
     }
     const start = new Date(`${formData.date}T${formData.startTime}`);
     const end = new Date(`${formData.date}T${formData.endTime}`);
-    const now = new Date();
-    if (start < new Date(now.getTime() + 30 * 60000)) {
-      addToast(language === 'ar' ? 'وقت البداية لازم يكون بعد 30 دقيقة على الأقل' : 'Start time must be at least 30 minutes from now', 'error');
-      return false;
-    }
-    if (end <= start) {
-      addToast(language === 'ar' ? 'وقت النهاية لازم يكون بعد وقت البداية' : 'End time must be after start time', 'error');
+    if (end.getTime() <= start.getTime()) {
+      addToast(language === 'ar' ? 'وقت النهاية يجب أن يكون بعد وقت البداية' : 'End time must be after start time', 'warning');
       return false;
     }
     return true;
   };
 
+  // --- SUBMIT ---
   const submitBooking = async () => {
     if (!formData.paymentMethod) {
       addToast(language === 'ar' ? 'اختار طريقة الدفع' : 'Please select a payment method', 'warning');
       return;
     }
     if (!formData.transactionImage) {
-      addToast(language === 'ar' ? 'ارفع صورة التحويل' : 'Please upload the transaction screenshot', 'warning');
+      addToast(language === 'ar' ? 'ارفع صورة التحويل للتأكيد' : 'Please upload transaction receipt', 'warning');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const purposeLabel = t(formData.eventPurpose);
-      const eventType = formData.bookingType === 'table'
-        ? `Table booking – ${purposeLabel}`
-        : `Room booking – ${purposeLabel}`;
-
       const data = new FormData();
-      data.append('eventType', eventType);
+      data.append('bookingType', formData.bookingType);
+      data.append('eventPurpose', formData.eventPurpose);
+      data.append('tableCount', String(formData.tableCount));
+      data.append('peopleCount', String(formData.peopleCount));
+      data.append('name', formData.name);
+      data.append('contactNumber', formData.contactNumber);
       data.append('date', formData.date);
       data.append('startTime', formData.startTime);
       data.append('endTime', formData.endTime);
-      data.append('name', formData.name);
-      data.append('peopleCount', formData.peopleCount.toString());
-      const noteParts = [];
-      if (formData.bookingType === 'table') noteParts.push(`Tables: ${formData.tableCount}`);
-      noteParts.push(`Contact: ${formData.contactNumber}`);
-      if (formData.notes.trim()) noteParts.push(formData.notes);
-      noteParts.push(`Deposit to pay: ${calculatedPrices.deposit} EGP`);
-      data.append('notes', noteParts.join(' | '));
+      data.append('notes', formData.notes);
       data.append('paymentMethod', formData.paymentMethod);
-      data.append('status', 'pending');
-      data.append('paymentStatus', 'pending_verification');
-      data.append('totalPrice', calculatedPrices.total.toString());
+      data.append('totalPrice', String(calculatedPrices.total));
+      data.append('depositPaid', String(calculatedPrices.deposit));
+      data.append('tablesSelected', JSON.stringify(formData.bookingType === 'table' ? selectedTables : selectedRooms));
+
       if (formData.transactionImage) {
         data.append('screenshot', formData.transactionImage);
       }
@@ -237,6 +223,7 @@ export default function BookingPage() {
         method: 'POST',
         body: data,
       });
+
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'Failed to submit booking');
@@ -287,50 +274,23 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* TOP BAR */}
-      <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
-        <div className="px-4 h-16 flex items-center justify-between max-w-3xl mx-auto">
-          <Link href="/" className="block transition-transform hover:scale-105">
-            <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
-          </Link>
-          <div className="flex items-center gap-2">
-            {mounted && (
-              <>
-                <button
-                  onClick={toggleLanguage}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border-subtle text-xs font-bold text-muted hover:text-foreground transition-colors"
-                >
-                  {language === 'en' ? 'AR' : 'EN'}
-                </button>
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border-subtle text-muted hover:text-foreground transition-colors"
-                >
-                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* MAIN */}
-      <main className="flex-1 flex flex-col items-center p-4 sm:p-8">
+      <main className="flex-1 flex flex-col items-center px-4 sm:px-8 py-16">
         <div className="w-full max-w-2xl">
 
           {/* Progress */}
           {step < 5 && (
-            <div className="mb-8">
-              <div className="flex justify-between mb-2">
+            <div className="mb-12">
+              <div className="flex justify-between mb-3">
                 {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(i => (
-                  <div key={i} className={`text-xs font-bold ${step >= i ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <div key={i} className={`text-xs uppercase tracking-widest font-bold transition-colors ${step >= i ? 'text-accent' : 'text-muted/60'}`}>
                     {t('step') || 'Step'} {i}
                   </div>
                 ))}
               </div>
-              <div className="h-2 bg-surface-elevated rounded-full overflow-hidden">
+              <div className="h-[2px] bg-border/20 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all duration-500 ease-out"
+                  className="h-full bg-accent transition-all duration-500 ease-out"
                   style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
                 />
               </div>
@@ -340,41 +300,46 @@ export default function BookingPage() {
           <AnimatePresence mode="wait">
             {/* ═══ STEP 1: TABLE or ROOM ═══ */}
             {step === 1 && (
-              <motion.div key="step1" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold font-heading mb-2">{t('what_are_you_booking')}</h1>
-                <p className="text-muted-foreground mb-8">{t('select_booking_type')}</p>
+              <motion.div key="step1" {...anim} className="space-y-8">
+                <div className="space-y-2 border-b border-border/20 pb-4">
+                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                    {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground tracking-tight">{t('what_are_you_booking')}</h1>
+                  <p className="text-sm text-muted leading-relaxed max-w-md">{t('select_booking_type')}</p>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                   {/* Table Booking */}
                   <Card
-                    hoverable
                     onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
-                    className="p-8 cursor-pointer border-2 transition-all border-border-subtle hover:border-primary hover:bg-primary/5 group"
+                    className="p-8 md:p-10 cursor-pointer border border-border bg-surface hover:border-accent transition-all duration-300 rounded-sm group relative"
                   >
-                    <div className="flex flex-col items-center text-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <LayoutGrid size={32} className="text-primary" />
+                    <div className="absolute inset-0 bg-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                      <div className="w-16 h-16 rounded-full border border-border flex items-center justify-center bg-background group-hover:border-accent transition-colors duration-300">
+                        <LayoutGrid size={28} className="text-accent" />
                       </div>
-                      <div>
-                        <h3 className="font-bold font-heading text-lg">{t('table_booking')}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{t('table_booking_desc')}</p>
+                      <div className="space-y-2">
+                        <h3 className="font-display font-light text-2xl text-foreground group-hover:text-accent transition-colors duration-300">{t('table_booking')}</h3>
+                        <p className="text-xs text-muted leading-relaxed uppercase tracking-wider">{t('table_booking_desc')}</p>
                       </div>
                     </div>
                   </Card>
 
                   {/* Room Booking */}
                   <Card
-                    hoverable
                     onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
-                    className="p-8 cursor-pointer border-2 transition-all border-border-subtle hover:border-primary hover:bg-primary/5 group"
+                    className="p-8 md:p-10 cursor-pointer border border-border bg-surface hover:border-accent transition-all duration-300 rounded-sm group relative"
                   >
-                    <div className="flex flex-col items-center text-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <MapPin size={32} className="text-primary" />
+                    <div className="absolute inset-0 bg-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                      <div className="w-16 h-16 rounded-full border border-border flex items-center justify-center bg-background group-hover:border-accent transition-colors duration-300">
+                        <MapPin size={28} className="text-accent" />
                       </div>
-                      <div>
-                        <h3 className="font-bold font-heading text-lg">{t('room_booking')}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{t('room_booking_desc')}</p>
+                      <div className="space-y-2">
+                        <h3 className="font-display font-light text-2xl text-foreground group-hover:text-accent transition-colors duration-300">{t('room_booking')}</h3>
+                        <p className="text-xs text-muted leading-relaxed uppercase tracking-wider">{t('room_booking_desc')}</p>
                       </div>
                     </div>
                   </Card>
@@ -384,16 +349,21 @@ export default function BookingPage() {
 
             {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
             {step === 2 && (
-              <motion.div key="step2" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold font-heading mb-2">{t('booking_details')}</h1>
-                <p className="text-muted-foreground mb-8">{t('tell_us_more')}</p>
+              <motion.div key="step2" {...anim} className="space-y-8">
+                <div className="space-y-2 border-b border-border/20 pb-4">
+                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                    {formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('booking_details')}</h1>
+                  <p className="text-sm text-muted leading-relaxed">{t('tell_us_more')}</p>
+                </div>
 
-                <Card className="p-6 space-y-6">
+                <Card className="p-8 space-y-8 border border-border bg-surface rounded-sm">
                   {/* Table selection — only for table booking */}
                   {formData.bookingType === 'table' && (
-                    <div>
-                      <label className="block text-sm font-bold text-muted-foreground mb-3">{t('select_your_tables')}</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="space-y-4">
+                      <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('select_your_tables')}</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         {TABLE_OPTIONS.map((tbl) => {
                           const isSelected = selectedTables.includes(tbl.id);
                           return (
@@ -401,24 +371,24 @@ export default function BookingPage() {
                               key={tbl.id}
                               type="button"
                               onClick={() => toggleTable(tbl.id)}
-                              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                              className={`relative flex flex-col items-center gap-4 p-6 rounded-sm border transition-all duration-300 ${
                                 isSelected
-                                  ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-                                  : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                                  ? 'border-accent bg-accent/5'
+                                  : 'border-border bg-background hover:border-accent/60'
                               }`}
                             >
-                              {isSelected && (
+                                           {isSelected && (
                                 <div className="absolute top-2 right-2">
-                                  <CheckCircle2 size={16} className="text-primary" />
+                                  <CheckCircle2 size={16} className="text-accent" />
                                 </div>
                               )}
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                isSelected ? 'bg-primary/20' : 'bg-surface-elevated'
+                              <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${
+                                isSelected ? 'border-accent bg-accent/10' : 'border-border bg-surface'
                               }`}>
-                                <UserRound size={20} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
+                                <UserRound size={20} className={isSelected ? 'text-accent' : 'text-muted'} />
                               </div>
-                              <span className={`font-semibold text-sm ${
-                                isSelected ? 'text-primary' : 'text-foreground'
+                              <span className={`text-xs uppercase tracking-wider font-semibold ${
+                                isSelected ? 'text-accent font-bold' : 'text-foreground'
                               }`}>
                                 {t(tbl.label)}
                               </span>
@@ -427,7 +397,7 @@ export default function BookingPage() {
                         })}
                       </div>
                       {selectedTables.length > 0 && (
-                        <p className="mt-3 text-sm text-muted-foreground text-center">
+                        <p className="mt-3 text-xs uppercase tracking-wider text-muted text-center">
                           {selectedTables.length} {selectedTables.length === 1 ? 'table' : 'tables'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
                         </p>
                       )}
@@ -436,9 +406,9 @@ export default function BookingPage() {
 
                   {/* Room selection — only for room booking */}
                   {formData.bookingType === 'room' && (
-                    <div>
-                      <label className="block text-sm font-bold text-muted-foreground mb-3">{t('select_your_room')}</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="space-y-4">
+                      <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('select_your_room')}</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {ROOM_OPTIONS.map((room) => {
                           const isSelected = selectedRooms.includes(room.id);
                           return (
@@ -446,24 +416,24 @@ export default function BookingPage() {
                               key={room.id}
                               type="button"
                               onClick={() => toggleRoom(room.id)}
-                              className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                              className={`relative flex flex-col items-center gap-4 p-6 rounded-sm border transition-all duration-300 ${
                                 isSelected
-                                  ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-                                  : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                                  ? 'border-accent bg-accent/5'
+                                  : 'border-border bg-background hover:border-accent/60'
                               }`}
                             >
                               {isSelected && (
                                 <div className="absolute top-2 right-2">
-                                  <CheckCircle2 size={16} className="text-primary" />
+                                  <CheckCircle2 size={16} className="text-accent" />
                                 </div>
                               )}
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                isSelected ? 'bg-primary/20' : 'bg-surface-elevated'
+                              <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${
+                                isSelected ? 'border-accent bg-accent/10' : 'border-border bg-surface'
                               }`}>
-                                <Users size={20} className={isSelected ? 'text-primary' : 'text-muted-foreground'} />
+                                <Users size={20} className={isSelected ? 'text-accent' : 'text-muted'} />
                               </div>
-                              <span className={`font-semibold text-sm ${
-                                isSelected ? 'text-primary' : 'text-foreground'
+                              <span className={`text-xs uppercase tracking-wider font-semibold ${
+                                isSelected ? 'text-accent font-bold' : 'text-foreground'
                               }`}>
                                 {t(room.label)}
                               </span>
@@ -472,7 +442,7 @@ export default function BookingPage() {
                         })}
                       </div>
                       {selectedRooms.length > 0 && (
-                        <p className="mt-3 text-sm text-muted-foreground text-center">
+                        <p className="mt-3 text-xs uppercase tracking-wider text-muted text-center">
                           {selectedRooms.length} {selectedRooms.length === 1 ? 'room' : 'rooms'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
                         </p>
                       )}
@@ -480,9 +450,9 @@ export default function BookingPage() {
                   )}
 
                   {/* Event Purpose */}
-                  <div>
-                    <label className="block text-sm font-bold text-muted-foreground mb-3">{t('event_purpose')}</label>
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-4">
+                    <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('event_purpose')}</label>
+                    <div className="grid grid-cols-2 gap-4">
                       {EVENT_PURPOSES.map(purpose => {
                         const Icon = purpose.icon;
                         const selected = formData.eventPurpose === purpose.id;
@@ -491,14 +461,14 @@ export default function BookingPage() {
                             key={purpose.id}
                             type="button"
                             onClick={() => setFormData({ ...formData, eventPurpose: purpose.id })}
-                            className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-start ${
+                            className={`flex items-center gap-4 p-5 rounded-sm border transition-all duration-300 text-start ${
                               selected
-                                ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                                : 'border-border-subtle hover:border-primary/40 hover:bg-surface-elevated'
+                                ? 'border-accent bg-accent/5 text-accent font-bold'
+                                : 'border-border bg-background hover:border-accent/60 text-foreground'
                             }`}
                           >
-                            <Icon size={22} className={selected ? 'text-primary' : 'text-muted-foreground'} />
-                            <span className="font-semibold text-sm">{t(purpose.translationKey)}</span>
+                            <Icon size={20} className={selected ? 'text-accent' : 'text-muted'} />
+                            <span className="text-xs uppercase tracking-wider font-semibold">{t(purpose.translationKey)}</span>
                           </button>
                         );
                       })}
@@ -507,19 +477,24 @@ export default function BookingPage() {
                 </Card>
 
                 <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1">{t('back')}</Button>
-                  <Button onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1">{t('next')}</Button>
+                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
+                  <Button variant="primary" onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
               </motion.div>
             )}
 
             {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
             {step === 3 && (
-              <motion.div key="step3" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold font-heading mb-2">{t('contact_and_date')}</h1>
-                <p className="text-muted-foreground mb-8">{t('your_info_and_timing')}</p>
+              <motion.div key="step3" {...anim} className="space-y-8">
+                <div className="space-y-2 border-b border-border/20 pb-4">
+                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                    {isRtl ? 'بيانات الحجز' : 'Details'}
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('contact_and_date')}</h1>
+                  <p className="text-sm text-muted leading-relaxed">{t('your_info_and_timing')}</p>
+                </div>
 
-                <Card className="p-6 space-y-6">
+                <Card className="p-8 space-y-6 border border-border bg-surface rounded-sm">
                   <FormInput
                     label={t('your_name')}
                     value={formData.name}
@@ -537,7 +512,7 @@ export default function BookingPage() {
                     placeholder="01xxxxxxxxx"
                   />
 
-                  <hr className="border-border" />
+                  <hr className="border-border/20 my-6" />
 
                   <FormInput
                     label={t('date')}
@@ -564,8 +539,8 @@ export default function BookingPage() {
                     />
                   </div>
 
-                  <div className="bg-info-bg/50 border border-info/20 text-info p-4 rounded-lg text-sm">
-                    <strong>{language === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {t('time_slot_note')}
+                  <div className="bg-surface-elevated border border-border/30 text-muted p-4 rounded-sm text-xs leading-relaxed">
+                    <strong className="text-accent uppercase tracking-wider">{language === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {t('time_slot_note')}
                   </div>
 
                   <Textarea
@@ -577,45 +552,50 @@ export default function BookingPage() {
                   />
 
                   {calculatedPrices.total > 0 && (
-                    <div className="bg-surface-elevated border border-border p-4 rounded-xl flex items-center justify-between">
+                    <div className="bg-surface-elevated border border-border p-6 rounded-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">
-                          {language === 'ar' ? 'التكلفة الإجمالية' : 'Estimated Cost'}
+                        <p className="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">
+                          {language === 'ar' ? 'التكلفة الإجمالية' : 'Estimated Total Cost'}
                         </p>
-                        <p className="text-2xl font-black">{calculatedPrices.total} EGP</p>
+                        <p className="text-3xl font-display font-light text-foreground">{calculatedPrices.total} <span className="text-sm font-sans font-bold">EGP</span></p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider mb-1">
+                      <div className="sm:text-right">
+                        <p className="text-[10px] text-accent font-bold uppercase tracking-widest mb-1">
                           {language === 'ar' ? 'المقدم المطلوب (50%)' : 'Required Deposit (50%)'}
                         </p>
-                        <p className="text-xl font-bold text-primary">{calculatedPrices.deposit} EGP</p>
+                        <p className="text-2xl font-display font-bold text-accent">{calculatedPrices.deposit} <span className="text-xs font-sans font-bold">EGP</span></p>
                       </div>
                     </div>
                   )}
                 </Card>
 
                 <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1">{t('back')}</Button>
-                  <Button onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1">{t('next')}</Button>
+                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
+                  <Button variant="primary" onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
               </motion.div>
             )}
 
             {/* ═══ STEP 4: PAYMENT ═══ */}
             {step === 4 && (
-              <motion.div key="step4" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold font-heading mb-2">{t('payment')}</h1>
-                <p className="text-muted-foreground mb-8">{t('secure_your_booking')}</p>
+              <motion.div key="step4" {...anim} className="space-y-8">
+                <div className="space-y-2 border-b border-border/20 pb-4">
+                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                    {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}
+                  </span>
+                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('payment')}</h1>
+                  <p className="text-sm text-muted leading-relaxed">{t('secure_your_booking')}</p>
+                </div>
 
-                <div className="flex bg-surface-elevated p-1 rounded-xl border border-border mb-6">
+                <div className="flex bg-surface-elevated p-1 rounded-sm border border-border mb-6">
                   {(['Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
                     <button
                       key={method}
                       onClick={() => setFormData({ ...formData, paymentMethod: method })}
-                      className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                      className={`flex-1 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-all ${
                         formData.paymentMethod === method
-                          ? 'bg-primary text-white shadow-md'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-accent text-[#2C1A0E] shadow-sm'
+                          : 'text-muted hover:text-foreground'
                       }`}
                     >
                       {t(method.toLowerCase().replace(' ', '_'))}
@@ -623,31 +603,32 @@ export default function BookingPage() {
                   ))}
                 </div>
 
-                <Card className="p-6">
+                <Card className="p-8 border border-border bg-surface rounded-sm">
                   {calculatedPrices.deposit > 0 && (
-                    <div className="w-full mb-6 text-center bg-primary/10 text-primary py-3 rounded-lg font-bold border border-primary/20">
+                    <div className="w-full mb-8 text-center bg-accent/5 text-accent py-4 rounded-sm font-bold border border-accent/20 uppercase tracking-wider text-xs">
                       {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
                     </div>
                   )}
+                  
                   {formData.paymentMethod === 'Instapay' && (
                     <div className="space-y-6 animate-in fade-in">
-                      <p className="text-center text-muted-foreground">
+                      <p className="text-center text-xs text-muted uppercase tracking-wider leading-relaxed">
                         {t('transfer_via_instapay')}
                       </p>
 
-                      <div className="w-full">
+                      <div className="w-full flex justify-center">
                         <div className="flex items-center justify-center gap-2">
-                          <code className="text-xl font-mono bg-surface-elevated px-4 py-2 rounded-lg">{config.instapayPhone}</code>
+                          <code className="text-lg font-mono bg-surface-elevated px-4 py-2 border border-border rounded-sm">{config.instapayPhone}</code>
                           <button
                             onClick={() => copyToClipboard(config.instapayPhone)}
-                            className="p-2 bg-secondary text-foreground rounded-lg hover:bg-accent hover:text-white transition-colors"
+                            className="p-2.5 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors duration-200"
                           >
-                            {copied ? <Check size={20} /> : <Copy size={20} />}
+                            {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
                           </button>
                         </div>
                       </div>
 
-                      <div className="w-full pt-4 border-t border-border">
+                      <div className="w-full pt-6 border-t border-border/20">
                         <UploadInput
                           label={t('upload_transaction')}
                           onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
@@ -658,23 +639,23 @@ export default function BookingPage() {
 
                   {formData.paymentMethod === 'Mobile wallet' && (
                     <div className="space-y-6 animate-in fade-in">
-                      <p className="text-center text-muted-foreground">
+                      <p className="text-center text-xs text-muted uppercase tracking-wider leading-relaxed">
                         {t('transfer_via_wallet')}
                       </p>
 
-                      <div className="w-full">
+                      <div className="w-full flex justify-center">
                         <div className="flex items-center justify-center gap-2">
-                          <code className="text-xl font-mono bg-surface-elevated px-4 py-2 rounded-lg">{config.mobileWalletPhone}</code>
+                          <code className="text-lg font-mono bg-surface-elevated px-4 py-2 border border-border rounded-sm">{config.mobileWalletPhone}</code>
                           <button
                             onClick={() => copyToClipboard(config.mobileWalletPhone)}
-                            className="p-2 bg-secondary text-foreground rounded-lg hover:bg-accent hover:text-white transition-colors"
+                            className="p-2.5 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors duration-200"
                           >
-                            {copied ? <Check size={20} /> : <Copy size={20} />}
+                            {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
                           </button>
                         </div>
                       </div>
 
-                      <div className="w-full pt-4 border-t border-border">
+                      <div className="w-full pt-6 border-t border-border/20">
                         <UploadInput
                           label={t('upload_transaction')}
                           onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
@@ -684,17 +665,18 @@ export default function BookingPage() {
                   )}
 
                   {!formData.paymentMethod && (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-12 text-xs uppercase tracking-widest text-muted">
                       {t('select_payment_method')}
                     </div>
                   )}
                 </Card>
 
                 <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1" disabled={isSubmitting}>{t('back')}</Button>
+                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12" disabled={isSubmitting}>{t('back')}</Button>
                   <Button
+                    variant="primary"
                     onClick={submitBooking}
-                    className="flex-1 bg-success hover:bg-success/90"
+                    className="flex-1 uppercase tracking-widest text-xs font-bold h-12"
                     loading={isSubmitting}
                     disabled={!formData.paymentMethod}
                   >
@@ -708,21 +690,25 @@ export default function BookingPage() {
             {step === 5 && (
               <motion.div
                 key="step5"
-                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
+                initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-16 space-y-8"
               >
-                <div className="w-24 h-24 bg-success/20 text-success rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 size={48} />
+                <div className="w-20 h-20 bg-accent/10 text-accent rounded-full border border-accent/20 flex items-center justify-center mx-auto">
+                  <CheckCircle2 size={40} />
                 </div>
-                <h1 className="text-3xl font-black font-heading mb-4">{t('booking_success')}</h1>
-                <p className="text-xl text-muted-foreground mb-12">
-                  {t('enjoy_event')} <span className="text-primary font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
-                </p>
+                
+                <div className="space-y-2">
+                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('booking_success')}</h1>
+                  <p className="text-xs text-muted uppercase tracking-widest">
+                    {t('enjoy_event')} <span className="text-accent font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
+                  </p>
+                </div>
 
-                <div className="space-y-4 max-w-sm mx-auto">
+                <div className="space-y-3 max-w-sm mx-auto pt-6">
                   <Button
+                    variant="primary"
                     size="lg"
-                    className="w-full rounded-xl"
+                    className="w-full uppercase tracking-widest text-xs font-bold h-12"
                     onClick={generatePDF}
                   >
                     {t('download_summary')}
@@ -730,7 +716,7 @@ export default function BookingPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full rounded-xl"
+                    className="w-full uppercase tracking-widest text-xs font-bold h-12"
                     onClick={() => window.location.href = '/'}
                   >
                     {t('back_to_home')}

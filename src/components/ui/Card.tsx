@@ -32,11 +32,10 @@ export default function Card({
       onClick={onClick}
       {...props}
       className={`
-        bg-surface rounded-2xl border border-border/50
-        transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+        bg-surface rounded-md border border-border
+        transition-all duration-250 ease-out
         ${paddingClasses[padding]}
-        ${hoverable ? 'hover:shadow-[var(--card-shadow-hover)] hover:border-primary/40 hover:-translate-y-1 cursor-pointer' : 'shadow-[var(--card-shadow)]'}
-        ${glowing ? 'shadow-[var(--glow)] hover:shadow-[var(--glow-hover)]' : ''}
+        ${hoverable || onClick ? 'hover:bg-surface-elevated hover:border-accent hover:-translate-y-1 cursor-pointer' : ''}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}

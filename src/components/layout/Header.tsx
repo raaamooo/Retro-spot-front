@@ -13,16 +13,24 @@ export default function Header() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => setMounted(true), []);
   // Close mobile menu on route change
   useEffect(() => setMobileOpen(false), [pathname]);
 
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 15);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (
     pathname?.startsWith('/admin') ||
-    pathname?.startsWith('/menu') ||
-    pathname?.startsWith('/booking') ||
-    pathname?.startsWith('/arts')
+    pathname?.startsWith('/menu')
   ) {
     return null;
   }
@@ -38,7 +46,11 @@ export default function Header() {
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-[var(--header-blur)]">
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      scrolled 
+        ? 'border-b border-border bg-background/90 backdrop-blur-md py-3 shadow-none' 
+        : 'border-b border-transparent bg-transparent py-5'
+    }`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -46,39 +58,42 @@ export default function Header() {
             href="/"
             className="block transition-transform hover:scale-105"
           >
-            <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
+            <img src="/logo.jpeg" alt="Retro Spot" className="w-12 h-12 rounded-full object-cover border border-border" />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1 rtl:space-x-reverse">
+          <nav className="hidden md:flex items-center gap-8 rtl:space-x-reverse">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`
-                  px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200
+                  text-sm font-semibold tracking-widest uppercase transition-all duration-250 relative py-2
                   ${
                     isActive(link.href)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-muted hover:text-foreground hover:bg-surface-elevated'
+                      ? 'text-accent'
+                      : 'text-muted hover:text-foreground'
                   }
                 `}
               >
                 {link.label}
+                {isActive(link.href) && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-accent rounded-full" />
+                )}
               </Link>
             ))}
           </nav>
 
           {/* Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {/* Language */}
             <button
               onClick={toggleLanguage}
               className={`
-                px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider
+                px-3 py-1.5 rounded-sm text-xs font-bold uppercase tracking-widest
                 bg-surface-elevated text-muted hover:text-foreground
-                border border-border-subtle hover:border-border
-                transition-all duration-200 focus-ring
+                border border-border hover:border-accent
+                transition-all duration-250 focus-ring
               `}
               aria-label="Toggle Language"
             >
@@ -90,8 +105,9 @@ export default function Header() {
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 className={`
-                  p-2 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated
-                  transition-colors duration-200 focus-ring
+                  p-2 rounded-sm text-muted hover:text-foreground hover:bg-surface-elevated
+                  border border-transparent hover:border-border
+                  transition-colors duration-250 focus-ring
                 `}
                 aria-label="Toggle Theme"
               >
@@ -103,8 +119,8 @@ export default function Header() {
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               className={`
-                md:hidden p-2 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated
-                transition-colors duration-200 focus-ring
+                md:hidden p-2 rounded-sm text-muted hover:text-foreground hover:bg-surface-elevated
+                transition-colors duration-250 focus-ring
               `}
               aria-label="Toggle menu"
             >
@@ -116,18 +132,18 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border-subtle bg-surface animate-[slideDown_0.2s_ease-out]">
-          <nav className="flex flex-col px-4 py-3 gap-1">
+        <div className="md:hidden border-t border-border bg-surface-elevated/95 backdrop-blur-lg animate-[slideDown_0.25s_ease-out]">
+          <nav className="flex flex-col px-6 py-6 gap-4">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`
-                  px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200
+                  text-lg font-semibold tracking-widest uppercase py-2 border-b border-border/10
                   ${
                     isActive(link.href)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-muted hover:text-foreground hover:bg-surface-elevated'
+                      ? 'text-accent'
+                      : 'text-muted hover:text-foreground'
                   }
                 `}
               >

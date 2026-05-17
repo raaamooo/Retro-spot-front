@@ -3,21 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { EVENTS } from '@/lib/socket';
-import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, Image as ImageIcon, Copy, Check, UploadCloud, Heart, Clock, CheckCircle2 } from 'lucide-react';
+import { ImageIcon, Copy, Check, UploadCloud, Heart, Clock, CheckCircle2 } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
-
 import { API_URL } from '@/lib/constants';
 
 type PaymentMethod = 'Card' | 'Instapay' | 'Mobile wallet';
 
 export default function ArtsPage() {
-  const { t, language, toggleLanguage, isRtl } = useLanguage();
-  const { theme, setTheme } = useTheme();
+  const { t, language, isRtl } = useLanguage();
   const { addToast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
@@ -135,101 +129,81 @@ export default function ArtsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
-        <div className="px-4 h-16 flex items-center justify-between max-w-4xl mx-auto">
-          <Link href="/" className="block transition-transform hover:scale-105">
-            <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
-          </Link>
-          
-          <div className="flex items-center gap-2">
-            {mounted && (
-              <>
-                <button
-                  onClick={toggleLanguage}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border-subtle text-xs font-bold text-muted hover:text-foreground transition-colors"
-                >
-                  {language === 'en' ? 'AR' : 'EN'}
-                </button>
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border-subtle text-muted hover:text-foreground transition-colors"
-                >
-                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full space-y-16">
+      <main className="flex-1 px-4 sm:px-8 py-12 max-w-4xl mx-auto w-full space-y-20">
         
         {/* =========================================
             SECTION 1: WEEKLY BIDDING 
             ========================================= */}
-        <section>
-          <div className="flex items-center gap-3 mb-6">
-            <Heart className="text-primary" />
-            <h2 className="text-3xl font-black font-heading">{t('weekly_bidding')}</h2>
+        <section className="space-y-8">
+          <div className="flex flex-col space-y-2 border-b border-border/20 pb-4">
+            <span className="text-xs uppercase tracking-widest text-accent font-bold">
+              {isRtl ? 'المعرض الفني والأعمال الأسبوعية' : 'The Exhibition'}
+            </span>
+            <div className="flex items-center gap-3">
+              <Heart size={24} className="text-accent shrink-0" />
+              <h2 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('weekly_bidding')}</h2>
+            </div>
           </div>
 
-          <Card className="overflow-hidden border-border-subtle shadow-xl">
-            <div className="grid md:grid-cols-2">
-              <div className="bg-surface-elevated aspect-square md:aspect-auto flex flex-col items-center justify-center border-r border-border-subtle relative p-6">
-                <ImageIcon size={64} className="text-muted-foreground/50 mb-4" />
-                <span className="text-muted-foreground font-medium">Painting Placeholder</span>
-                <div className="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                  <Clock size={12} /> Ends in 3 Days
+          <Card className="overflow-hidden border border-border bg-surface rounded-sm">
+            <div className="grid md:grid-cols-12">
+              {/* Photo Display with Amber Multiply blend tint */}
+              <div className="md:col-span-5 bg-surface-elevated aspect-square md:aspect-auto flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-border relative p-8">
+                <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
+                <ImageIcon size={48} className="text-accent/50 mb-3" />
+                <span className="text-xs text-muted uppercase tracking-widest font-semibold">{isRtl ? 'صورة اللوحة' : 'Midnight Jazz Canvas'}</span>
+                <div className="absolute top-4 left-4 bg-accent text-[#2C1A0E] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm flex items-center gap-1.5 shadow-sm">
+                  <Clock size={12} /> {isRtl ? 'تنتهي خلال ٣ أيام' : 'Ends in 3 Days'}
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 flex flex-col justify-between">
+              {/* Bidding Information */}
+              <div className="md:col-span-7 p-8 md:p-10 flex flex-col justify-between space-y-6">
                 <div>
-                  <h3 className="text-2xl font-bold font-heading mb-1">{weeklyPainting.name}</h3>
-                  <p className="text-primary font-medium mb-4">by {weeklyPainting.artist}</p>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
+                  <h3 className="text-3xl font-display font-light text-foreground mb-1">{weeklyPainting.name}</h3>
+                  <p className="text-sm font-semibold tracking-wider uppercase text-accent mb-6">by {weeklyPainting.artist}</p>
+                  <p className="text-sm text-muted leading-relaxed mb-8">
                     {weeklyPainting.description}
                   </p>
                   
-                  <div className="bg-surface p-4 rounded-xl border border-border mb-8">
-                    <p className="text-sm text-muted-foreground font-medium mb-1">{t('highest_bid')}</p>
-                    <p className="text-3xl font-black text-foreground">{currentHighestBid} EGP</p>
+                  <div className="bg-surface-elevated p-6 rounded-sm border border-border mb-8">
+                    <p className="text-xs text-muted uppercase tracking-widest font-bold mb-1.5">{t('highest_bid')}</p>
+                    <p className="text-4xl font-display font-light text-foreground">{currentHighestBid} <span className="text-lg font-sans font-bold">EGP</span></p>
                   </div>
                 </div>
 
                 <AnimatePresence mode="wait">
                   {bidStep === 0 && (
                     <motion.div key="step0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <Button size="lg" className="w-full" onClick={() => setBidStep(1)}>
+                      <Button variant="primary" size="lg" className="w-full uppercase tracking-widest text-xs font-bold h-12" onClick={() => setBidStep(1)}>
                         {t('place_bid')}
                       </Button>
                     </motion.div>
                   )}
 
                   {bidStep === 1 && (
-                    <motion.div key="step1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                      <div className="space-y-4">
-                        <FormInput label="Name" value={bidForm.name} onChange={e => setBidForm({...bidForm, name: e.target.value})} />
-                        <FormInput label="Phone / Email" value={bidForm.contact} onChange={e => setBidForm({...bidForm, contact: e.target.value})} />
-                        <FormInput label={t('bid_amount')} type="number" min={currentHighestBid + 10} value={bidForm.amount} onChange={e => setBidForm({...bidForm, amount: e.target.value})} />
-                        <div className="flex gap-2 pt-2">
-                          <Button variant="outline" className="flex-1" onClick={() => setBidStep(0)}>Cancel</Button>
-                          <Button className="flex-1" onClick={handleBidNext}>Next</Button>
-                        </div>
+                    <motion.div key="step1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+                      <FormInput label="Name" value={bidForm.name} onChange={e => setBidForm({...bidForm, name: e.target.value})} />
+                      <FormInput label="Phone / Email" value={bidForm.contact} onChange={e => setBidForm({...bidForm, contact: e.target.value})} />
+                      <FormInput label={t('bid_amount')} type="number" min={currentHighestBid + 10} value={bidForm.amount} onChange={e => setBidForm({...bidForm, amount: e.target.value})} />
+                      <div className="flex gap-3 pt-2">
+                        <Button variant="outline" className="flex-1 uppercase tracking-widest text-xs font-bold h-11" onClick={() => setBidStep(0)}>Cancel</Button>
+                        <Button variant="primary" className="flex-1 uppercase tracking-widest text-xs font-bold h-11" onClick={handleBidNext}>Next</Button>
                       </div>
                     </motion.div>
                   )}
 
                   {bidStep === 2 && (
-                    <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                      <p className="text-sm text-muted-foreground mb-4">Secure your bid using one of the methods below.</p>
-                      <div className="flex bg-surface-elevated p-1 rounded-xl border border-border mb-4">
+                    <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+                      <p className="text-xs text-muted uppercase tracking-wider">Secure your bid using one of the payment options:</p>
+                      
+                      <div className="flex bg-surface-elevated p-1 rounded-sm border border-border">
                         {(['Card', 'Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
                           <button
                             key={method}
                             onClick={() => setBidForm({ ...bidForm, paymentMethod: method })}
-                            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                              bidForm.paymentMethod === method ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
+                            className={`flex-1 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-all ${
+                              bidForm.paymentMethod === method ? 'bg-accent text-[#2C1A0E] shadow-sm' : 'text-muted hover:text-foreground'
                             }`}
                           >
                             {t(method.toLowerCase().replace(' ', '_'))}
@@ -237,11 +211,11 @@ export default function ArtsPage() {
                         ))}
                       </div>
 
-                      <div className="mb-6">
+                      <div>
                         {bidForm.paymentMethod === 'Card' && (
-                          <div className="space-y-3 animate-in fade-in text-sm">
+                          <div className="space-y-4 animate-in fade-in">
                             <FormInput label="Card Number" placeholder="0000 0000 0000 0000" />
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-4">
                               <FormInput label="Expiry" placeholder="MM/YY" />
                               <FormInput label="CVV" placeholder="123" />
                             </div>
@@ -249,13 +223,13 @@ export default function ArtsPage() {
                         )}
 
                         {bidForm.paymentMethod === 'Instapay' && (
-                          <div className="space-y-4 animate-in fade-in flex flex-col items-center">
-                            <div className="w-32 h-32 bg-white rounded-xl flex items-center justify-center border-4 border-primary">
-                              <span className="text-black font-bold text-center text-xs">QR Code<br/>@owner</span>
+                          <div className="space-y-6 animate-in fade-in flex flex-col items-center">
+                            <div className="w-32 h-32 bg-white rounded-sm flex flex-col items-center justify-center border border-border p-2">
+                              <span className="text-black font-semibold text-center text-[10px] leading-tight uppercase tracking-wider">Instapay QR<br/>@retrospot</span>
                             </div>
                             <div className="w-full flex items-center justify-center gap-2">
-                              <code className="text-lg font-mono bg-surface-elevated px-3 py-1 rounded-lg">{config.instapayPhone}</code>
-                              <button onClick={() => copyToClipboard(config.instapayPhone)} className="p-1.5 bg-secondary text-foreground rounded-lg">
+                              <code className="text-base font-mono bg-surface-elevated px-3 py-1.5 border border-border rounded-sm">{config.instapayPhone}</code>
+                              <button onClick={() => copyToClipboard(config.instapayPhone)} className="p-2 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors">
                                 {copied ? <Check size={16} /> : <Copy size={16} />}
                               </button>
                             </div>
@@ -264,11 +238,11 @@ export default function ArtsPage() {
                         )}
 
                         {bidForm.paymentMethod === 'Mobile wallet' && (
-                          <div className="space-y-4 animate-in fade-in">
-                            <p className="text-center text-muted-foreground text-xs">Transfer via Vodafone/Orange/e& Cash</p>
+                          <div className="space-y-6 animate-in fade-in">
+                            <p className="text-center text-muted text-xs uppercase tracking-wider">Transfer via Vodafone/Orange/e& Cash</p>
                             <div className="w-full flex items-center justify-center gap-2">
-                              <code className="text-lg font-mono bg-surface-elevated px-3 py-1 rounded-lg">{config.mobileWalletPhone}</code>
-                              <button onClick={() => copyToClipboard(config.mobileWalletPhone)} className="p-1.5 bg-secondary text-foreground rounded-lg">
+                              <code className="text-base font-mono bg-surface-elevated px-3 py-1.5 border border-border rounded-sm">{config.mobileWalletPhone}</code>
+                              <button onClick={() => copyToClipboard(config.mobileWalletPhone)} className="p-2 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors">
                                 {copied ? <Check size={16} /> : <Copy size={16} />}
                               </button>
                             </div>
@@ -277,9 +251,9 @@ export default function ArtsPage() {
                         )}
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button variant="outline" className="flex-1" onClick={() => setBidStep(1)} disabled={isSubmittingBid}>Back</Button>
-                        <Button className="flex-1 bg-success hover:bg-success/90" onClick={submitBid} loading={isSubmittingBid} disabled={!bidForm.paymentMethod}>
+                      <div className="flex gap-3">
+                        <Button variant="outline" className="flex-1 uppercase tracking-widest text-xs font-bold h-11" onClick={() => setBidStep(1)} disabled={isSubmittingBid}>Back</Button>
+                        <Button variant="primary" className="flex-1 uppercase tracking-widest text-xs font-bold h-11" onClick={submitBid} loading={isSubmittingBid} disabled={!bidForm.paymentMethod}>
                           Confirm Bid
                         </Button>
                       </div>
@@ -287,12 +261,16 @@ export default function ArtsPage() {
                   )}
 
                   {bidStep === 3 && (
-                    <motion.div key="step3" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
-                      <CheckCircle2 size={48} className="text-success mx-auto mb-4" />
-                      <h4 className="text-xl font-bold font-heading mb-2">Bid Placed Successfully!</h4>
-                      <p className="text-muted-foreground mb-6">You are currently the highest bidder.</p>
-                      <Button variant="outline" className="w-full mb-2" onClick={generateBidPDF}>Download Receipt</Button>
-                      <Button variant="ghost" className="w-full" onClick={() => setBidStep(0)}>Close</Button>
+                    <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-4">
+                      <CheckCircle2 size={48} className="text-accent mx-auto" />
+                      <div className="space-y-1">
+                        <h4 className="text-2xl font-display font-light text-foreground">Bid Placed Successfully!</h4>
+                        <p className="text-xs text-muted uppercase tracking-wider">You are currently the highest bidder.</p>
+                      </div>
+                      <div className="pt-4 space-y-2">
+                        <Button variant="outline" className="w-full uppercase tracking-widest text-xs font-bold h-11" onClick={generateBidPDF}>Download Receipt</Button>
+                        <Button variant="ghost" className="w-full uppercase tracking-widest text-xs font-bold h-11" onClick={() => setBidStep(0)}>Close</Button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -301,50 +279,59 @@ export default function ArtsPage() {
           </Card>
         </section>
 
-
         {/* =========================================
             SECTION 2: ARTIST SUBMISSION 
             ========================================= */}
-        <section className="pb-16">
-          <div className="flex items-center gap-3 mb-6">
-            <UploadCloud className="text-primary" />
-            <h2 className="text-3xl font-black font-heading">{t('artist_submission')}</h2>
+        <section className="space-y-8 pb-12">
+          <div className="flex flex-col space-y-2 border-b border-border/20 pb-4">
+            <span className="text-xs uppercase tracking-widest text-accent font-bold">
+              {isRtl ? 'المشاركة الفنية' : 'Call For Artists'}
+            </span>
+            <div className="flex items-center gap-3">
+              <UploadCloud size={24} className="text-accent shrink-0" />
+              <h2 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('artist_submission')}</h2>
+            </div>
           </div>
 
-          <Card className="p-6 md:p-8 border-border-subtle shadow-lg">
+          <Card className="p-8 md:p-10 border border-border bg-surface rounded-sm">
             {!artistSuccess ? (
-              <div className="space-y-6">
-                <p className="text-muted-foreground mb-6">
-                  Are you a local artist? Submit your painting to be featured in our cafe and added to the weekly bidding queue.
+              <div className="space-y-8">
+                <p className="text-sm text-muted leading-relaxed max-w-xl">
+                  Are you a local artist? Submit your painting to be featured in our physical cafe gallery and added to the weekly bidding queue. We support local art.
                 </p>
                 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <FormInput label={t('artist_name')} value={artistForm.name} onChange={e => setArtistForm({...artistForm, name: e.target.value})} />
                     <FormInput label="Contact (Phone/Email)" value={artistForm.contact} onChange={e => setArtistForm({...artistForm, contact: e.target.value})} />
                     <FormInput label={t('painting_name')} value={artistForm.paintingName} onChange={e => setArtistForm({...artistForm, paintingName: e.target.value})} />
                     <FormInput label={t('price')} type="number" placeholder="In EGP" value={artistForm.price} onChange={e => setArtistForm({...artistForm, price: e.target.value})} />
                   </div>
-                  <div className="space-y-4 flex flex-col">
-                    <Textarea label={t('description')} className="flex-1 min-h-[120px]" value={artistForm.description} onChange={e => setArtistForm({...artistForm, description: e.target.value})} />
+                  
+                  <div className="space-y-4 flex flex-col justify-between">
+                    <Textarea label={t('description')} className="flex-grow min-h-[140px]" value={artistForm.description} onChange={e => setArtistForm({...artistForm, description: e.target.value})} />
                     <UploadInput label="Upload Painting Photo" onFileSelect={f => setArtistForm({...artistForm, photo: f})} />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-border mt-6">
-                  <Button size="lg" className="w-full md:w-auto md:px-12" onClick={submitArtistRequest} loading={isSubmittingArtist}>
+                <div className="pt-6 border-t border-border/20 flex justify-end">
+                  <Button variant="primary" size="lg" className="w-full md:w-auto px-12 uppercase tracking-widest text-xs font-bold h-12" onClick={submitArtistRequest} loading={isSubmittingArtist}>
                     {t('submit_art')}
                   </Button>
                 </div>
               </div>
             ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-                <CheckCircle2 size={64} className="text-success mx-auto mb-6" />
-                <h3 className="text-2xl font-bold font-heading mb-2">Submission Received!</h3>
-                <p className="text-muted-foreground max-w-md mx-auto mb-8">
-                  Thank you for sharing your art with Retro Spot. Our team will review your submission and contact you soon.
-                </p>
-                <Button onClick={() => setArtistSuccess(false)}>Submit Another Art</Button>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 space-y-6">
+                <CheckCircle2 size={64} className="text-accent mx-auto" />
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-display font-light text-foreground">Submission Received!</h3>
+                  <p className="text-sm text-muted max-w-md mx-auto leading-relaxed">
+                    Thank you for sharing your art with Retro Spot. Our team will review your submission and contact you soon.
+                  </p>
+                </div>
+                <div className="pt-4">
+                  <Button variant="outline" className="uppercase tracking-widest text-xs font-bold px-8 h-11" onClick={() => setArtistSuccess(false)}>Submit Another Art</Button>
+                </div>
               </motion.div>
             )}
           </Card>

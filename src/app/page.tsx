@@ -36,109 +36,142 @@ export default function Home() {
   }, []);
 
   return (
-    <PageContainer className="p-0 sm:p-0 md:p-0 lg:p-0 max-w-full">
+    <PageContainer className="p-0 sm:p-0 md:p-0 lg:p-0 max-w-full overflow-hidden">
       {/* 
         ========================================
-        HERO SECTION
+        HERO SECTION (Editorial Magazine Cover Style)
         ========================================
       */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-        
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-[20%] left-[20%] w-[40rem] h-[40rem] bg-accent/8 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[35rem] h-[35rem] bg-primary/8 rounded-full blur-[100px]" />
-        </div>
-        
-        {/* Geometric Retro Elements */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20 dark:opacity-40">
-          <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.2"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-        </div>
+      <section className="relative min-h-[90vh] flex flex-col justify-center px-4 sm:px-8 lg:px-16 py-20 md:py-32">
+        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Headline and Narrative */}
+          <div className="lg:col-span-8 space-y-8 text-left z-10">
+            <span className="text-xs uppercase tracking-widest text-accent font-bold">
+              {isRtl ? 'القهوة • العمل • الفن' : 'Specialty Coffee • Crafted Workspace • Art Gallery'}
+            </span>
+            
+            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-display font-light text-foreground tracking-tight leading-[1.05]">
+              Retro <br />
+              <span className="italic font-normal text-accent">Spot</span>
+            </h1>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="z-10 text-center max-w-4xl mt-12 glass p-10 md:p-16 rounded-[2rem] shadow-2xl relative overflow-hidden"
-        >
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
-          
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 font-heading text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground/90 to-primary tracking-tighter leading-tight relative z-10">
-            Retro Spot
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 font-medium leading-relaxed max-w-2xl mx-auto relative z-10">
-            {t('subtitle')}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full relative z-10">
-            <Link href="/menu" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
-                <Coffee size={20} />
-                {t('menu')}
-              </Button>
-            </Link>
-            <Link href="/booking" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
-                <CalendarDays size={20} />
-                {t('booking')}
-              </Button>
-            </Link>
-            <Link href="/arts" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-10 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2">
-                <Palette size={20} />
-                {isRtl ? 'المعرض' : 'Arts'}
-              </Button>
-            </Link>
+            <div className="w-24 h-px bg-accent opacity-60" />
+
+            <p className="text-lg md:text-xl text-muted leading-relaxed max-w-xl">
+              {t('subtitle')}
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link href="/menu">
+                <Button variant="primary" size="lg" className="h-12 px-8 uppercase tracking-widest text-xs font-bold">
+                  {t('order_now')}
+                </Button>
+              </Link>
+              <Link href="/booking">
+                <Button variant="outline" size="lg" className="h-12 px-8 uppercase tracking-widest text-xs font-bold">
+                  {t('book_table')}
+                </Button>
+              </Link>
+            </div>
           </div>
-        </motion.div>
+
+          {/* Side Feature (Vinyl Record / Visual Ornament) */}
+          <div className="lg:col-span-4 flex justify-center z-10">
+            <div className="relative group p-8 border border-border bg-surface-elevated/40 rounded-sm max-w-sm w-full text-center">
+              <div className="absolute inset-0 bg-accent/5 pointer-events-none rounded-sm" />
+              <div className="aspect-square flex items-center justify-center relative mb-6">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                  className="w-48 h-48 rounded-full bg-gradient-to-br from-zinc-950 to-zinc-800 border-[6px] border-[#3D2010] flex items-center justify-center shadow-2xl relative"
+                >
+                  <div className="w-16 h-16 rounded-full bg-[#EDD9C0] dark:bg-[#2C1A0E] flex items-center justify-center border border-border/40">
+                    <div className="w-2 h-2 rounded-full bg-accent" />
+                  </div>
+                </motion.div>
+              </div>
+              <h3 className="font-display text-2xl font-light text-foreground italic mb-2">The Listening Table</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                {isRtl ? 'استمع إلى أسطوانات الفينيل المختارة بعناية أثناء العمل.' : 'Analog vibes, pour-overs, and a hand-curated vinyl library for your focus.'}
+              </p>
+            </div>
+          </div>
+
+        </div>
       </section>
 
+      {/* Gold Fine Divider */}
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-px bg-accent opacity-20" />
+      </div>
+
       {/* 
         ========================================
-        NEWS SECTION
+        NEWS SECTION (Latest Dispatch - Staggered Card Grid)
         ========================================
       */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-elevated/30">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-28 px-4 sm:px-8 lg:px-16 bg-surface/20">
+        <div className="max-w-6xl mx-auto">
           <ScrollReveal>
-            <div className="flex items-center gap-3 mb-12">
-              <div className="p-3 bg-primary/10 text-primary rounded-xl">
-                <Newspaper size={28} />
+            <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-4 mb-16 border-b border-border/20 pb-6">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                  {isRtl ? 'الأخبار والأحداث' : 'The Gazette'}
+                </span>
+                <h2 className="text-4xl md:text-5xl font-display font-light text-foreground mt-2">
+                  {t('latest_news')}
+                </h2>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold font-heading">{t('latest_news')}</h2>
+              <p className="text-sm text-muted max-w-xs md:text-right">
+                {isRtl ? 'كن على اطلاع دائم بآخر المستجدات والأنشطة لدينا.' : 'Artisan workshops, music listings, and seasonal coffee updates from our baristas.'}
+              </p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
             {loading ? (
-              <div className="flex justify-center py-12"><div className="animate-pulse text-muted-foreground">Loading news...</div></div>
+              <div className="flex justify-center py-12">
+                <div className="text-sm font-medium tracking-widest uppercase text-muted animate-pulse">
+                  {t('loading')}
+                </div>
+              </div>
             ) : newsItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {newsItems.slice(0, 3).map((item, index) => (
-                  <Card key={item.id} hoverable className="h-full flex flex-col p-6 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'both' }}>
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
-                        {item.type.replace('_', ' ')}
-                      </span>
-                      {item.startDate && (
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <CalendarDays size={14} />
-                          {new Date(item.startDate).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {newsItems.slice(0, 3).map((item, index) => {
+                  const isEven = index % 2 === 1;
+                  return (
+                    <div 
+                      key={item.id} 
+                      className={`flex flex-col transition-all duration-300 ${
+                        isEven ? 'md:translate-y-8' : ''
+                      }`}
+                    >
+                      <Card 
+                        hoverable 
+                        className="flex flex-col p-8 h-full bg-surface border border-border rounded-sm relative overflow-hidden"
+                      >
+                        <div className="flex justify-between items-baseline mb-6">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-accent border border-accent/30 px-2 py-0.5 rounded-sm">
+                            {item.type.replace('_', ' ')}
+                          </span>
+                          {item.startDate && (
+                            <span className="text-xs text-muted flex items-center gap-1.5 font-medium">
+                              <CalendarDays size={12} />
+                              {new Date(item.startDate).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-2xl font-display font-light text-foreground mb-4 line-clamp-2 leading-snug">
+                          {isRtl ? item.titleAr : item.titleEn}
+                        </h3>
+                        <p className="text-sm text-muted mb-8 leading-relaxed line-clamp-3">
+                          {isRtl ? item.descriptionAr : item.descriptionEn}
+                        </p>
+                      </Card>
                     </div>
-                    <h3 className="text-xl font-bold font-heading mb-3 line-clamp-2">{isRtl ? item.titleAr : item.titleEn}</h3>
-                    <p className="text-muted-foreground mb-6 flex-1 line-clamp-3 leading-relaxed">{isRtl ? item.descriptionAr : item.descriptionEn}</p>
-                  </Card>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <EmptyState 
@@ -151,141 +184,161 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gold Fine Divider */}
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-px bg-accent opacity-20" />
+      </div>
+
       {/* 
         ========================================
-        OUR STORY SECTION
+        OUR STORY SECTION (Asymmetric editorial spread)
         ========================================
       */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <ScrollReveal direction={isRtl ? 'right' : 'left'}>
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-border relative group shadow-2xl">
-                {/* Retro-themed decorative banner */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-surface-elevated" />
-                <div className="absolute inset-0" style={{
-                  backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.04) 39px, rgba(255,255,255,0.04) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.04) 39px, rgba(255,255,255,0.04) 40px)'
-                }} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8">
-                  {/* Animated vinyl record */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                    className="w-36 h-36 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 border-4 border-primary/30 flex items-center justify-center shadow-2xl"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <Music size={20} className="text-white" />
-                    </div>
-                  </motion.div>
-                  <div className="flex gap-4">
-                    {[Coffee, Palette, Music].map((Icon, i) => (
-                      <motion.div key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.2 }}
-                        className="p-3 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white"
-                      >
-                        <Icon size={22} />
-                      </motion.div>
-                    ))}
-                  </div>
-                  <p className="text-white/80 font-bold text-lg tracking-wider uppercase">Where Memories Are Made</p>
-                </div>
-              </div>
-            </ScrollReveal>
+      <section className="py-28 px-4 sm:px-8 lg:px-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             
-            <ScrollReveal direction={isRtl ? 'left' : 'right'} delay={0.2}>
-              <div>
-                <h2 className="text-4xl md:text-5xl font-bold font-heading mb-8">{t('our_story')}</h2>
-                <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+            {/* Editorial Media Container */}
+            <div className="lg:col-span-6">
+              <ScrollReveal direction={isRtl ? 'right' : 'left'}>
+                <div className="aspect-[4/3] border border-border bg-surface-elevated p-8 relative rounded-sm flex flex-col justify-center items-center text-center overflow-hidden">
+                  {/* Amber multiply tint overlay pattern */}
+                  <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
+                  
+                  <div className="space-y-6 relative z-10">
+                    <div className="flex gap-4 justify-center">
+                      {[Coffee, Palette, Music].map((Icon, i) => (
+                        <div key={i} className="p-3 border border-border rounded-sm bg-surface/60 text-accent">
+                          <Icon size={20} />
+                        </div>
+                      ))}
+                    </div>
+                    <h3 className="font-display text-3xl font-light italic text-foreground mt-4">
+                      {isRtl ? 'ملتقى الحواس' : 'Sensory Gathering'}
+                    </h3>
+                    <p className="text-xs text-muted max-w-xs leading-relaxed uppercase tracking-wider">
+                      {isRtl ? 'الجمع بين الإلهام والراحة البصرية' : 'Cozy corners, single-origins, and local art galleries in a single room'}
+                    </p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            </div>
+            
+            {/* Narrative Editorial Text */}
+            <div className="lg:col-span-6 space-y-6">
+              <ScrollReveal direction={isRtl ? 'left' : 'right'} delay={0.2}>
+                <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                  {t('our_story')}
+                </span>
+                <h2 className="text-4xl md:text-5xl font-display font-light text-foreground leading-tight">
+                  {isRtl ? 'أكثر من مجرد مقهى' : 'A space built for slow coffee and deep work'}
+                </h2>
+                <div className="space-y-6 text-base text-muted leading-relaxed font-normal">
                   <p>{t('story_text')}</p>
                   <p>Whether you're looking for a quiet corner to finish that novel, a vibrant table to brainstorm with your startup team, or just a really good cup of specialty coffee, we've built this place for you.</p>
                 </div>
-                <Button className="mt-10 rounded-xl px-8" size="lg" variant="outline">
-                  Read Full Story
-                </Button>
-              </div>
-            </ScrollReveal>
+                <div className="pt-4">
+                  <Link href="/booking">
+                    <Button variant="outline" size="md" className="uppercase tracking-widest text-xs font-bold px-6">
+                      {isRtl ? 'احجز طاولة' : 'Read Our Story'}
+                    </Button>
+                  </Link>
+                </div>
+              </ScrollReveal>
+            </div>
+
           </div>
         </div>
       </section>
 
+      {/* Gold Fine Divider */}
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full h-px bg-accent opacity-20" />
+      </div>
+
       {/* 
         ========================================
-        MAP SECTION
+        MAP & INFO SECTION
         ========================================
       */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-elevated/30">
-        <div className="max-w-7xl mx-auto text-center mb-12">
+      <section className="py-28 px-4 sm:px-8 lg:px-16 bg-surface/20">
+        <div className="max-w-6xl mx-auto">
+          
           <ScrollReveal>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium mb-6">
-              <MapPin size={18} />
-              {t('our_location')}
+            <div className="text-center mb-16 space-y-4">
+              <span className="text-xs uppercase tracking-widest text-accent font-bold">
+                {t('our_location')}
+              </span>
+              <h2 className="text-4xl md:text-5xl font-display font-light text-foreground">
+                {t('find_us')}
+              </h2>
             </div>
-            <h2 className="text-4xl font-bold font-heading">{t('find_us')}</h2>
           </ScrollReveal>
-        </div>
 
-        <ScrollReveal delay={0.2}>
-          <div className="max-w-4xl mx-auto">
-            <div className="rounded-3xl overflow-hidden border border-border bg-surface shadow-xl">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                {/* Address card */}
-                <div className="p-10 flex flex-col justify-center gap-6 border-b md:border-b-0 md:border-r border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-primary/10 text-primary rounded-2xl">
-                      <MapPin size={24} />
+          <ScrollReveal delay={0.2}>
+            <div className="max-w-5xl mx-auto">
+              <div className="border border-border bg-surface rounded-sm overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  
+                  {/* Address info */}
+                  <div className="p-10 md:p-14 flex flex-col justify-center gap-8 border-b md:border-b-0 md:border-r border-border">
+                    <div className="space-y-2">
+                      <h3 className="text-3xl font-display font-light text-foreground">{isRtl ? 'العنوان' : 'The Spot'}</h3>
+                      <p className="text-sm text-muted">{isRtl ? 'القاهرة، مصر' : 'Cairo, Egypt'}</p>
                     </div>
-                    <h3 className="text-2xl font-bold font-heading">{isRtl ? 'العنوان' : 'Our Address'}</h3>
-                  </div>
-                  <div className="space-y-2 text-muted-foreground">
-                    <p className="font-semibold text-foreground text-lg">Retro Spot Café</p>
-                    <p>{isRtl ? 'القاهرة، مصر' : 'Cairo, Egypt'}</p>
-                  </div>
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                      <span className="text-muted-foreground">{isRtl ? 'السبت – الخميس: ١٠ص – ١٢م' : 'Sat – Thu: 10 AM – 12 AM'}</span>
+
+                    <div className="w-12 h-px bg-accent opacity-60" />
+
+                    <div className="space-y-4 text-sm text-muted">
+                      <p className="font-semibold text-foreground text-lg">Retro Spot Café</p>
+                      <div className="flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                        <span>{isRtl ? 'السبت – الخميس: ١٠ص – ١٢م' : 'Sat – Thu: 10 AM – 12 AM'}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                        <span>{isRtl ? 'الجمعة: ٢م – ١٢م' : 'Friday: 2 PM – 12 AM'}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="w-2 h-2 rounded-full bg-accent shrink-0" />
-                      <span className="text-muted-foreground">{isRtl ? 'الجمعة: ٢م – ١٢م' : 'Friday: 2 PM – 12 AM'}</span>
+
+                    <div className="pt-4">
+                      <Link href="/booking">
+                        <Button variant="primary" size="md" className="uppercase tracking-widest text-xs font-bold px-8 h-11">
+                          {isRtl ? 'احجز مكانك' : 'Reserve a Spot'}
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                  <Link href="/booking">
-                    <Button className="rounded-xl mt-2">
-                      {isRtl ? 'احجز مكانك' : 'Reserve a Spot'}
-                    </Button>
-                  </Link>
-                </div>
-                {/* Interactive Map Link */}
-                <a 
-                  href="https://maps.app.goo.gl/b11MWcxeD3sN4Z8q7" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="relative min-h-[280px] bg-gradient-to-br from-primary/10 to-accent/10 flex flex-col items-center justify-center overflow-hidden group transition-all hover:opacity-90 cursor-pointer"
-                >
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(var(--color-primary)/0.1) 29px, rgba(var(--color-primary)/0.1) 30px), repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(var(--color-primary)/0.1) 29px, rgba(var(--color-primary)/0.1) 30px)'
-                  }} />
-                  <motion.div
-                    animate={{ scale: [1, 1.08, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="relative z-10 flex flex-col items-center gap-3"
+
+                  {/* Google maps link element */}
+                  <a 
+                    href="https://maps.app.goo.gl/b11MWcxeD3sN4Z8q7" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="relative min-h-[300px] bg-surface-elevated flex flex-col items-center justify-center overflow-hidden group transition-all hover:bg-surface-elevated/70 cursor-pointer p-8"
                   >
-                    <div className="w-16 h-16 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <MapPin size={28} className="text-primary" />
-                    </div>
-                    <div className="w-3 h-3 rounded-full bg-primary animate-ping" />
-                  </motion.div>
-                  <div className="relative z-10 mt-4 px-4 py-2 bg-background/80 backdrop-blur-sm rounded-full text-sm font-medium border border-border shadow-sm group-hover:-translate-y-1 transition-transform">
-                    {isRtl ? 'افتح في خرائط جوجل' : 'Open in Google Maps'}
-                  </div>
-                </a>
+                    <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
+                    
+                    <motion.div
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                      className="relative z-10 flex flex-col items-center gap-4 text-center"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-background border border-border flex items-center justify-center group-hover:scale-105 transition-all">
+                        <MapPin size={24} className="text-accent" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-display text-lg text-foreground font-semibold">{isRtl ? 'افتح في خرائط جوجل' : 'Open in Google Maps'}</h4>
+                        <p className="text-xs text-muted max-w-xs">{isRtl ? 'انقر للحصول على الاتجاهات مباشرة' : 'Click to launch navigation directions'}</p>
+                      </div>
+                    </motion.div>
+                  </a>
+
+                </div>
               </div>
             </div>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
       </section>
 
     </PageContainer>

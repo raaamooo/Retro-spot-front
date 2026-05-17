@@ -38,10 +38,10 @@ export default function Select({
           id={inputId}
           className={`
             w-full px-4 py-2.5 text-sm appearance-none
-            bg-background border border-border rounded-xl
+            bg-surface border border-border rounded-sm
             text-foreground
-            transition-colors duration-200
-            focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20
+            transition-all duration-250 ease-out
+            focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 focus:bg-surface-elevated
             disabled:opacity-50 disabled:cursor-not-allowed
             pe-10
             ${error ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}
