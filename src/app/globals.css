@@ -6,19 +6,19 @@
 
 /* ---------- Light Theme ---------- */
 :root {
-  --background: 240 15% 97%;
-  --surface: 0 0% 100%;
-  --surface-elevated: 240 10% 98%;
-  --primary: 330 60% 42%;
-  --primary-hover: 330 60% 36%;
-  --secondary: 330 40% 88%;
-  --accent: 330 70% 45%;
-  --accent-glow: 330 70% 60%;
-  --foreground: 240 10% 10%;
-  --muted: 240 6% 55%;
-  --border: 330 25% 82%;
-  --border-subtle: 330 15% 90%;
-  --ring: 330 60% 42%;
+  --background: 33 30% 95%;
+  --surface: 35 35% 98%;
+  --surface-elevated: 34 28% 96%;
+  --primary: 24 60% 28%;
+  --primary-hover: 24 60% 22%;
+  --secondary: 33 30% 88%;
+  --accent: 36 50% 42%;
+  --accent-glow: 36 55% 55%;
+  --foreground: 24 30% 12%;
+  --muted: 24 8% 50%;
+  --border: 33 20% 80%;
+  --border-subtle: 33 15% 88%;
+  --ring: 36 50% 42%;
 
   --success: 142 60% 38%;
   --success-bg: 142 60% 94%;
@@ -29,10 +29,10 @@
   --info: 210 80% 52%;
   --info-bg: 210 80% 94%;
 
-  --card-shadow: 0 2px 12px hsl(330 20% 70% / 0.15);
-  --card-shadow-hover: 0 8px 30px hsl(330 20% 60% / 0.2);
+  --card-shadow: 0 2px 12px hsl(33 20% 60% / 0.15);
+  --card-shadow-hover: 0 8px 30px hsl(33 20% 50% / 0.2);
   --glow: none;
-  --glow-hover: 0 0 20px hsl(330 70% 50% / 0.12);
+  --glow-hover: 0 0 20px hsl(36 55% 45% / 0.15);
   --header-blur: 16px;
 
   --radius-sm: 8px;
@@ -59,19 +59,19 @@
 
 /* ---------- Dark Theme (Default) ---------- */
 .dark {
-  --background: 270 10% 8%;
-  --surface: 270 8% 12%;
-  --surface-elevated: 270 8% 16%;
-  --primary: 330 60% 55%;
-  --primary-hover: 330 60% 62%;
-  --secondary: 270 20% 20%;
-  --accent: 330 70% 50%;
-  --accent-glow: 330 80% 60%;
-  --foreground: 0 0% 95%;
-  --muted: 270 6% 55%;
-  --border: 270 10% 22%;
-  --border-subtle: 270 8% 18%;
-  --ring: 330 60% 55%;
+  --background: 24 15% 9%;
+  --surface: 24 12% 13%;
+  --surface-elevated: 24 10% 17%;
+  --primary: 36 50% 52%;
+  --primary-hover: 36 50% 60%;
+  --secondary: 24 15% 20%;
+  --accent: 36 55% 55%;
+  --accent-glow: 36 60% 65%;
+  --foreground: 33 20% 93%;
+  --muted: 24 8% 52%;
+  --border: 24 10% 23%;
+  --border-subtle: 24 8% 19%;
+  --ring: 36 50% 52%;
 
   --success: 142 55% 50%;
   --success-bg: 142 40% 14%;
@@ -82,10 +82,10 @@
   --info: 210 80% 60%;
   --info-bg: 210 50% 14%;
 
-  --card-shadow: 0 2px 12px hsl(270 30% 4% / 0.5);
-  --card-shadow-hover: 0 8px 30px hsl(270 30% 4% / 0.6);
+  --card-shadow: 0 2px 12px hsl(24 20% 4% / 0.5);
+  --card-shadow-hover: 0 8px 30px hsl(24 20% 4% / 0.6);
   --glow: 0 0 0px transparent;
-  --glow-hover: 0 0 24px hsl(330 80% 55% / 0.2);
+  --glow-hover: 0 0 24px hsl(36 60% 50% / 0.2);
 }
 
 /* ---------- Tailwind v4 Theme Mapping ---------- */
