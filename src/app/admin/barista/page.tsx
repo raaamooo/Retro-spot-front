@@ -211,6 +211,11 @@ export default function BaristaPage() {
                               + {item.additions}
                             </p>
                           )}
+                          {item.notes && (
+                            <p className="text-sm text-accent font-bold mt-1">
+                              {item.notes}
+                            </p>
+                          )}
                         </div>
                       </li>
                     ))}

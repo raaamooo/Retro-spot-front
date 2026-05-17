@@ -18,7 +18,12 @@ export default function Header() {
   // Close mobile menu on route change
   useEffect(() => setMobileOpen(false), [pathname]);
 
-  if (pathname?.startsWith('/admin')) {
+  if (
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/menu') ||
+    pathname?.startsWith('/booking') ||
+    pathname?.startsWith('/arts')
+  ) {
     return null;
   }
 

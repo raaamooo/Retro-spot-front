@@ -24,6 +24,7 @@ interface Order {
     id: string;
     quantity: number;
     additions: string | null;
+    notes: string | null;
     menuItem: { id: string; nameEn: string; nameAr: string };
   }[];
 }
@@ -279,6 +280,16 @@ export default function WaiterPage() {
                             </div>
                             <div>
                               <p className="font-bold text-xl leading-tight">{item.menuItem.nameEn}</p>
+                              {item.additions && (
+                                <p className="text-sm text-muted-foreground mt-1 font-medium">
+                                  + {item.additions}
+                                </p>
+                              )}
+                              {item.notes && (
+                                <p className="text-sm text-accent font-bold mt-1">
+                                  {item.notes}
+                                </p>
+                              )}
                             </div>
                           </li>
                         ))}
