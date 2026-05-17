@@ -35,7 +35,13 @@ export default function Footer() {
             </p>
             {/* Social Media */}
             <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="text-[#C4A882] hover:text-[#EDD9C0] border border-border p-2 rounded-sm transition-colors focus-ring">
+              <a 
+                href="https://www.instagram.com/retro__spot/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                aria-label="Instagram" 
+                className="text-[#C4A882] hover:text-[#EDD9C0] border border-border p-2 rounded-sm transition-colors focus-ring"
+              >
                 <Camera size={16} />
               </a>
               <a href="#" aria-label="Twitter" className="text-[#C4A882] hover:text-[#EDD9C0] border border-border p-2 rounded-sm transition-colors focus-ring">
