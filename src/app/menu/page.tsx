@@ -62,6 +62,7 @@ function MenuContent() {
   const [tip, setTip] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [hasActiveOrder, setHasActiveOrder] = useState(false);
 
   // Ice cream flavors state
   const [flavorModalItem, setFlavorModalItem] = useState<MenuItem | null>(null);
@@ -187,6 +188,28 @@ function MenuContent() {
 
       });
   }, [searchParams, language]);
+
+  // Check if table has active orders
+  useEffect(() => {
+    if (!tableId) return;
+
+    const checkActiveOrder = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/orders?locationId=${tableId}`);
+        if (res.ok) {
+          const orders = await res.json();
+          const active = orders.some((o: any) => o.status !== 'completed');
+          setHasActiveOrder(active);
+        }
+      } catch (err) {
+        console.error('Failed to check active orders', err);
+      }
+    };
+
+    checkActiveOrder();
+    const interval = setInterval(checkActiveOrder, 10000);
+    return () => clearInterval(interval);
+  }, [tableId]);
 
   // Listen for menu availability updates from inventory changes
   useSocketEvent<{id: string; available: boolean}[]>(EVENTS.MENU_AVAILABILITY, (items) => {
@@ -331,6 +354,7 @@ function MenuContent() {
       if (!res.ok) throw new Error('Order failed');
       
       addToast('Order placed successfully! We are preparing it now.', 'success');
+      setHasActiveOrder(true);
       setCart([]);
       setNotes('');
       setIsCartOpen(false);
@@ -376,13 +400,15 @@ function MenuContent() {
           </div>
           
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCallCheck}
-              className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors text-sm font-bold flex items-center gap-1.5"
-            >
-              <CreditCard size={14} />
-              <span className="hidden sm:inline">Request Check</span>
-            </button>
+            {hasActiveOrder && (
+              <button
+                onClick={handleCallCheck}
+                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors text-sm font-bold flex items-center gap-1.5"
+              >
+                <CreditCard size={14} />
+                <span className="hidden sm:inline">Request Check</span>
+              </button>
+            )}
             <button
               onClick={handleCallWaiter}
               className="px-3 py-1.5 rounded-full bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors text-sm font-bold flex items-center gap-1.5"
