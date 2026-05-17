@@ -7,8 +7,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp, CreditCard, X } from 'lucide-react';
-import { Button, Card, ScrollReveal, FormInput, Textarea, Select, EmptyState, LoadingState } from '@/components';
+import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles } from 'lucide-react';
+import { Button, FormInput, Textarea, Select, EmptyState, LoadingState } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 
 import { API_URL } from '@/lib/constants';
@@ -37,7 +37,7 @@ type CartItem = MenuItem & {
 };
 
 function MenuContent() {
-  const { t, language, toggleLanguage, isRtl } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const searchParams = useSearchParams();
   const { addToast } = useToast();
@@ -48,17 +48,29 @@ function MenuContent() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableId, setTableId] = useState<string>('');
   
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [quizHighlight, setQuizHighlight] = useState<string>('');
+  const [activeCategory, setActiveCategory] = useState<string>('');
   
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [tip, setTip] = useState(0);
+  const [tipType, setTipType] = useState<'percent' | 'custom'>('percent');
+  const [tipPct, setTipPct] = useState<number>(0);
+  const [customTipVal, setCustomTipVal] = useState<string>('');
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [hasActiveOrder, setHasActiveOrder] = useState(false);
 
+  // Customization modal states
+  const [customizingItem, setCustomizingItem] = useState<MenuItem | null>(null);
+  const [modalQuantity, setModalQuantity] = useState(1);
+  const [modalSelectedAdditions, setModalSelectedAdditions] = useState<MenuItem[]>([]);
+  const [sweetness, setSweetness] = useState<'standard' | 'half' | 'none'>('standard');
+  const [milk, setMilk] = useState<'none' | 'full' | 'oat' | 'almond'>('none');
+
+  // Flavor modal states for Ice Cream
   const [flavorModalItem, setFlavorModalItem] = useState<MenuItem | null>(null);
   const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
   const ICE_CREAM_FLAVORS = ['Vanilla', 'Chocolate', 'Mango', 'Strawberry'];
@@ -125,25 +137,47 @@ function MenuContent() {
   const categories = Array.from(new Set(menuItems.filter(i => !i.isAddition).map(i => i.category)));
   const additions = menuItems.filter(i => i.isAddition);
 
+  // Set default active category once loaded
   useEffect(() => {
-    if (categories.length > 0 && expandedCategories.length === 0 && !quizHighlight) {
-      setExpandedCategories([categories[0]]);
+    if (categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0]);
     }
-  }, [categories, expandedCategories, quizHighlight]);
+  }, [categories, activeCategory]);
 
-  const toggleCategory = (cat: string) => {
-    setExpandedCategories(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
-  };
+  // Scrollspy observer logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 180;
+      let currentActive = activeCategory;
+      
+      for (const cat of categories) {
+        const el = document.getElementById(`category-${cat}`);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            currentActive = cat;
+            break;
+          }
+        }
+      }
+      if (currentActive && currentActive !== activeCategory) {
+        setActiveCategory(currentActive);
+        const pillEl = document.getElementById(`pill-${currentActive}`);
+        if (pillEl) {
+          pillEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [categories, activeCategory]);
 
   const handleQuizComplete = (recommendedCategory: string) => {
     const localizedCatName = recommendedCategory;
     const isCatExist = categories.find(c => c.toLowerCase() === localizedCatName.toLowerCase());
     if (isCatExist) {
-      if (!expandedCategories.includes(isCatExist)) {
-        setExpandedCategories(prev => [...prev, isCatExist]);
-      }
       setQuizHighlight(isCatExist);
       setTimeout(() => {
         const el = document.getElementById(`category-${isCatExist}`);
@@ -164,22 +198,85 @@ function MenuContent() {
     );
   };
 
-  const addToCart = (item: MenuItem) => {
+  // Trigger customization or add directly to cart
+  const handleAddClick = (item: MenuItem) => {
     if (isIceCream(item)) {
       setFlavorModalItem(item);
       setSelectedFlavors([]);
       return;
     }
+    
     const itemAdditions = getAdditionsForItem(item);
-    if (itemAdditions.length > 0) {
-      // Logic for adding with additions is simplified here. In a real scenario, you'd show a modal.
-      // For now, we just add it.
+    const hasMilksOrSyrups = item.tags?.includes('coffee') || item.tags?.includes('tea');
+
+    if (itemAdditions.length > 0 || hasMilksOrSyrups) {
+      setCustomizingItem(item);
+      setModalQuantity(1);
+      setModalSelectedAdditions([]);
+      setSweetness('standard');
+      setMilk('none');
+    } else {
+      setCart(prev => {
+        const exists = prev.find(i => i.id === item.id && (!i.selectedAdditions || i.selectedAdditions.length === 0));
+        if (exists) {
+          return prev.map(i => (i.id === item.id && (!i.selectedAdditions || i.selectedAdditions.length === 0))
+            ? { ...i, cartQuantity: i.cartQuantity + 1 }
+            : i
+          );
+        }
+        return [...prev, { ...item, cartQuantity: 1 }];
+      });
+      addToast(t('item_added'), 'success');
     }
+  };
+
+  const toggleModalAddition = (add: MenuItem) => {
+    setModalSelectedAdditions(prev => 
+      prev.some(a => a.id === add.id) 
+        ? prev.filter(a => a.id !== add.id) 
+        : [...prev, add]
+    );
+  };
+
+  const confirmCustomization = () => {
+    if (!customizingItem) return;
+    
+    const details: string[] = [];
+    if (sweetness !== 'standard') {
+      details.push(sweetness === 'half' ? 'Half Sweet' : 'Unsweetened');
+    }
+    if (milk !== 'none') {
+      details.push(`${milk.toUpperCase()} Milk`);
+    }
+    if (modalSelectedAdditions.length > 0) {
+      details.push(modalSelectedAdditions.map(a => a.name).join(', '));
+    }
+    
+    const finalItem: CartItem = {
+      ...customizingItem,
+      cartQuantity: modalQuantity,
+      selectedAdditions: modalSelectedAdditions,
+      description: details.length > 0 ? `${customizingItem.description} (${details.join(' • ')})` : customizingItem.description
+    };
+    
     setCart(prev => {
-      const exists = prev.find(i => i.id === item.id);
-      if (exists) return prev.map(i => i.id === item.id ? { ...i, cartQuantity: i.cartQuantity + 1 } : i);
-      return [...prev, { ...item, cartQuantity: 1 }];
+      const exists = prev.find(i => 
+        i.id === finalItem.id && 
+        JSON.stringify(i.selectedAdditions?.map(a => a.id)) === JSON.stringify(finalItem.selectedAdditions?.map(a => a.id)) &&
+        i.description === finalItem.description
+      );
+      if (exists) {
+        return prev.map(i => (i.id === finalItem.id && 
+          JSON.stringify(i.selectedAdditions?.map(a => a.id)) === JSON.stringify(finalItem.selectedAdditions?.map(a => a.id)) &&
+          i.description === finalItem.description)
+            ? { ...i, cartQuantity: i.cartQuantity + finalItem.cartQuantity } 
+            : i
+        );
+      }
+      return [...prev, finalItem];
     });
+    
+    setCustomizingItem(null);
     addToast(t('item_added'), 'success');
   };
 
@@ -222,6 +319,21 @@ function MenuContent() {
 
   const finalTotal = cartTotal + tip;
 
+  const handleTipPctSelect = (pct: number) => {
+    setTipType('percent');
+    setTipPct(pct);
+    const calculatedTip = Math.round(cartTotal * (pct / 100));
+    setTip(calculatedTip);
+  };
+
+  const handleCustomTipChange = (val: string) => {
+    setTipType('custom');
+    setTipPct(0);
+    setCustomTipVal(val);
+    const parsed = parseFloat(val) || 0;
+    setTip(parsed);
+  };
+
   const submitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return;
@@ -234,7 +346,7 @@ function MenuContent() {
         items: cart.map(i => ({
           menuItemId: i.id,
           quantity: i.cartQuantity,
-          notes: i.selectedAdditions ? `Additions: ${i.selectedAdditions.map(a => a.nameEn).join(', ')}` : ''
+          notes: i.selectedAdditions ? `Additions: ${i.selectedAdditions.map(a => a.nameEn || a.name).join(', ')}` : ''
         })),
         totalAmount: finalTotal,
         paymentMethod,
@@ -253,6 +365,9 @@ function MenuContent() {
       setCart([]);
       setIsCartOpen(false);
       setHasActiveOrder(true);
+      setTip(0);
+      setTipPct(0);
+      setCustomTipVal('');
     } catch (error) {
       addToast('Failed to place order', 'error');
     } finally {
@@ -275,10 +390,18 @@ function MenuContent() {
 
   if (isLoading) return <LoadingState fullHeight />;
 
+  const customizingItemAdditions = customizingItem ? getAdditionsForItem(customizingItem) : [];
+  const customizingItemSubtotal = customizingItem 
+    ? (customizingItem.price + modalSelectedAdditions.reduce((sum, a) => sum + a.price, 0)) * modalQuantity 
+    : 0;
+
   return (
     <div className={styles.page}>
+      {/* Premium Header */}
       <header className={styles.header}>
-        <div className={styles.title}>Retro <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Menu</span></div>
+        <div className={styles.title}>
+          Retro <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Menu</span>
+        </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {tableId && (
             <div className={styles.tableInfo}>
@@ -286,43 +409,85 @@ function MenuContent() {
             </div>
           )}
           {mounted && (
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="focus-ring" style={{ padding: '8px', color: 'var(--muted)' }}>
+            <button 
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} 
+              className="focus-ring" 
+              style={{ padding: '8px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           )}
-          <button onClick={toggleLanguage} className="focus-ring" style={{ padding: '8px', color: 'var(--muted)', fontWeight: 700, fontSize: '12px' }}>
+          <button 
+            onClick={toggleLanguage} 
+            className="focus-ring" 
+            style={{ padding: '8px', color: 'var(--muted)', fontWeight: 700, fontSize: '12px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
             {language === 'en' ? 'AR' : 'EN'}
           </button>
         </div>
       </header>
 
+      {/* Sticky Category Scroll Navigation Bar */}
+      {categories.length > 0 && (
+        <nav className={styles.categoryNav}>
+          <div className={styles.categoryNavScroll}>
+            {categories.map(category => (
+              <button
+                key={category}
+                id={`pill-${category}`}
+                className={`${styles.categoryPill} ${activeCategory === category ? styles.categoryPillActive : ''}`}
+                onClick={() => {
+                  const el = document.getElementById(`category-${category}`);
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
+
       <div className="container">
         <DrinkQuiz onSelectCategory={handleQuizComplete} />
       </div>
 
-      <div className="container" style={{ marginTop: '32px' }}>
+      {/* Sequential Categories Layout */}
+      <div className="container" style={{ marginTop: '24px' }}>
         <div className={styles.categoryList}>
           {categories.map((category) => {
-            const isExpanded = expandedCategories.includes(category);
             const isHighlighted = quizHighlight === category;
             const catItems = menuItems.filter(i => i.category === category && !i.isAddition);
 
             return (
-              <div key={category} id={`category-${category}`} className={`${styles.categoryCard} ${isHighlighted ? styles.categoryCardHighlight : ''}`}>
-                <button 
-                  onClick={() => toggleCategory(category)} 
-                  className={styles.categoryHeader}
-                >
+              <section 
+                key={category} 
+                id={`category-${category}`} 
+                className={`${styles.categorySection} ${isHighlighted ? styles.categoryCardHighlight : ''}`}
+              >
+                <div className={styles.categoryHeader}>
                   <h2 className={styles.categoryTitle}>{category}</h2>
-                  <div className={`${styles.categoryIcon} ${isExpanded ? styles.categoryIconExpanded : ''}`}>
-                    <ChevronDown size={24} />
-                  </div>
-                </button>
+                  <p className={styles.categoryDesc}>
+                    {category.toLowerCase().includes('coffee') && 'Artisanal roasts and classic blends.'}
+                    {category.toLowerCase().includes('tea') && 'Fragrant infusions and aromatic spiced brews.'}
+                    {category.toLowerCase().includes('frappe') && 'Sweet frosty blends of rich cream and flavor.'}
+                    {category.toLowerCase().includes('juice') && 'Freshly squeezed premium raw fruits.'}
+                    {category.toLowerCase().includes('waffle') && 'Warm golden delicacies with sweet premium toppings.'}
+                    {category.toLowerCase().includes('yogurt') && 'Healthy light creations made fresh daily.'}
+                    {!['coffee', 'tea', 'frappe', 'juice', 'waffle', 'yogurt'].some(x => category.toLowerCase().includes(x)) && 'Delectable curated choices for your pleasure.'}
+                  </p>
+                </div>
 
-                {isExpanded && (
-                  <div className={styles.itemList}>
-                    {catItems.map((item) => (
-                      <div key={item.id} className={styles.menuItem}>
+                <div className={styles.gridList}>
+                  {catItems.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className={styles.menuItem}
+                      onClick={() => handleAddClick(item)}
+                    >
+                      <div className={styles.itemImageWrap}>
                         <img 
                           src={item.image || getItemImage(item.nameEn || item.name) || ''} 
                           alt={item.name} 
@@ -331,41 +496,56 @@ function MenuContent() {
                             (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
                           }}
                         />
-                        <div className={styles.itemContent}>
-                          <div>
-                            <h4 className={styles.itemName}>{item.name}</h4>
-                            <p className={styles.itemDesc}>{item.description}</p>
-                          </div>
-                          <div className={styles.itemFooter}>
-                            <span className={styles.itemPrice}>{item.price.toFixed(2)} EGP</span>
-                            {item.available ? (
-                              <button onClick={() => addToCart(item)} className={styles.addButton}>
-                                {t('add')}
-                              </button>
-                            ) : (
-                              <span style={{ fontSize: '12px', color: 'var(--danger)' }}>Out of stock</span>
-                            )}
-                          </div>
+                      </div>
+                      <div className={styles.itemContent}>
+                        <div>
+                          <h4 className={styles.itemName}>{item.name}</h4>
+                          <p className={styles.itemDesc}>{item.description}</p>
+                          {item.tags && item.tags.length > 0 && (
+                            <div className={styles.itemTags}>
+                              {item.tags.map(t => (
+                                <span key={t} className={styles.tag}>{t}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className={styles.itemFooter}>
+                          <span className={styles.itemPrice}>{item.price.toFixed(2)} EGP</span>
+                          {item.available ? (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddClick(item);
+                              }} 
+                              className={styles.addButton}
+                            >
+                              {t('add')}
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--danger)' }}>Out of stock</span>
+                          )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             );
           })}
         </div>
       </div>
 
+      {/* Floating Action Cart Button */}
       {cart.length > 0 && !isCartOpen && (
         <button onClick={() => setIsCartOpen(true)} className={styles.cartButton}>
           <div className={styles.cartBadge}>{cart.reduce((s, i) => s + i.cartQuantity, 0)}</div>
-          <span style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <span style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {t('view_cart')} • {cartTotal.toFixed(2)} EGP
           </span>
         </button>
       )}
 
+      {/* Staff Check request alert */}
       {hasActiveOrder && cart.length === 0 && !isCartOpen && (
         <div className={styles.requestCheckBar}>
           <span style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -377,7 +557,7 @@ function MenuContent() {
         </div>
       )}
 
-      {/* Cart Sheet */}
+      {/* Dual Layout Cart Sheet Drawer */}
       <div className={`${styles.cartOverlay} ${isCartOpen ? styles.cartOverlayOpen : ''}`} onClick={() => setIsCartOpen(false)} />
       <div className={`${styles.cartSheet} ${isCartOpen ? styles.cartSheetOpen : ''}`}>
         <div className={styles.cartHeader}>
@@ -398,7 +578,9 @@ function MenuContent() {
                     <div className={styles.cartItemDetails}>
                       <div className={styles.cartItemName}>{item.name}</div>
                       {item.selectedAdditions && item.selectedAdditions.map(a => (
-                        <div key={a.id} style={{ fontSize: '12px', color: 'var(--muted)' }}>+ {a.name} ({a.price} EGP)</div>
+                        <div key={a.id} style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
+                          + {a.name} ({a.price.toFixed(2)} EGP)
+                        </div>
                       ))}
                       <div className={styles.cartItemPrice}>
                         {((item.price + (item.selectedAdditions?.reduce((s, a) => s + a.price, 0) || 0)) * item.cartQuantity).toFixed(2)} EGP
@@ -406,25 +588,60 @@ function MenuContent() {
                     </div>
                     <div className={styles.cartItemControls}>
                       <button onClick={() => updateQuantity(idx, -1)} className={styles.quantityBtn}>-</button>
-                      <span style={{ fontSize: '14px', fontWeight: 600, width: '20px', textAlign: 'center' }}>{item.cartQuantity}</span>
+                      <span style={{ fontSize: '14px', fontWeight: 700, width: '20px', textAlign: 'center' }}>{item.cartQuantity}</span>
                       <button onClick={() => updateQuantity(idx, 1)} className={styles.quantityBtn}>+</button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div>
-                <FormInput label="Customer Name (Optional)" value={customerName} onChange={e => setCustomerName(e.target.value)} />
-                <Textarea label="Order Notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Allergies, preferences..." rows={2} />
+              {/* Checkout Details */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <FormInput 
+                  label="Customer Name (Optional)" 
+                  value={customerName} 
+                  onChange={e => setCustomerName(e.target.value)} 
+                />
+                <Textarea 
+                  label="Order Notes" 
+                  value={notes} 
+                  onChange={e => setNotes(e.target.value)} 
+                  placeholder="Allergies, customization details..." 
+                  rows={2} 
+                />
                 <Select
                   label="Payment Method"
                   value={paymentMethod}
                   onChange={e => setPaymentMethod(e.target.value)}
                   options={[
                     { label: 'Cash / Pay at Counter', value: 'cash' },
-                    { label: 'Instapay / Transfer', value: 'transfer' },
+                    { label: 'Instapay / Mobile Wallet', value: 'transfer' },
                   ]}
                 />
+
+                {/* Quick Tips Section */}
+                <div className={styles.tipSection}>
+                  <label className={styles.optionLabel}>Add Tip for Service</label>
+                  <div className={styles.tipGrid}>
+                    {[0, 10, 15, 20].map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => handleTipPctSelect(pct)}
+                        className={`${styles.tipBtn} ${tipType === 'percent' && tipPct === pct ? styles.tipBtnActive : ''}`}
+                      >
+                        {pct === 0 ? 'No Tip' : `${pct}%`}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '8px' }}>
+                    <FormInput
+                      placeholder="Custom Tip Amount (EGP)"
+                      value={customTipVal}
+                      onChange={(e) => handleCustomTipChange(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </>
           )}
@@ -433,6 +650,16 @@ function MenuContent() {
         {cart.length > 0 && (
           <div className={styles.cartFooter}>
             <div className={styles.cartTotalRow}>
+              <span>Subtotal</span>
+              <span>{cartTotal.toFixed(2)} EGP</span>
+            </div>
+            {tip > 0 && (
+              <div className={styles.cartTotalRow} style={{ fontSize: '15px', color: 'var(--muted)', fontWeight: 600 }}>
+                <span>Tip</span>
+                <span>{tip.toFixed(2)} EGP</span>
+              </div>
+            )}
+            <div className={styles.cartTotalRow} style={{ borderTop: '1px dashed var(--border-subtle)', paddingTop: '8px', fontSize: '20px' }}>
               <span>Total</span>
               <span>{finalTotal.toFixed(2)} EGP</span>
             </div>
@@ -443,34 +670,209 @@ function MenuContent() {
         )}
       </div>
 
-      {/* Flavor Modal */}
-      <div className={`${styles.modalOverlay} ${flavorModalItem ? styles.modalOverlayOpen : ''}`} onClick={() => setFlavorModalItem(null)}>
-        <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-          <h2 className="h2">Select Flavors</h2>
-          <p className="body-text" style={{ marginBottom: '24px' }}>Choose your ice cream flavors for {flavorModalItem?.name}</p>
-          <div style={{ display: 'grid', gap: '8px', marginBottom: '24px' }}>
-            {ICE_CREAM_FLAVORS.map(f => (
-              <button 
-                key={f} 
-                onClick={() => toggleFlavor(f)}
-                style={{
-                  padding: '12px',
-                  border: `1px solid ${selectedFlavors.includes(f) ? 'var(--accent)' : 'var(--border)'}`,
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: selectedFlavors.includes(f) ? 'var(--accent)' : 'transparent',
-                  color: selectedFlavors.includes(f) ? 'var(--primary-foreground)' : 'var(--foreground)',
-                  transition: 'all var(--transition-fast)'
-                }}
-              >
-                {f}
+      {/* Brand New Customization / Additions Modal */}
+      <div 
+        className={`${styles.modalOverlay} ${customizingItem ? styles.modalOverlayOpen : ''}`} 
+        onClick={() => setCustomizingItem(null)}
+      >
+        {customizingItem && (
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.cartTitle}>Customize Drink</h2>
+              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton}>
+                <X size={24} />
               </button>
-            ))}
+            </div>
+
+            <div className={styles.modalBody}>
+              {/* Product Info Summary */}
+              <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
+                <div className={styles.itemImageWrap} style={{ width: '70px', height: '70px' }}>
+                  <img 
+                    src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || ''} 
+                    alt={customizingItem.name} 
+                    className={styles.itemImage}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
+                    }}
+                  />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}>
+                    {customizingItem.name}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>
+                    {customizingItem.price.toFixed(2)} EGP
+                  </p>
+                </div>
+              </div>
+
+              {/* Coffee Custom Preferences */}
+              {(customizingItem.tags?.includes('coffee') || customizingItem.tags?.includes('tea')) && (
+                <>
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Sweetness Level</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'Standard Sweetness', value: 'standard' },
+                        { label: 'Half Sugar', value: 'half' },
+                        { label: 'No Sugar', value: 'none' }
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setSweetness(opt.value as any)}
+                          className={`${styles.customizationPill} ${sweetness === opt.value ? styles.customizationPillActive : ''}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Milk Preferences</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'No Milk', value: 'none' },
+                        { label: 'Full Cream', value: 'full' },
+                        { label: 'Oat Milk (+15 EGP)', value: 'oat' },
+                        { label: 'Almond Milk (+15 EGP)', value: 'almond' }
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setMilk(opt.value as any)}
+                          className={`${styles.customizationPill} ${milk === opt.value ? styles.customizationPillActive : ''}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Compatible Extra Additions */}
+              {customizingItemAdditions.length > 0 && (
+                <div className={styles.optionGroup}>
+                  <span className={styles.optionLabel}>Compatible Additions</span>
+                  <div className={styles.optionGrid}>
+                    {customizingItemAdditions.map((add) => {
+                      const isSelected = modalSelectedAdditions.some(a => a.id === add.id);
+                      return (
+                        <button
+                          key={add.id}
+                          onClick={() => toggleModalAddition(add)}
+                          className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}
+                        >
+                          <span>{add.name}</span>
+                          <span className={styles.additionPrice}>+{add.price.toFixed(0)} EGP</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Product Quantity Incrementor */}
+              <div className={styles.optionGroup} style={{ marginTop: '16px' }}>
+                <span className={styles.optionLabel} style={{ textAlign: 'center' }}>Quantity</span>
+                <div className={styles.modalQuantityContainer}>
+                  <button 
+                    onClick={() => setModalQuantity(q => Math.max(1, q - 1))} 
+                    className={styles.quantityBtn}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span style={{ fontSize: '18px', fontWeight: 700, width: '30px', textAlign: 'center' }}>
+                    {modalQuantity}
+                  </span>
+                  <button 
+                    onClick={() => setModalQuantity(q => q + 1)} 
+                    className={styles.quantityBtn}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button variant="ghost" fullWidth onClick={() => setCustomizingItem(null)}>
+                Cancel
+              </Button>
+              <Button fullWidth onClick={confirmCustomization}>
+                Add to Order ({customizingItemSubtotal.toFixed(2)} EGP)
+              </Button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <Button variant="ghost" fullWidth onClick={() => setFlavorModalItem(null)}>Cancel</Button>
-            <Button fullWidth onClick={addIceCreamToCart}>Confirm</Button>
+        )}
+      </div>
+
+      {/* Premium Refactored Ice Cream Flavor Modal */}
+      <div 
+        className={`${styles.modalOverlay} ${flavorModalItem ? styles.modalOverlayOpen : ''}`} 
+        onClick={() => setFlavorModalItem(null)}
+      >
+        {flavorModalItem && (
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.cartTitle}>Select Flavors</h2>
+              <button onClick={() => setFlavorModalItem(null)} className={styles.closeButton}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
+                <div className={styles.itemImageWrap} style={{ width: '70px', height: '70px' }}>
+                  <img 
+                    src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || ''} 
+                    alt={flavorModalItem.name} 
+                    className={styles.itemImage}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
+                    }}
+                  />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}>
+                    {flavorModalItem.name}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>
+                    Choose your ice cream scoop options below.
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.optionGroup} style={{ marginTop: '8px' }}>
+                <span className={styles.optionLabel}>Ice Cream Flavors</span>
+                <div className={styles.optionGrid}>
+                  {ICE_CREAM_FLAVORS.map(f => {
+                    const isSelected = selectedFlavors.includes(f);
+                    return (
+                      <button 
+                        key={f} 
+                        onClick={() => toggleFlavor(f)}
+                        className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}
+                      >
+                        {f}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button variant="ghost" fullWidth onClick={() => setFlavorModalItem(null)}>
+                Cancel
+              </Button>
+              <Button fullWidth onClick={addIceCreamToCart}>
+                Confirm Flavors
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
