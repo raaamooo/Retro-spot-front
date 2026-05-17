@@ -408,7 +408,7 @@ function MenuContent() {
                   <div key={cat} id={`cat-${cat.replace(/\s+/g, '-')}`} className="flex flex-col">
                     <button 
                       onClick={() => toggleCategory(cat)}
-                      className={`flex items-center justify-between w-full p-4 rounded-xl font-bold text-lg transition-all duration-300 border ${
+                      className={`flex items-center justify-between w-full p-4 rounded-xl font-bold font-heading text-lg transition-all duration-300 border ${
                         isExpanded 
                           ? 'bg-primary/10 text-primary border-primary' 
                           : 'bg-surface text-foreground border-border hover:bg-surface-elevated'
@@ -478,7 +478,7 @@ function MenuContent() {
                                       })()}
 
                                       <div className="p-3 flex flex-col flex-1">
-                                        <h3 className="font-bold text-sm sm:text-base leading-tight mb-1">{item.name}</h3>
+                                        <h3 className="font-bold font-heading text-sm sm:text-base leading-tight mb-1">{item.name}</h3>
                                         <p className="text-xs text-muted-foreground line-clamp-2 mb-3 flex-1">{item.description}</p>
                                         <div className="flex items-center justify-between mt-auto pt-2 border-t border-border-subtle">
                                           <span className="font-bold text-primary">{item.price} EGP</span>
@@ -505,7 +505,7 @@ function MenuContent() {
                                   {itemsForCat.map((item, idx) => (
                                     <ScrollReveal key={item.id} delay={idx * 0.05}>
                                       <Card className={`p-4 flex flex-col h-full ${!item.available ? 'opacity-60' : ''}`}>
-                                        <h3 className="font-bold text-sm mb-1">{item.name}</h3>
+                                        <h3 className="font-bold font-heading text-sm mb-1">{item.name}</h3>
                                         <p className="text-xs text-muted-foreground mb-3 flex-1">{item.description}</p>
                                         <div className="flex items-center justify-between">
                                           <span className="font-bold text-sm">{item.price} EGP</span>
@@ -590,7 +590,7 @@ function MenuContent() {
                     <div key={`${item.id}-${index}`} className="flex items-start gap-4 p-4 bg-surface-elevated rounded-2xl border border-border">
                       <div className="flex-1">
                         <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-foreground">{item.name}</h4>
+                          <h4 className="font-bold font-heading text-foreground">{item.name}</h4>
                           <span className="font-bold">{item.price * item.cartQuantity} EGP</span>
                         </div>
                         {item.selectedAdditions && item.selectedAdditions.length > 0 && (

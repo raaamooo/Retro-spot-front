@@ -71,7 +71,7 @@ export default function Home() {
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
           
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground/90 to-primary tracking-tighter leading-tight relative z-10">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 font-heading text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground/90 to-primary tracking-tighter leading-tight relative z-10">
             Retro Spot
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 font-medium leading-relaxed max-w-2xl mx-auto relative z-10">
@@ -113,7 +113,7 @@ export default function Home() {
               <div className="p-3 bg-primary/10 text-primary rounded-xl">
                 <Newspaper size={28} />
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold">{t('latest_news')}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold font-heading">{t('latest_news')}</h2>
             </div>
           </ScrollReveal>
 
@@ -135,8 +135,8 @@ export default function Home() {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold mb-3 line-clamp-2">{isRtl ? item.titleAr : item.titleEn}</h3>
-                    <p className="text-muted-foreground mb-6 flex-1 line-clamp-3">{isRtl ? item.descriptionAr : item.descriptionEn}</p>
+                    <h3 className="text-xl font-bold font-heading mb-3 line-clamp-2">{isRtl ? item.titleAr : item.titleEn}</h3>
+                    <p className="text-muted-foreground mb-6 flex-1 line-clamp-3 leading-relaxed">{isRtl ? item.descriptionAr : item.descriptionEn}</p>
                   </Card>
                 ))}
               </div>
@@ -196,7 +196,7 @@ export default function Home() {
             
             <ScrollReveal direction={isRtl ? 'left' : 'right'} delay={0.2}>
               <div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('our_story')}</h2>
+                <h2 className="text-4xl md:text-5xl font-bold font-heading mb-8">{t('our_story')}</h2>
                 <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
                   <p>{t('story_text')}</p>
                   <p>Whether you're looking for a quiet corner to finish that novel, a vibrant table to brainstorm with your startup team, or just a really good cup of specialty coffee, we've built this place for you.</p>
@@ -222,7 +222,7 @@ export default function Home() {
               <MapPin size={18} />
               {t('our_location')}
             </div>
-            <h2 className="text-4xl font-bold">{t('find_us')}</h2>
+            <h2 className="text-4xl font-bold font-heading">{t('find_us')}</h2>
           </ScrollReveal>
         </div>
 
@@ -236,7 +236,7 @@ export default function Home() {
                     <div className="p-3 bg-primary/10 text-primary rounded-2xl">
                       <MapPin size={24} />
                     </div>
-                    <h3 className="text-2xl font-bold">{isRtl ? 'العنوان' : 'Our Address'}</h3>
+                    <h3 className="text-2xl font-bold font-heading">{isRtl ? 'العنوان' : 'Our Address'}</h3>
                   </div>
                   <div className="space-y-2 text-muted-foreground">
                     <p className="font-semibold text-foreground text-lg">Retro Spot Café</p>

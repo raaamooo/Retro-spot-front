@@ -23,15 +23,18 @@ export default function LoadingState({
   const { t } = useLanguage();
 
   const content = (
-    <div className="flex flex-col items-center justify-center gap-3 py-12">
-      <span
-        className={`
-          inline-block rounded-full
-          border-primary border-t-transparent animate-spin
-          ${sizeMap[size]}
-        `}
-      />
-      <p className="text-sm text-muted font-medium">
+    <div className="flex flex-col items-center justify-center gap-4 py-16">
+      <div className="relative flex items-center justify-center">
+        <div className={`absolute rounded-full border-2 border-primary/20 ${sizeMap[size]} scale-110`} />
+        <span
+          className={`
+            inline-block rounded-full
+            border-primary border-t-transparent animate-spin
+            ${sizeMap[size]}
+          `}
+        />
+      </div>
+      <p className="text-sm text-primary font-medium tracking-wide uppercase">
         {message || t('loading')}
       </p>
     </div>

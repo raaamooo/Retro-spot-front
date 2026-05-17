@@ -15,17 +15,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary text-white hover:bg-primary-hover shadow-sm hover:shadow-md',
+    'bg-primary text-primary-foreground hover:bg-primary-hover shadow-md hover:shadow-lg hover:-translate-y-0.5',
   secondary:
-    'bg-secondary text-foreground hover:bg-secondary/80 border border-border',
+    'bg-secondary text-foreground hover:bg-secondary/80 border border-border/50 hover:border-border',
   danger:
-    'bg-danger text-white hover:bg-danger/90',
+    'bg-danger text-white hover:bg-danger/90 hover:shadow-sm',
   success:
-    'bg-success text-white hover:bg-success/90',
+    'bg-success text-white hover:bg-success/90 hover:shadow-sm',
   ghost:
     'bg-transparent text-muted hover:text-foreground hover:bg-surface-elevated',
   outline:
-    'bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white',
+    'bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:-translate-y-0.5',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -49,10 +49,11 @@ export default function Button({
     <button
       className={`
         inline-flex items-center justify-center font-semibold
-        transition-all duration-200 ease-out
-        focus-ring select-none
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none
-        active:scale-[0.97]
+        transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+        select-none
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:transform-none disabled:shadow-none
+        active:scale-[0.98] active:translate-y-0
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${fullWidth ? 'w-full' : ''}

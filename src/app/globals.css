@@ -13,6 +13,7 @@
   /* accent gold: #C4993F */
   --primary: 41 53% 51%;
   --primary-hover: 41 53% 44%;
+  --primary-foreground: 22 64% 7%;
   --secondary: 34 40% 86%;
   --accent: 41 53% 51%;
   --accent-glow: 41 60% 60%;
@@ -49,8 +50,8 @@
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-heading: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-body: var(--font-sans), 'Segoe UI', system-ui, sans-serif;
+  --font-display: var(--font-heading), 'Georgia', serif;
 
   --space-xs: 4px;
   --space-sm: 8px;
@@ -70,6 +71,7 @@
   /* accent gold: #C4993F */
   --primary: 41 53% 51%;
   --primary-hover: 41 53% 58%;
+  --primary-foreground: 22 64% 7%;
   --secondary: 24 30% 18%;
   --accent: 41 53% 51%;
   --accent-glow: 41 60% 62%;
@@ -104,6 +106,7 @@
   --color-surface-elevated: hsl(var(--surface-elevated));
   --color-primary: hsl(var(--primary));
   --color-primary-hover: hsl(var(--primary-hover));
+  --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
   --color-accent: hsl(var(--accent));
   --color-accent-glow: hsl(var(--accent-glow));
@@ -121,7 +124,8 @@
   --color-info-bg: hsl(var(--info-bg));
 
   --font-sans: var(--font-body);
-  --font-heading: var(--font-heading);
+  --font-heading: var(--font-display);
+  --font-serif: var(--font-display);
 }
 
 /* ---------- Base Resets ---------- */

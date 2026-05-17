@@ -341,7 +341,7 @@ export default function BookingPage() {
             {/* ═══ STEP 1: TABLE or ROOM ═══ */}
             {step === 1 && (
               <motion.div key="step1" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold mb-2">{t('what_are_you_booking')}</h1>
+                <h1 className="text-3xl font-bold font-heading mb-2">{t('what_are_you_booking')}</h1>
                 <p className="text-muted-foreground mb-8">{t('select_booking_type')}</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -356,7 +356,7 @@ export default function BookingPage() {
                         <LayoutGrid size={32} className="text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg">{t('table_booking')}</h3>
+                        <h3 className="font-bold font-heading text-lg">{t('table_booking')}</h3>
                         <p className="text-sm text-muted-foreground mt-1">{t('table_booking_desc')}</p>
                       </div>
                     </div>
@@ -373,7 +373,7 @@ export default function BookingPage() {
                         <MapPin size={32} className="text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg">{t('room_booking')}</h3>
+                        <h3 className="font-bold font-heading text-lg">{t('room_booking')}</h3>
                         <p className="text-sm text-muted-foreground mt-1">{t('room_booking_desc')}</p>
                       </div>
                     </div>
@@ -385,7 +385,7 @@ export default function BookingPage() {
             {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
             {step === 2 && (
               <motion.div key="step2" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold mb-2">{t('booking_details')}</h1>
+                <h1 className="text-3xl font-bold font-heading mb-2">{t('booking_details')}</h1>
                 <p className="text-muted-foreground mb-8">{t('tell_us_more')}</p>
 
                 <Card className="p-6 space-y-6">
@@ -516,7 +516,7 @@ export default function BookingPage() {
             {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
             {step === 3 && (
               <motion.div key="step3" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold mb-2">{t('contact_and_date')}</h1>
+                <h1 className="text-3xl font-bold font-heading mb-2">{t('contact_and_date')}</h1>
                 <p className="text-muted-foreground mb-8">{t('your_info_and_timing')}</p>
 
                 <Card className="p-6 space-y-6">
@@ -604,7 +604,7 @@ export default function BookingPage() {
             {/* ═══ STEP 4: PAYMENT ═══ */}
             {step === 4 && (
               <motion.div key="step4" {...anim} className="space-y-6">
-                <h1 className="text-3xl font-bold mb-2">{t('payment')}</h1>
+                <h1 className="text-3xl font-bold font-heading mb-2">{t('payment')}</h1>
                 <p className="text-muted-foreground mb-8">{t('secure_your_booking')}</p>
 
                 <div className="flex bg-surface-elevated p-1 rounded-xl border border-border mb-6">
@@ -714,7 +714,7 @@ export default function BookingPage() {
                 <div className="w-24 h-24 bg-success/20 text-success rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 size={48} />
                 </div>
-                <h1 className="text-3xl font-black mb-4">{t('booking_success')}</h1>
+                <h1 className="text-3xl font-black font-heading mb-4">{t('booking_success')}</h1>
                 <p className="text-xl text-muted-foreground mb-12">
                   {t('enjoy_event')} <span className="text-primary font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
                 </p>

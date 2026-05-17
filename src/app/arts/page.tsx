@@ -170,7 +170,7 @@ export default function ArtsPage() {
         <section>
           <div className="flex items-center gap-3 mb-6">
             <Heart className="text-primary" />
-            <h2 className="text-3xl font-black">{t('weekly_bidding')}</h2>
+            <h2 className="text-3xl font-black font-heading">{t('weekly_bidding')}</h2>
           </div>
 
           <Card className="overflow-hidden border-border-subtle shadow-xl">
@@ -185,7 +185,7 @@ export default function ArtsPage() {
 
               <div className="p-6 md:p-8 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-2xl font-bold mb-1">{weeklyPainting.name}</h3>
+                  <h3 className="text-2xl font-bold font-heading mb-1">{weeklyPainting.name}</h3>
                   <p className="text-primary font-medium mb-4">by {weeklyPainting.artist}</p>
                   <p className="text-muted-foreground mb-6 leading-relaxed">
                     {weeklyPainting.description}
@@ -289,7 +289,7 @@ export default function ArtsPage() {
                   {bidStep === 3 && (
                     <motion.div key="step3" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
                       <CheckCircle2 size={48} className="text-success mx-auto mb-4" />
-                      <h4 className="text-xl font-bold mb-2">Bid Placed Successfully!</h4>
+                      <h4 className="text-xl font-bold font-heading mb-2">Bid Placed Successfully!</h4>
                       <p className="text-muted-foreground mb-6">You are currently the highest bidder.</p>
                       <Button variant="outline" className="w-full mb-2" onClick={generateBidPDF}>Download Receipt</Button>
                       <Button variant="ghost" className="w-full" onClick={() => setBidStep(0)}>Close</Button>
@@ -308,7 +308,7 @@ export default function ArtsPage() {
         <section className="pb-16">
           <div className="flex items-center gap-3 mb-6">
             <UploadCloud className="text-primary" />
-            <h2 className="text-3xl font-black">{t('artist_submission')}</h2>
+            <h2 className="text-3xl font-black font-heading">{t('artist_submission')}</h2>
           </div>
 
           <Card className="p-6 md:p-8 border-border-subtle shadow-lg">
@@ -340,7 +340,7 @@ export default function ArtsPage() {
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
                 <CheckCircle2 size={64} className="text-success mx-auto mb-6" />
-                <h3 className="text-2xl font-bold mb-2">Submission Received!</h3>
+                <h3 className="text-2xl font-bold font-heading mb-2">Submission Received!</h3>
                 <p className="text-muted-foreground max-w-md mx-auto mb-8">
                   Thank you for sharing your art with Retro Spot. Our team will review your submission and contact you soon.
                 </p>
