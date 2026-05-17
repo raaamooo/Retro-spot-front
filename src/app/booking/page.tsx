@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
+import Link from 'next/link';
 import { Sun, Moon, Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid, UserRound } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
@@ -289,10 +290,9 @@ export default function BookingPage() {
       {/* TOP BAR */}
       <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="px-4 h-16 flex items-center justify-between max-w-3xl mx-auto">
-          <div className="flex items-center gap-2">
-            <img src="/logo.jpeg" alt="Retro Spot Logo" className="w-8 h-8 rounded-full object-cover border border-border" />
-            <span className="font-black text-xl text-primary tracking-tight">Retro Spot</span>
-          </div>
+          <Link href="/" className="block transition-transform hover:scale-105">
+            <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
+          </Link>
           <div className="flex items-center gap-2">
             {mounted && (
               <>

@@ -44,10 +44,9 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl sm:text-2xl font-bold tracking-tight text-primary transition-colors hover:text-primary-hover"
+            className="block transition-transform hover:scale-105"
           >
-            <img src="/logo.jpeg" alt="Retro Spot Logo" className="w-8 h-8 rounded-full object-cover border border-border" />
-            <span>Retro Spot</span>
+            <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
           </Link>
 
           {/* Desktop Nav */}

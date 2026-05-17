@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
 import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react';
@@ -347,10 +348,11 @@ function MenuContent() {
       {/* --- TOP BAR --- */}
       <header className="sticky top-0 z-40 bg-surface-elevated/80 backdrop-blur-lg border-b border-border shadow-sm">
         <div className="px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.jpeg" alt="Retro Spot Logo" className="w-8 h-8 rounded-full object-cover border border-border" />
-            <span className="font-black text-xl text-primary tracking-tight">Retro Spot</span>
-            <div className="hidden sm:flex items-center ml-2 px-3 py-1 rounded-full bg-surface border border-border text-xs font-medium text-muted-foreground gap-1.5">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="block transition-transform hover:scale-105">
+              <img src="/logo.jpeg" alt="Retro Spot" className="w-10 h-10 rounded-full object-cover border-2 border-border shadow-sm" />
+            </Link>
+            <div className="hidden sm:flex items-center px-3 py-1 rounded-full bg-surface border border-border text-xs font-medium text-muted-foreground gap-1.5">
               <MapPin size={12} className="text-primary" />
               {tableId ? tableId : 'Guest'}
             </div>

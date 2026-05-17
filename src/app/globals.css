@@ -6,19 +6,23 @@
 
 /* ---------- Light Theme ---------- */
 :root {
-  --background: 33 30% 95%;
-  --surface: 35 35% 98%;
-  --surface-elevated: 34 28% 96%;
-  --primary: 24 60% 28%;
-  --primary-hover: 24 60% 22%;
-  --secondary: 33 30% 88%;
-  --accent: 36 50% 42%;
-  --accent-glow: 36 55% 55%;
-  --foreground: 24 30% 12%;
-  --muted: 24 8% 50%;
-  --border: 33 20% 80%;
-  --border-subtle: 33 15% 88%;
-  --ring: 36 50% 42%;
+  /* bg: #EDD9C0 | surface: #F5E8D5 */
+  --background: 33 55% 84%;
+  --surface: 36 62% 90%;
+  --surface-elevated: 36 58% 93%;
+  /* accent gold: #C4993F */
+  --primary: 41 53% 51%;
+  --primary-hover: 41 53% 44%;
+  --secondary: 34 40% 86%;
+  --accent: 41 53% 51%;
+  --accent-glow: 41 60% 60%;
+  /* text-primary: #2C1A0E | text-secondary: #6B4226 */
+  --foreground: 24 52% 11%;
+  --muted: 24 48% 28%;
+  /* border: #3D2010 | muted: #C4A882 */
+  --border: 21 58% 15%;
+  --border-subtle: 35 36% 64%;
+  --ring: 41 53% 51%;
 
   --success: 142 60% 38%;
   --success-bg: 142 60% 94%;
@@ -29,10 +33,10 @@
   --info: 210 80% 52%;
   --info-bg: 210 80% 94%;
 
-  --card-shadow: 0 2px 12px hsl(33 20% 60% / 0.15);
-  --card-shadow-hover: 0 8px 30px hsl(33 20% 50% / 0.2);
+  --card-shadow: 0 2px 12px hsl(24 30% 40% / 0.15);
+  --card-shadow-hover: 0 8px 30px hsl(24 30% 30% / 0.2);
   --glow: none;
-  --glow-hover: 0 0 20px hsl(36 55% 45% / 0.15);
+  --glow-hover: 0 0 20px hsl(41 55% 50% / 0.2);
   --header-blur: 16px;
 
   --radius-sm: 8px;
@@ -59,19 +63,23 @@
 
 /* ---------- Dark Theme (Default) ---------- */
 .dark {
-  --background: 24 15% 9%;
-  --surface: 24 12% 13%;
-  --surface-elevated: 24 10% 17%;
-  --primary: 36 50% 52%;
-  --primary-hover: 36 50% 60%;
-  --secondary: 24 15% 20%;
-  --accent: 36 55% 55%;
-  --accent-glow: 36 60% 65%;
-  --foreground: 33 20% 93%;
-  --muted: 24 8% 52%;
-  --border: 24 10% 23%;
-  --border-subtle: 24 8% 19%;
-  --ring: 36 50% 52%;
+  /* bg: #1C0E06 | surface: #2C1A0E */
+  --background: 22 64% 7%;
+  --surface: 24 52% 11%;
+  --surface-elevated: 24 45% 16%;
+  /* accent gold: #C4993F */
+  --primary: 41 53% 51%;
+  --primary-hover: 41 53% 58%;
+  --secondary: 24 30% 18%;
+  --accent: 41 53% 51%;
+  --accent-glow: 41 60% 62%;
+  /* text-primary: #EDD9C0 | text-secondary: #C4A882 */
+  --foreground: 33 55% 84%;
+  --muted: 35 36% 64%;
+  /* border: #4A2E10 | muted: #5C3D20 */
+  --border: 31 64% 18%;
+  --border-subtle: 29 49% 24%;
+  --ring: 41 53% 51%;
 
   --success: 142 55% 50%;
   --success-bg: 142 40% 14%;
@@ -82,10 +90,10 @@
   --info: 210 80% 60%;
   --info-bg: 210 50% 14%;
 
-  --card-shadow: 0 2px 12px hsl(24 20% 4% / 0.5);
-  --card-shadow-hover: 0 8px 30px hsl(24 20% 4% / 0.6);
+  --card-shadow: 0 2px 12px hsl(22 40% 4% / 0.6);
+  --card-shadow-hover: 0 8px 30px hsl(22 40% 4% / 0.7);
   --glow: 0 0 0px transparent;
-  --glow-hover: 0 0 24px hsl(36 60% 50% / 0.2);
+  --glow-hover: 0 0 24px hsl(41 55% 50% / 0.25);
 }
 
 /* ---------- Tailwind v4 Theme Mapping ---------- */
