@@ -297,7 +297,7 @@ function MenuContent() {
       </header>
 
       <div className="container">
-        <DrinkQuiz onComplete={handleQuizComplete} />
+        <DrinkQuiz onSelectCategory={handleQuizComplete} />
       </div>
 
       <div className="container" style={{ marginTop: '32px' }}>
@@ -324,7 +324,7 @@ function MenuContent() {
                     {catItems.map((item) => (
                       <div key={item.id} className={styles.menuItem}>
                         <img 
-                          src={item.image || getItemImage(item.nameEn || item.name)} 
+                          src={item.image || getItemImage(item.nameEn || item.name) || ''} 
                           alt={item.name} 
                           className={styles.itemImage}
                           onError={(e) => {

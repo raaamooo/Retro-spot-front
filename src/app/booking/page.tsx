@@ -478,7 +478,7 @@ export default function BookingPage() {
 
                 <div className="flex gap-4 pt-4">
                   <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
-                  <Button variant="primary" onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
+                  <Button variant="filled" onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
               </div>
             )}
@@ -571,7 +571,7 @@ export default function BookingPage() {
 
                 <div className="flex gap-4 pt-4">
                   <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
-                  <Button variant="primary" onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
+                  <Button variant="filled" onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
               </div>
             )}
@@ -674,7 +674,7 @@ export default function BookingPage() {
                 <div className="flex gap-4 pt-4">
                   <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12" disabled={isSubmitting}>{t('back')}</Button>
                   <Button
-                    variant="primary"
+                    variant="filled"
                     onClick={submitBooking}
                     className="flex-1 uppercase tracking-widest text-xs font-bold h-12"
                     loading={isSubmitting}
@@ -705,7 +705,7 @@ export default function BookingPage() {
 
                 <div className="space-y-3 max-w-sm mx-auto pt-6">
                   <Button
-                    variant="primary"
+                    variant="filled"
                     size="lg"
                     className="w-full uppercase tracking-widest text-xs font-bold h-12"
                     onClick={generatePDF}

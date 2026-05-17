@@ -227,7 +227,7 @@ export default function ArtsPage() {
                           <span className={styles.paymentDetailLabel}>Upload Transfer Receipt</span>
                           <UploadInput 
                             label="Transaction Screenshot"
-                            onChange={(file) => setBidForm({ ...bidForm, transactionImage: file })}
+                            onFileSelect={(file) => setBidForm({ ...bidForm, transactionImage: file })}
                           />
                         </div>
                       </div>
@@ -313,7 +313,7 @@ export default function ArtsPage() {
                   <label className={styles.paymentDetailLabel}>High-Quality Photo of Artwork</label>
                   <UploadInput 
                     label="Upload image"
-                    onChange={(file) => setArtistForm({ ...artistForm, photo: file })}
+                    onFileSelect={(file) => setArtistForm({ ...artistForm, photo: file })}
                   />
                 </div>
 
