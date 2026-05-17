@@ -52,6 +52,7 @@ interface Worker {
 interface WaiterCall {
   id: string;
   locationId: string;
+  type?: string;
   status: string;
   createdAt: string;
   location: { name: string };

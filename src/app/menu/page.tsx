@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sun, Moon, MapPin, Bell, ChevronLeft, ArrowRight, Trash2, CheckCircle2, Clock, ChevronDown, ChevronUp, CreditCard } from 'lucide-react';
 import { Button, Card, Tabs, ScrollReveal, FormInput, Textarea, Select, EmptyState, LoadingState } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -206,11 +206,28 @@ function MenuContent() {
       await fetch(`${API_URL}/api/waitercalls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationId: tableId }),
+        body: JSON.stringify({ locationId: tableId, type: 'waiter' }),
       });
       addToast('Waiter has been called', 'success');
     } catch (err) {
       addToast('Failed to call waiter', 'error');
+    }
+  };
+
+  const handleCallCheck = async () => {
+    if (!tableId) {
+      addToast('Please scan a valid QR code first', 'error');
+      return;
+    }
+    try {
+      await fetch(`${API_URL}/api/waitercalls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locationId: tableId, type: 'check' }),
+      });
+      addToast('Check requested successfully', 'success');
+    } catch (err) {
+      addToast('Failed to request check', 'error');
     }
   };
 
@@ -359,6 +376,13 @@ function MenuContent() {
           </div>
           
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleCallCheck}
+              className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors text-sm font-bold flex items-center gap-1.5"
+            >
+              <CreditCard size={14} />
+              <span className="hidden sm:inline">Request Check</span>
+            </button>
             <button
               onClick={handleCallWaiter}
               className="px-3 py-1.5 rounded-full bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors text-sm font-bold flex items-center gap-1.5"

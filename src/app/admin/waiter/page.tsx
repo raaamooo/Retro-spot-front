@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Clock, MapPin, CheckCircle2, FileText, BellRing } from 'lucide-react';
+import { Clock, MapPin, CheckCircle2, FileText, BellRing, CreditCard } from 'lucide-react';
 import { Button } from '@/components';
 
 import { API_URL } from '@/lib/constants';
@@ -32,6 +32,7 @@ interface Order {
 interface WaiterCall {
   id: string;
   locationId: string;
+  type?: string;
   status: string;
   createdAt: string;
   location: { id: string; name: string; type: string };
@@ -198,10 +199,16 @@ export default function WaiterPage() {
                     className="bg-danger/5 rounded-2xl border-2 border-danger/50 shadow-lg p-6 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-10 text-danger pointer-events-none">
-                      <BellRing size={120} className="transform rotate-12" />
+                      {call.type === 'check' ? (
+                        <CreditCard size={120} className="transform rotate-12" />
+                      ) : (
+                        <BellRing size={120} className="transform rotate-12" />
+                      )}
                     </div>
 
-                    <p className="text-danger font-bold text-sm uppercase tracking-widest mb-1">{t('call_from')}</p>
+                    <p className="text-danger font-bold text-sm uppercase tracking-widest mb-1">
+                      {call.type === 'check' ? 'CHECK REQUEST FROM' : t('call_from')}
+                    </p>
                     <h3 className="text-5xl sm:text-6xl font-black text-foreground mb-6 break-words tracking-tighter">
                       {call.location?.name || 'Unknown'}
                     </h3>
