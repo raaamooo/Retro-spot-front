@@ -1,0 +1,22 @@
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+}
+
+/* Padding variants */
+.paddingNone { padding: 0; }
+.paddingSm { padding: var(--space-sm); }
+.paddingMd { padding: var(--space-md); }
+.paddingLg { padding: var(--space-xl); }
+
+/* Hoverable variant */
+.hoverable {
+  cursor: pointer;
+}
+.hoverable:hover {
+  background-color: var(--surface-elevated);
+  border-color: var(--border-subtle);
+  transform: translateY(-4px);
+}

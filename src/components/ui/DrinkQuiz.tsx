@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, RotateCcw, ChevronRight, Zap } from 'lucide-react';
+import styles from './DrinkQuiz.module.css';
 
 interface DrinkQuizProps {
-  /** When on the menu page, pass this to switch the tab in-place without navigation */
   onSelectCategory?: (category: string) => void;
 }
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Tag =
   | 'cold' | 'hot' | 'frozen' | 'fresh'
@@ -36,11 +33,9 @@ interface DrinkProfile {
   emoji: string;
   description: string;
   tags: Tag[];
-  category: string; // maps to menu category tab
+  category: string;
   accentColor: string;
 }
-
-// ─── Quiz Questions ───────────────────────────────────────────────────────────
 
 const QUESTIONS: Question[] = [
   {
@@ -100,8 +95,6 @@ const QUESTIONS: Question[] = [
   },
 ];
 
-// ─── Drink Profiles ───────────────────────────────────────────────────────────
-
 const DRINK_PROFILES: DrinkProfile[] = [
   {
     name: 'Frappe Lotus',
@@ -109,7 +102,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Indulgent, iconic, impossible to resist. You walk into a room and own it.",
     tags: ['frozen', 'creamy', 'sweet', 'indulgent', 'bold', 'cold'],
     category: 'Frappe',
-    accentColor: 'from-amber-500 to-orange-400',
+    accentColor: '#F59E0B',
   },
   {
     name: 'Frappe Pistachio',
@@ -117,7 +110,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Sophisticated with a twist. You appreciate the finer things in a very chill way.",
     tags: ['frozen', 'nutty', 'creamy', 'exotic', 'sweet', 'cold'],
     category: 'Frappe',
-    accentColor: 'from-green-500 to-emerald-400',
+    accentColor: '#10B981',
   },
   {
     name: 'Frappe Nutella',
@@ -125,7 +118,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Rich, generous, unapologetically chocolatey. People love being around you.",
     tags: ['frozen', 'chocolate', 'creamy', 'indulgent', 'sweet', 'rich'],
     category: 'Frappe',
-    accentColor: 'from-amber-700 to-brown-500',
+    accentColor: '#B45309',
   },
   {
     name: 'Mango Smoothie',
@@ -133,7 +126,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Tropical, bright, effortlessly joyful. You're the sunshine of the group.",
     tags: ['fresh', 'fruit', 'sweet', 'exotic', 'refreshing', 'energizing'],
     category: 'Smoothie',
-    accentColor: 'from-yellow-400 to-orange-300',
+    accentColor: '#FBBF24',
   },
   {
     name: 'Strawberry Smoothie',
@@ -141,7 +134,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Sweet and bold with a tangy edge. You keep things real, always.",
     tags: ['fruit', 'fresh', 'tangy', 'sweet', 'refreshing', 'light'],
     category: 'Smoothie',
-    accentColor: 'from-red-400 to-pink-400',
+    accentColor: '#F87171',
   },
   {
     name: 'Passion Fruit Smoothie',
@@ -149,7 +142,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Exotic, complex, one of a kind. You don't follow trends — you start them.",
     tags: ['exotic', 'fruit', 'tangy', 'refreshing', 'bold', 'energizing'],
     category: 'Smoothie',
-    accentColor: 'from-purple-500 to-pink-400',
+    accentColor: '#A855F7',
   },
   {
     name: 'Karak Tea',
@@ -157,7 +150,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Warm, spiced, deeply comforting. You are the friend everyone calls at midnight.",
     tags: ['hot', 'relaxing', 'bold', 'rich', 'energizing', 'creamy'],
     category: 'Tea & Herbs',
-    accentColor: 'from-amber-600 to-yellow-500',
+    accentColor: '#D97706',
   },
   {
     name: 'Mint Tea',
@@ -165,7 +158,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Cool-headed, crisp, and refreshing. You bring clarity to every situation.",
     tags: ['hot', 'herbal', 'light', 'refreshing', 'relaxing', 'fresh'],
     category: 'Tea & Herbs',
-    accentColor: 'from-green-400 to-teal-300',
+    accentColor: '#34D399',
   },
   {
     name: 'Avocado Juice',
@@ -173,7 +166,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Creamy, health-conscious, quietly luxurious. Understated royalty.",
     tags: ['fresh', 'creamy', 'rich', 'light', 'relaxing', 'exotic'],
     category: 'Fresh Juice',
-    accentColor: 'from-green-600 to-lime-400',
+    accentColor: '#16A34A',
   },
   {
     name: 'Orange Juice',
@@ -181,7 +174,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "A classic for a reason. Energizing, honest, and always a good idea.",
     tags: ['fresh', 'fruit', 'energizing', 'tangy', 'refreshing', 'light'],
     category: 'Fresh Juice',
-    accentColor: 'from-orange-400 to-yellow-300',
+    accentColor: '#FB923C',
   },
   {
     name: 'Nutella Waffle',
@@ -189,7 +182,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Pure indulgence on a plate. You live life like every day is a celebration.",
     tags: ['sweet', 'chocolate', 'indulgent', 'dessert', 'waffle', 'rich'],
     category: 'Waffle Corner',
-    accentColor: 'from-amber-700 to-amber-500',
+    accentColor: '#92400E',
   },
   {
     name: 'Pistachio Waffle',
@@ -197,7 +190,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "A rare blend of elegance and warmth. Sweet tooth meets refined taste.",
     tags: ['sweet', 'nutty', 'indulgent', 'dessert', 'waffle', 'creamy'],
     category: 'Waffle Corner',
-    accentColor: 'from-green-600 to-yellow-400',
+    accentColor: '#059669',
   },
   {
     name: 'Ice Cream 3 Scoop',
@@ -205,7 +198,7 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Triple the fun, zero regrets. You make everything more fun just by being there.",
     tags: ['cold', 'sweet', 'dessert', 'icecream', 'indulgent', 'creamy'],
     category: 'Ice Cream',
-    accentColor: 'from-pink-400 to-purple-400',
+    accentColor: '#F472B6',
   },
   {
     name: 'Honey Yogurt',
@@ -213,11 +206,9 @@ const DRINK_PROFILES: DrinkProfile[] = [
     description: "Balanced, thoughtful, quietly sweet. You're the one who actually has it together.",
     tags: ['light', 'sweet', 'fresh', 'yogurt', 'relaxing', 'creamy'],
     category: 'Yogurt Corner',
-    accentColor: 'from-yellow-400 to-amber-300',
+    accentColor: '#FBBF24',
   },
 ];
-
-// ─── Scoring Engine ───────────────────────────────────────────────────────────
 
 function scoreProfiles(selectedTags: Tag[]): { profile: DrinkProfile; score: number; pct: number }[] {
   const tagCounts: Record<string, number> = {};
@@ -226,7 +217,7 @@ function scoreProfiles(selectedTags: Tag[]): { profile: DrinkProfile; score: num
   const results = DRINK_PROFILES.map(profile => {
     let score = 0;
     profile.tags.forEach(tag => {
-      if (tagCounts[tag]) score += tagCounts[tag] * 2; // weighted match
+      if (tagCounts[tag]) score += tagCounts[tag] * 2;
     });
     return { profile, score };
   });
@@ -240,355 +231,209 @@ function scoreProfiles(selectedTags: Tag[]): { profile: DrinkProfile; score: num
   }));
 }
 
-// ─── Sub-Components ───────────────────────────────────────────────────────────
+const MatchBar = ({ pct, accentColor }: { pct: number; accentColor: string; }) => {
+  const [width, setWidth] = useState(0);
 
-const MatchBar = ({ pct, accentColor, delay }: { pct: number; accentColor: string; delay: number }) => (
-  <div className="w-full bg-surface-elevated rounded-full h-2 overflow-hidden mt-3">
-    <motion.div
-      initial={{ width: 0 }}
-      animate={{ width: `${pct}%` }}
-      transition={{ duration: 0.8, delay, ease: 'easeOut' }}
-      className={`h-full rounded-full bg-gradient-to-r ${accentColor}`}
-    />
-  </div>
-);
+  useEffect(() => {
+    const timer = setTimeout(() => setWidth(pct), 100);
+    return () => clearTimeout(timer);
+  }, [pct]);
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+  return (
+    <div className={styles.matchBarBg}>
+      <div 
+        className={styles.matchBarFill} 
+        style={{ width: `${width}%`, backgroundColor: accentColor }}
+      />
+    </div>
+  );
+};
 
 export default function DrinkQuiz({ onSelectCategory }: DrinkQuizProps) {
   const router = useRouter();
   const [phase, setPhase] = useState<'intro' | 'quiz' | 'results'>('intro');
   const [currentQ, setCurrentQ] = useState(0);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [chosenAnswers, setChosenAnswers] = useState<number[]>([]); // answer idx per question
   const [results, setResults] = useState<ReturnType<typeof scoreProfiles>>([]);
-  const [isExiting, setIsExiting] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleStart = () => {
     setPhase('quiz');
     setCurrentQ(0);
     setSelectedTags([]);
-    setChosenAnswers([]);
   };
 
-  const handleAnswer = useCallback((answer: Answer, answerIdx: number) => {
+  const handleAnswer = useCallback((answer: Answer) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    
     const newTags = [...selectedTags, ...answer.tags];
-    const newAnswers = [...chosenAnswers, answerIdx];
 
     if (currentQ < QUESTIONS.length - 1) {
-      setIsExiting(true);
       setTimeout(() => {
         setSelectedTags(newTags);
-        setChosenAnswers(newAnswers);
         setCurrentQ(q => q + 1);
-        setIsExiting(false);
-      }, 250);
+        setIsAnimating(false);
+      }, 300);
     } else {
       setSelectedTags(newTags);
-      setChosenAnswers(newAnswers);
       const scored = scoreProfiles(newTags);
       setResults(scored);
       setPhase('results');
+      setIsAnimating(false);
     }
-  }, [currentQ, selectedTags, chosenAnswers]);
+  }, [currentQ, selectedTags, isAnimating]);
 
   const handleReset = () => {
     setPhase('intro');
     setCurrentQ(0);
     setSelectedTags([]);
-    setChosenAnswers([]);
     setResults([]);
   };
 
   const handleGoToMenu = (category: string) => {
     if (onSelectCategory) {
-      // In-page: switch tab directly, no navigation needed
       onSelectCategory(category);
-      // Scroll category tabs into view
-      setTimeout(() => {
-        const el = document.getElementById(`cat-tab-${category.replace(/\s+/g, '-')}`);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        // Also scroll the tab row itself into viewport
-        document.getElementById('menu-category-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
     } else {
-      // Navigate to menu page with quiz_category param
       router.push(`/menu?quiz_category=${encodeURIComponent(category)}`);
     }
   };
 
   const top3 = results.slice(0, 3);
-  const progressPct = ((currentQ) / QUESTIONS.length) * 100;
+  const progressPct = ((currentQ + 1) / QUESTIONS.length) * 100;
 
   return (
-    <section
-      id="drink-quiz"
-      className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
-    >
-      {/* Background gradient blobs */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/8 rounded-full blur-[80px]" />
-        {/* Retro dot grid */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.iconWrap}>
+          <Sparkles size={28} />
+        </div>
+        <h2 className={styles.title}>Which Drink Are You?</h2>
       </div>
 
-      <div className="max-w-3xl mx-auto">
-        {/* Section Header */}
-        <div className="flex items-center gap-3 mb-12">
-          <div className="p-3 bg-primary/10 text-primary rounded-xl">
-            <Sparkles size={28} />
+      {phase === 'intro' && (
+        <div className={styles.card}>
+          <div className={styles.topAccent} />
+          <div className={styles.content}>
+            <div className={styles.emojis}>
+              <span className={styles.emoji}>☕</span>
+              <span className={styles.emoji}>🧋</span>
+              <span className={styles.emoji}>🍓</span>
+              <span className={styles.emoji}>🥭</span>
+              <span className={styles.emoji}>🧇</span>
+            </div>
+            <h3 className={styles.subtitle}>The Retro Spot Personality Quiz</h3>
+            <p className={styles.desc}>
+              5 questions. Zero wrong answers. We'll tell you exactly which menu item was made for your soul.
+            </p>
+            <button onClick={handleStart} className={styles.startBtn}>
+              <Zap size={20} />
+              Let's Find Out
+              <ChevronRight size={20} />
+            </button>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold">Which Drink Are You?</h2>
         </div>
+      )}
 
-        <AnimatePresence mode="wait">
+      {phase === 'quiz' && (
+        <div className={styles.card} style={{ opacity: isAnimating ? 0 : 1, transition: 'opacity 0.3s' }}>
+          <div className={styles.progressBg}>
+            <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
+          </div>
+          <div className={styles.content}>
+            <div className={styles.stepWrap}>
+              <span className={styles.stepText}>Question {currentQ + 1} of {QUESTIONS.length}</span>
+            </div>
+            
+            <div className={styles.questionWrap}>
+              <div className={styles.qEmoji}>{QUESTIONS[currentQ].emoji}</div>
+              <h3 className={styles.question}>{QUESTIONS[currentQ].question}</h3>
+            </div>
 
-          {/* ── INTRO ── */}
-          {phase === 'intro' && (
-            <motion.div
-              key="intro"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.4 }}
-            >
-              <div className="relative rounded-3xl overflow-hidden border border-border bg-surface shadow-xl">
-                {/* Top accent bar */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-primary via-accent to-primary" />
-
-                <div className="p-8 sm:p-12 text-center">
-                  {/* Animated emoji stack */}
-                  <div className="flex justify-center gap-4 mb-8">
-                    {['☕', '🧋', '🍓', '🥭', '🧇'].map((emoji, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{ y: [0, -8, 0] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: i * 0.3,
-                          ease: 'easeInOut',
-                        }}
-                        className="text-3xl sm:text-4xl select-none"
-                      >
-                        {emoji}
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <h3 className="text-2xl sm:text-3xl font-black mb-4 text-foreground">
-                    The Retro Spot Personality Quiz
-                  </h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed max-w-lg mx-auto mb-10">
-                    5 questions. Zero wrong answers. We'll tell you exactly which menu item was made for your soul.
-                  </p>
-
-                  <button
-                    id="quiz-start-btn"
-                    onClick={handleStart}
-                    className="inline-flex items-center gap-3 px-10 py-4 rounded-2xl bg-primary text-white font-black text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 active:translate-y-0 transition-all duration-200 cursor-pointer"
-                  >
-                    <Zap size={20} />
-                    Let's Find Out
-                    <ChevronRight size={20} />
-                  </button>
-
-                  <p className="mt-6 text-sm text-muted-foreground">Takes about 30 seconds ✦ No commitment required</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── QUIZ ── */}
-          {phase === 'quiz' && !isExiting && (
-            <motion.div
-              key={`question-${currentQ}`}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="relative rounded-3xl overflow-hidden border border-border bg-surface shadow-xl">
-                {/* Progress bar */}
-                <div className="h-1.5 w-full bg-border overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-primary to-accent"
-                    initial={{ width: `${progressPct}%` }}
-                    animate={{ width: `${((currentQ + 1) / QUESTIONS.length) * 100}%` }}
-                    transition={{ duration: 0.4 }}
-                  />
-                </div>
-
-                <div className="p-6 sm:p-10">
-                  {/* Step indicator */}
-                  <div className="flex items-center justify-between mb-8">
-                    <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                      Question {currentQ + 1} of {QUESTIONS.length}
-                    </span>
-                    <div className="flex gap-1.5">
-                      {QUESTIONS.map((_, i) => (
-                        <div
-                          key={i}
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            i <= currentQ ? 'bg-primary w-6' : 'bg-border w-3'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Question */}
-                  <div className="mb-8">
-                    <div className="text-5xl mb-4 select-none">{QUESTIONS[currentQ].emoji}</div>
-                    <h3 className="text-xl sm:text-2xl font-black text-foreground leading-snug">
-                      {QUESTIONS[currentQ].question}
-                    </h3>
-                  </div>
-
-                  {/* Answer grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {QUESTIONS[currentQ].answers.map((answer, idx) => (
-                      <motion.button
-                        key={idx}
-                        id={`quiz-answer-q${currentQ + 1}-${idx + 1}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleAnswer(answer, idx)}
-                        className="text-left px-5 py-4 rounded-2xl border-2 border-border bg-surface-elevated hover:border-primary hover:bg-primary/5 hover:shadow-md hover:shadow-primary/10 transition-all duration-200 cursor-pointer group"
-                      >
-                        <span className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
-                          {answer.text}
-                        </span>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── RESULTS ── */}
-          {phase === 'results' && (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            >
-              {/* Top match — hero card */}
-              {top3[0] && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="relative rounded-3xl overflow-hidden border-2 border-primary/40 bg-surface shadow-2xl shadow-primary/10 mb-6"
-                >
-                  <div className={`h-2 w-full bg-gradient-to-r ${top3[0].profile.accentColor}`} />
-
-                  <div className="p-6 sm:p-10">
-                    {/* Crown badge */}
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6">
-                      <Sparkles size={12} />
-                      Your Spirit Drink
-                    </div>
-
-                    <div className="flex items-start gap-6">
-                      <div
-                        className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br ${top3[0].profile.accentColor} flex items-center justify-center text-4xl shadow-lg`}
-                      >
-                        {top3[0].profile.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-2xl font-black text-foreground mb-1">
-                          {top3[0].profile.name}
-                        </h3>
-                        <p className="text-muted-foreground leading-relaxed mb-3">
-                          {top3[0].profile.description}
-                        </p>
-                        <MatchBar pct={top3[0].pct} accentColor={top3[0].profile.accentColor} delay={0.4} />
-                        <div className="flex items-center justify-between mt-1.5">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Match</span>
-                          <span className="text-sm font-black text-primary">{top3[0].pct}%</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      id="quiz-result-cta-primary"
-                      onClick={() => handleGoToMenu(top3[0].profile.category)}
-                      className={`mt-6 w-full py-3.5 rounded-2xl bg-gradient-to-r ${top3[0].profile.accentColor} text-white font-black text-base shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2`}
-                    >
-                      Order {top3[0].profile.name} Now
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Runner-ups */}
-              {top3.length > 1 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                  {top3.slice(1).map((result, i) => (
-                    <motion.div
-                      key={result.profile.name}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.25 + i * 0.1 }}
-                      className="rounded-2xl border border-border bg-surface p-5 hover:border-primary/30 hover:shadow-md transition-all duration-200 group cursor-pointer"
-                      onClick={() => handleGoToMenu(result.profile.category)}
-                      id={`quiz-result-runner-${i + 2}`}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className={`w-12 h-12 rounded-xl bg-gradient-to-br ${result.profile.accentColor} flex items-center justify-center text-2xl flex-shrink-0 shadow-sm`}
-                        >
-                          {result.profile.emoji}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
-                            #{i + 2} Match
-                          </p>
-                          <h4 className="font-black text-foreground leading-tight group-hover:text-primary transition-colors">
-                            {result.profile.name}
-                          </h4>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
-                        {result.profile.description}
-                      </p>
-                      <MatchBar pct={result.pct} accentColor={result.profile.accentColor} delay={0.5 + i * 0.1} />
-                      <div className="flex justify-end mt-1">
-                        <span className="text-xs font-black text-muted-foreground">{result.pct}%</span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* Play again */}
-              <div className="text-center">
+            <div className={styles.grid}>
+              {QUESTIONS[currentQ].answers.map((answer, idx) => (
                 <button
-                  id="quiz-play-again"
-                  onClick={handleReset}
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-2xl border-2 border-border text-muted-foreground font-bold hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer"
+                  key={idx}
+                  onClick={() => handleAnswer(answer)}
+                  className={styles.answerBtn}
                 >
-                  <RotateCcw size={16} />
-                  Play Again
+                  {answer.text}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {phase === 'results' && (
+        <div>
+          {top3[0] && (
+            <div className={styles.resultCard}>
+              <div className={styles.topAccent} style={{ backgroundColor: top3[0].profile.accentColor }} />
+              <div className={styles.content} style={{ textAlign: 'left' }}>
+                <div className={styles.resultBadge}>
+                  <Sparkles size={12} /> Your Spirit Drink
+                </div>
+                
+                <div className={styles.resultContent}>
+                  <div className={styles.resultEmoji} style={{ backgroundColor: top3[0].profile.accentColor }}>
+                    {top3[0].profile.emoji}
+                  </div>
+                  <div style={{ flexGrow: 1 }}>
+                    <h3 className={styles.resultName}>{top3[0].profile.name}</h3>
+                    <p className={styles.resultDesc}>{top3[0].profile.description}</p>
+                    <MatchBar pct={top3[0].pct} accentColor={top3[0].profile.accentColor} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', fontWeight: 700 }}>
+                      <span style={{ color: 'var(--muted)', textTransform: 'uppercase' }}>Match</span>
+                      <span style={{ color: top3[0].profile.accentColor }}>{top3[0].pct}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  className={styles.orderBtn} 
+                  style={{ backgroundColor: top3[0].profile.accentColor }}
+                  onClick={() => handleGoToMenu(top3[0].profile.category)}
+                >
+                  Order {top3[0].profile.name} Now
+                  <ChevronRight size={18} />
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
 
-        </AnimatePresence>
-      </div>
-    </section>
+          {top3.length > 1 && (
+            <div className={styles.runnerUpGrid}>
+              {top3.slice(1).map((result, i) => (
+                <div 
+                  key={result.profile.name} 
+                  className={styles.runnerUpCard}
+                  onClick={() => handleGoToMenu(result.profile.category)}
+                  style={{ animationDelay: `${0.2 * (i + 1)}s` }}
+                >
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                    <div className={styles.resultEmoji} style={{ width: '48px', height: '48px', fontSize: '24px', backgroundColor: result.profile.accentColor }}>
+                      {result.profile.emoji}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>#{i + 2} Match</div>
+                      <div style={{ fontWeight: 700, fontSize: '16px' }}>{result.profile.name}</div>
+                    </div>
+                  </div>
+                  <p className={styles.resultDesc} style={{ marginBottom: '8px', fontSize: '12px' }}>{result.profile.description}</p>
+                  <MatchBar pct={result.pct} accentColor={result.profile.accentColor} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center' }}>
+            <button onClick={handleReset} className={styles.restartBtn}>
+              <RotateCcw size={16} /> Play Again
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

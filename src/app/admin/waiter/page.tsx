@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
@@ -157,16 +157,13 @@ export default function WaiterPage() {
     <div className="space-y-6 h-full flex flex-col">
       
       {/* Visual Flash Overlay */}
-      <AnimatePresence>
+      <>
         {flash && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 z-50 pointer-events-none bg-danger/20 mix-blend-overlay"
           />
         )}
-      </AnimatePresence>
+      </>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-start">
         
@@ -180,22 +177,17 @@ export default function WaiterPage() {
           </div>
 
           <div className="space-y-4">
-            <AnimatePresence>
+            <>
               {calls.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                <div
                   className="p-8 text-center text-muted-foreground bg-surface border border-dashed border-border rounded-2xl"
                 >
                   No active calls.
-                </motion.div>
+                </div>
               ) : (
                 calls.map(call => (
-                  <motion.div
+                  <div
                     key={call.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95, x: -20 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, x: 20 }}
                     className="bg-danger/5 rounded-2xl border-2 border-danger/50 shadow-lg p-6 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-10 text-danger pointer-events-none">
@@ -225,10 +217,10 @@ export default function WaiterPage() {
                     >
                       <CheckCircle2 size={24} /> {t('mark_handled')}
                     </Button>
-                  </motion.div>
+                  </div>
                 ))
               )}
-            </AnimatePresence>
+            </>
           </div>
         </section>
 
@@ -243,22 +235,17 @@ export default function WaiterPage() {
           </div>
 
           <div className="space-y-4">
-            <AnimatePresence>
+            <>
               {orders.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                <div
                   className="p-8 text-center text-muted-foreground bg-surface border border-dashed border-border rounded-2xl"
                 >
                   No orders ready for delivery.
-                </motion.div>
+                </div>
               ) : (
                 orders.map(order => (
-                  <motion.div
+                  <div
                     key={order.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
                     className="bg-surface rounded-2xl border border-border shadow-lg flex flex-col overflow-hidden"
                   >
                     {/* Massive Location Header */}
@@ -321,10 +308,10 @@ export default function WaiterPage() {
                       </Button>
                     </div>
 
-                  </motion.div>
+                  </div>
                 ))
               )}
-            </AnimatePresence>
+            </>
           </div>
         </section>
 

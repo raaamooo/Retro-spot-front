@@ -2,72 +2,66 @@
 
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
+import styles from './Form.module.css';
 
 interface SelectOption {
-  value: string;
   label: string;
+  value: string;
 }
 
-interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'children'> {
+interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'options'> {
   label?: string;
-  error?: string;
   options: SelectOption[];
-  placeholder?: string;
+  error?: string;
+  icon?: React.ReactNode;
 }
 
 export default function Select({
   label,
-  error,
   options,
-  placeholder,
-  id,
+  error,
+  icon,
   className = '',
+  id,
+  required,
   ...props
 }: SelectProps) {
-  const inputId = id || `select-${label?.replace(/\s+/g, '-').toLowerCase()}`;
+  const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`;
+
+  const selectClassNames = [
+    styles.input,
+    styles.select,
+    icon ? styles.inputWithIcon : '',
+    error ? styles.inputError : '',
+    className
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={styles.formGroup}>
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-foreground">
-          {label}
+        <label htmlFor={selectId} className={styles.label}>
+          {label} {required && <span style={{ color: 'var(--danger)' }}>*</span>}
         </label>
       )}
-      <div className="relative">
+      <div className={styles.inputWrapper}>
+        {icon && <div className={styles.icon}>{icon}</div>}
         <select
-          id={inputId}
-          className={`
-            w-full px-4 py-2.5 text-sm appearance-none
-            bg-surface border border-border rounded-sm
-            text-foreground
-            transition-all duration-250 ease-out
-            focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 focus:bg-surface-elevated
-            disabled:opacity-50 disabled:cursor-not-allowed
-            pe-10
-            ${error ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}
-            ${className}
-          `}
+          id={selectId}
+          className={selectClassNames}
+          required={required}
           {...props}
         >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
         </select>
-        <ChevronDown
-          size={16}
-          className="absolute top-1/2 -translate-y-1/2 end-3 text-muted pointer-events-none"
-        />
+        <div className={styles.selectIconRight}>
+          <ChevronDown size={16} />
+        </div>
       </div>
-      {error && (
-        <p className="text-xs text-danger font-medium">{error}</p>
-      )}
+      {error && <p className={styles.errorText}>{error}</p>}
     </div>
   );
 }

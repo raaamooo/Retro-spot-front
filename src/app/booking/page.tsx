@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefcase, BookOpen, Coffee, LayoutGrid, UserRound } from 'lucide-react';
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
@@ -297,10 +297,10 @@ export default function BookingPage() {
             </div>
           )}
 
-          <AnimatePresence mode="wait">
+          <>
             {/* ═══ STEP 1: TABLE or ROOM ═══ */}
             {step === 1 && (
-              <motion.div key="step1" {...anim} className="space-y-8">
+              <div key="step1" {...anim} className="space-y-8">
                 <div className="space-y-2 border-b border-border/20 pb-4">
                   <span className="text-xs uppercase tracking-widest text-accent font-bold">
                     {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
@@ -344,12 +344,12 @@ export default function BookingPage() {
                     </div>
                   </Card>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
             {step === 2 && (
-              <motion.div key="step2" {...anim} className="space-y-8">
+              <div key="step2" {...anim} className="space-y-8">
                 <div className="space-y-2 border-b border-border/20 pb-4">
                   <span className="text-xs uppercase tracking-widest text-accent font-bold">
                     {formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
@@ -480,12 +480,12 @@ export default function BookingPage() {
                   <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
                   <Button variant="primary" onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
             {step === 3 && (
-              <motion.div key="step3" {...anim} className="space-y-8">
+              <div key="step3" {...anim} className="space-y-8">
                 <div className="space-y-2 border-b border-border/20 pb-4">
                   <span className="text-xs uppercase tracking-widest text-accent font-bold">
                     {isRtl ? 'بيانات الحجز' : 'Details'}
@@ -573,12 +573,12 @@ export default function BookingPage() {
                   <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
                   <Button variant="primary" onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ═══ STEP 4: PAYMENT ═══ */}
             {step === 4 && (
-              <motion.div key="step4" {...anim} className="space-y-8">
+              <div key="step4" {...anim} className="space-y-8">
                 <div className="space-y-2 border-b border-border/20 pb-4">
                   <span className="text-xs uppercase tracking-widest text-accent font-bold">
                     {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}
@@ -683,14 +683,13 @@ export default function BookingPage() {
                     {t('confirm_booking')}
                   </Button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ═══ STEP 5: SUCCESS ═══ */}
             {step === 5 && (
-              <motion.div
+              <div
                 key="step5"
-                initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-16 space-y-8"
               >
                 <div className="w-20 h-20 bg-accent/10 text-accent rounded-full border border-accent/20 flex items-center justify-center mx-auto">
@@ -722,9 +721,9 @@ export default function BookingPage() {
                     {t('back_to_home')}
                   </Button>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </>
         </div>
       </main>
     </div>

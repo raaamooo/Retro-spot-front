@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
@@ -246,11 +246,8 @@ export default function CashierPage() {
             const total = subtotal + tips;
 
             return (
-              <motion.div
+              <div
                 key={locationName}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
                 className="bg-surface rounded-2xl border-2 border-primary/50 shadow-lg overflow-hidden flex flex-col"
               >
                 {/* Header */}
@@ -313,7 +310,7 @@ export default function CashierPage() {
                     <CheckCircle2 size={18} /> {t('mark_done')}
                   </Button>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';

@@ -1,0 +1,76 @@
+.tabsUnderline {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.tabUnderline {
+  position: relative;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--transition-base);
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.tabUnderline:hover {
+  color: var(--foreground);
+}
+
+.tabUnderlineActive {
+  color: var(--accent);
+}
+
+.activeIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+}
+
+.tabsPill {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background-color: var(--surface-elevated);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.tabPill {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.tabPill:hover {
+  color: var(--foreground);
+  background-color: var(--surface);
+}
+
+.tabPillActive {
+  background-color: var(--accent);
+  color: #1C0E06;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.count {
+  margin-inline-start: 6px;
+  font-size: 12px;
+  opacity: 0.6;
+}

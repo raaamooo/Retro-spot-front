@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
@@ -288,7 +288,7 @@ export default function OrganizerPage() {
       {/* ═══════════ BOOKINGS TAB ═══════════ */}
       {activeTab === 'bookings' && (
         <div className="space-y-4 animate-in fade-in">
-          <AnimatePresence>
+          <>
             {bookings.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <Calendar size={48} className="mx-auto mb-4 opacity-50" />
@@ -296,7 +296,7 @@ export default function OrganizerPage() {
               </div>
             ) : (
               bookings.map(booking => (
-                <motion.div key={booking.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div key={booking.id}>
                   <Card className={`overflow-hidden ${booking.status === 'pending' ? 'border-warning/50 shadow-lg' : ''}`}>
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -342,17 +342,17 @@ export default function OrganizerPage() {
                       )}
                     </div>
                   </Card>
-                </motion.div>
+                </div>
               ))
             )}
-          </AnimatePresence>
+          </>
         </div>
       )}
 
       {/* ═══════════ ARTS TAB ═══════════ */}
       {activeTab === 'arts' && (
         <div className="space-y-6 animate-in fade-in">
-          <AnimatePresence>
+          <>
             {arts.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <Heart size={48} className="mx-auto mb-4 opacity-50" />
@@ -360,7 +360,7 @@ export default function OrganizerPage() {
               </div>
             ) : (
               arts.map(art => (
-                <motion.div key={art.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div key={art.id}>
                   <Card className={`overflow-hidden ${art.status === 'pending' ? 'border-warning/50 shadow-lg' : ''}`}>
                     <div className="grid md:grid-cols-3">
                       <div className="p-6 md:col-span-2 border-r border-border">
@@ -421,10 +421,10 @@ export default function OrganizerPage() {
                       </div>
                     </div>
                   </Card>
-                </motion.div>
+                </div>
               ))
             )}
-          </AnimatePresence>
+          </>
         </div>
       )}
 
@@ -470,9 +470,9 @@ export default function OrganizerPage() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AnimatePresence>
+            <>
               {news.map((item) => (
-                <motion.div key={item.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <div key={item.id}>
                   <Card className="p-5 h-full flex flex-col hover:border-primary/50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-1 rounded-md">
@@ -492,14 +492,14 @@ export default function OrganizerPage() {
                       </div>
                     )}
                   </Card>
-                </motion.div>
+                </div>
               ))}
               {news.length === 0 && !isAddingNews && (
                 <div className="col-span-1 md:col-span-2 text-center py-12 text-muted-foreground">
                   <p>No news items found. Create one to inform your customers!</p>
                 </div>
               )}
-            </AnimatePresence>
+            </>
           </div>
         </div>
       )}
@@ -560,15 +560,13 @@ export default function OrganizerPage() {
       )}
 
       {/* Screenshot Modal */}
-      <AnimatePresence>
+      <>
         {screenshotUrl && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
             onClick={() => setScreenshotUrl(null)}
           >
-            <motion.div 
-              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+            <div
               onClick={(e) => e.stopPropagation()}
               className="bg-surface border border-border p-4 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col"
             >
@@ -581,10 +579,10 @@ export default function OrganizerPage() {
               <div className="flex-1 overflow-auto bg-black/5 rounded-xl border border-border-subtle p-2 flex items-center justify-center">
                 <img src={screenshotUrl} alt="Payment Receipt" className="max-w-full max-h-full object-contain rounded-lg" />
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
     </div>
   );

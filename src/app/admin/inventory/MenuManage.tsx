@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { Plus, X, Trash2, ChevronDown, ChevronUp, Edit2, Check, FlaskConical } from 'lucide-react';
 import { API_URL } from '@/lib/constants';
 import { getItemImage } from '@/lib/itemImages';
@@ -115,7 +115,7 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
   return (
     <div className="space-y-4">
       {/* Recipe editor modal */}
-      <AnimatePresence>
+      <>
         {recipeItem && (
           <RecipeEditor
             menuItemId={recipeItem.id}
@@ -128,7 +128,7 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
             }}
           />
         )}
-      </AnimatePresence>
+      </>
 
       {/* Header actions */}
       <div className="flex gap-2">
@@ -143,9 +143,9 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
       </div>
 
       {/* Add Category form */}
-      <AnimatePresence>
+      <>
         {showAddCat && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+          <div className="overflow-hidden">
             <div className="p-4 bg-surface border border-primary/20 rounded-2xl space-y-3">
               <p className="font-bold text-sm text-primary">New Category</p>
               <div className="grid grid-cols-2 gap-3">
@@ -159,14 +159,14 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                 <button onClick={() => setShowAddCat(false)} className="px-4 py-2 bg-surface-elevated border border-border rounded-xl text-sm"><X size={16}/></button>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* Add Item form */}
-      <AnimatePresence>
+      <>
         {showAddItem && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+          <div className="overflow-hidden">
             <div className="p-4 bg-surface border border-accent/20 rounded-2xl space-y-3">
               <p className="font-bold text-sm text-accent">New Menu Item</p>
               <select className={inp} value={itemForm.categoryId} onChange={e => setItemForm(p => ({...p, categoryId: e.target.value}))}>
@@ -192,9 +192,9 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                 <button onClick={() => setShowAddItem(false)} className="px-4 py-2 bg-surface-elevated border border-border rounded-xl text-sm"><X size={16}/></button>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {/* Category list */}
       <div className="space-y-3">
@@ -220,9 +220,9 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                 </button>
                 {isExp ? <ChevronUp size={18} className="text-muted-foreground"/> : <ChevronDown size={18} className="text-muted-foreground"/>}
               </div>
-              <AnimatePresence>
+              <>
                 {isExp && (
-                  <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
+                  <div className="overflow-hidden border-t border-border">
                     <div className="p-3 space-y-2 bg-surface-elevated">
                       {catItems.length === 0 && <p className="text-center text-sm text-muted-foreground py-4">No items in this category</p>}
                       {catItems.map(item => {
@@ -268,9 +268,9 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                         );
                       })}
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
+              </>
             </div>
           );
         })}

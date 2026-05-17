@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { Plus, Trash2, Save, X, FlaskConical, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { API_URL } from '@/lib/constants';
 
@@ -64,17 +64,11 @@ export default function RecipeEditor({ menuItemId, menuItemName, ingredients, on
   const allInStock = lines.length === 0 || lines.every(l => stockOk(l));
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0 }}
+      <div
         className="bg-background border border-border rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
       >
         {/* Header */}
@@ -106,9 +100,9 @@ export default function RecipeEditor({ menuItemId, menuItemName, ingredients, on
           ) : lines.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-4">No ingredients linked yet. Add ingredients below to enable automatic stock tracking.</p>
           ) : (
-            <AnimatePresence>
+            <>
               {lines.map(line => (
-                <motion.div key={line.ingredientId} layout initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: 20 }}
+                <div key={line.ingredientId}
                   className={`flex items-center gap-3 p-3 rounded-xl border ${stockOk(line) ? 'bg-surface border-border' : 'bg-danger/5 border-danger/30'}`}>
                   <div className={`w-2 h-2 rounded-full shrink-0 ${stockOk(line) ? 'bg-success' : 'bg-danger'}`} />
                   <div className="flex-1 min-w-0">
@@ -129,9 +123,9 @@ export default function RecipeEditor({ menuItemId, menuItemName, ingredients, on
                       <Trash2 size={14} />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
+            </>
           )}
         </div>
 
@@ -179,7 +173,7 @@ export default function RecipeEditor({ menuItemId, menuItemName, ingredients, on
             {saving ? 'Saving...' : <><Save size={15} /> Save & Sync</>}
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

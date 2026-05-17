@@ -1,0 +1,106 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.dropZone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dropZone:hover {
+  border-color: var(--accent);
+  background-color: var(--surface-elevated);
+}
+
+.dropZoneError {
+  border-color: var(--danger);
+}
+
+.dropZonePreview {
+  padding: 8px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.previewWrap {
+  position: relative;
+  width: 100%;
+}
+
+.previewImage {
+  width: 100%;
+  max-height: 192px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.removeBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px; /* Default LTR */
+  padding: 4px;
+  background-color: var(--danger);
+  color: white;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[dir='rtl'] .removeBtn {
+  right: auto;
+  left: 4px;
+}
+
+.removeBtn:hover {
+  background-color: #dc2626; /* darker red */
+}
+
+.uploadIcon {
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.uploadText {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.browseLink {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.fileName {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.errorText {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}

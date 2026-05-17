@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
@@ -137,37 +137,29 @@ export default function BaristaPage() {
     <div className="space-y-6">
       
       {/* Visual Flash Overlay for New Orders */}
-      <AnimatePresence>
+      <>
         {flash && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
+          <div
             className="fixed inset-0 z-50 pointer-events-none bg-primary/20 mix-blend-overlay"
           />
         )}
-      </AnimatePresence>
+      </>
 
       {/* ORDERS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-24">
-        <AnimatePresence>
+        <>
           {filteredOrders.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            <div
               className="col-span-full py-20 text-center text-muted-foreground"
             >
               <Coffee size={48} className="mx-auto mb-4 opacity-50" />
               <p className="text-xl font-bold">No orders found.</p>
               <p>Time to clean the espresso machine!</p>
-            </motion.div>
+            </div>
           ) : (
             filteredOrders.map(order => (
-              <motion.div
+              <div
                 key={order.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -20 }}
                 className="bg-surface rounded-2xl border border-border shadow-lg flex flex-col overflow-hidden"
               >
                 {/* Header */}
@@ -248,10 +240,10 @@ export default function BaristaPage() {
                   </div>
                 </div>
 
-              </motion.div>
+              </div>
             ))
           )}
-        </AnimatePresence>
+        </>
       </div>
     </div>
   );

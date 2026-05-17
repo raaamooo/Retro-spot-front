@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import styles from './Tabs.module.css';
 
 interface Tab {
   id: string;
@@ -27,29 +28,20 @@ export default function Tabs({ tabs, activeTab, onChange, variant = 'pill' }: Ta
 
   if (variant === 'underline') {
     return (
-      <div className="flex border-b border-border gap-1 overflow-x-auto" role="tablist">
+      <div className={styles.tabsUnderline} role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             role="tab"
             aria-selected={currentActive === tab.id}
             onClick={() => handleClick(tab.id)}
-            className={`
-              relative px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors
-              ${
-                currentActive === tab.id
-                  ? 'text-primary'
-                  : 'text-muted hover:text-foreground'
-              }
-            `}
+            className={`${styles.tabUnderline} ${currentActive === tab.id ? styles.tabUnderlineActive : ''}`}
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span className="ms-1.5 text-xs opacity-60">({tab.count})</span>
+              <span className={styles.count}>({tab.count})</span>
             )}
-            {currentActive === tab.id && (
-              <span className="absolute bottom-0 inset-x-2 h-0.5 bg-primary rounded-full" />
-            )}
+            {currentActive === tab.id && <span className={styles.activeIndicator} />}
           </button>
         ))}
       </div>
@@ -58,25 +50,18 @@ export default function Tabs({ tabs, activeTab, onChange, variant = 'pill' }: Ta
 
   // Pill variant
   return (
-    <div className="flex gap-1.5 p-1 bg-surface-elevated rounded-xl overflow-x-auto" role="tablist">
+    <div className={styles.tabsPill} role="tablist">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           role="tab"
           aria-selected={currentActive === tab.id}
           onClick={() => handleClick(tab.id)}
-          className={`
-            px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-all duration-200
-            ${
-              currentActive === tab.id
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-muted hover:text-foreground hover:bg-surface'
-            }
-          `}
+          className={`${styles.tabPill} ${currentActive === tab.id ? styles.tabPillActive : ''}`}
         >
           {tab.label}
           {tab.count !== undefined && (
-            <span className="ms-1.5 text-xs opacity-70">({tab.count})</span>
+            <span className={styles.count}>({tab.count})</span>
           )}
         </button>
       ))}

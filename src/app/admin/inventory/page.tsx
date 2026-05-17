@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
@@ -124,11 +124,11 @@ export default function InventoryPage() {
           </div>
           {loading?<div className="text-center py-10 text-muted-foreground animate-pulse">Loading...</div>:(
             <div className="space-y-3">
-              <AnimatePresence>
+              <>
                 {ingredients.map(ing=>{
                   const st=ss(ing);const sc2=sc(st);const isExp=expandedId===ing.id;
                   return(
-                    <motion.div key={ing.id} layout initial={{opacity:0,y:10}} animate={{opacity:1,y:0}}
+                    <div key={ing.id}
                       className={`bg-surface rounded-2xl border overflow-hidden ${st==='out'?'border-danger/50':st==='low'?'border-warning/50':'border-border'}`}>
                       <button onClick={()=>toggleExpand(ing.id)} className="w-full p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors text-left">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${sc2}`}><Package size={20}/></div>
@@ -145,9 +145,9 @@ export default function InventoryPage() {
                         </div>
                         <div className="ml-2 text-muted-foreground">{isExp?<ChevronUp size={20}/>:<ChevronDown size={20}/>}</div>
                       </button>
-                      <AnimatePresence>
+                      <>
                         {isExp&&(
-                          <motion.div initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} className="border-t border-border overflow-hidden">
+                          <div className="border-t border-border overflow-hidden">
                             <div className="p-4 bg-surface-elevated space-y-4">
                               <p className="text-sm text-muted-foreground font-medium">Set new stock level:</p>
                               <div className="flex items-center gap-3 justify-center">
@@ -157,13 +157,13 @@ export default function InventoryPage() {
                               </div>
                               <Button className="w-full bg-primary hover:bg-primary/90" onClick={()=>adjustStock(ing.id)} loading={saving===ing.id} disabled={saving===ing.id}><RefreshCw size={18}/> Update Stock</Button>
                             </div>
-                          </motion.div>
+                          </div>
                         )}
-                      </AnimatePresence>
-                    </motion.div>
+                      </>
+                    </div>
                   );
                 })}
-              </AnimatePresence>
+              </>
             </div>
           )}
         </div>
@@ -207,7 +207,7 @@ export default function InventoryPage() {
                         const img=item.imageUrl||getItemImage(item.nameEn);
                         const isOn=item.available&&item.active;
                         return(
-                          <motion.div key={item.id} layout className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isOn?'bg-surface border-border':'bg-danger/5 border-danger/20 opacity-75'}`}>
+                          <div key={item.id} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isOn?'bg-surface border-border':'bg-danger/5 border-danger/20 opacity-75'}`}>
                             <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-border bg-surface-elevated">
                               {img?<img src={img} alt={item.nameEn} className="w-full h-full object-cover" onError={e=>{e.currentTarget.style.display='none'}}/>:<div className="w-full h-full flex items-center justify-center text-xs font-black text-primary/30">{item.nameEn.slice(0,2).toUpperCase()}</div>}
                             </div>
@@ -227,7 +227,7 @@ export default function InventoryPage() {
                                 {item.active?<ToggleRight size={11}/>:<ToggleLeft size={11}/>}{item.active?'Visible':'Hidden'}
                               </button>
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })}
                     </div>

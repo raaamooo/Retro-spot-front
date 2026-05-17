@@ -2,51 +2,22 @@
 
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import styles from './StateComponents.module.css';
 
 interface LoadingStateProps {
   message?: string;
-  size?: 'sm' | 'md' | 'lg';
-  fullPage?: boolean;
+  fullHeight?: boolean;
 }
 
-const sizeMap = {
-  sm: 'w-5 h-5 border-2',
-  md: 'w-8 h-8 border-3',
-  lg: 'w-12 h-12 border-4',
-};
-
-export default function LoadingState({
-  message,
-  size = 'md',
-  fullPage = false,
-}: LoadingStateProps) {
+export default function LoadingState({ message, fullHeight = false }: LoadingStateProps) {
   const { t } = useLanguage();
 
-  const content = (
-    <div className="flex flex-col items-center justify-center gap-4 py-16">
-      <div className="relative flex items-center justify-center">
-        <div className={`absolute rounded-full border-2 border-primary/20 ${sizeMap[size]} scale-110`} />
-        <span
-          className={`
-            inline-block rounded-full
-            border-primary border-t-transparent animate-spin
-            ${sizeMap[size]}
-          `}
-        />
-      </div>
-      <p className="text-sm text-primary font-medium tracking-wide uppercase">
+  return (
+    <div className={styles.loadingContainer} style={{ minHeight: fullHeight ? '60vh' : 'auto' }}>
+      <div className={styles.loadingSpinner} />
+      <p className={styles.loadingText}>
         {message || t('loading')}
       </p>
     </div>
   );
-
-  if (fullPage) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-        {content}
-      </div>
-    );
-  }
-
-  return content;
 }

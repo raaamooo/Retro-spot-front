@@ -3,6 +3,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import styles from './UploadInput.module.css';
 
 interface UploadInputProps {
   label?: string;
@@ -45,35 +46,28 @@ export default function UploadInput({
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={styles.container}>
       {label && (
-        <label className="text-sm font-medium text-foreground">{label}</label>
+        <label className={styles.label}>{label}</label>
       )}
       <div
         onClick={() => inputRef.current?.click()}
-        className={`
-          relative flex flex-col items-center justify-center
-          border-2 border-dashed rounded-xl p-6 cursor-pointer
-          transition-colors duration-200
-          hover:border-primary/50 hover:bg-surface-elevated/50
-          ${error ? 'border-danger' : 'border-border'}
-          ${preview ? 'p-2' : ''}
-        `}
+        className={`${styles.dropZone} ${error ? styles.dropZoneError : ''} ${preview ? styles.dropZonePreview : ''}`}
       >
         <input
           ref={inputRef}
           type="file"
           accept={accept}
           onChange={handleChange}
-          className="hidden"
+          className={styles.hiddenInput}
         />
 
         {preview ? (
-          <div className="relative w-full">
+          <div className={styles.previewWrap}>
             <img
               src={preview}
               alt="Preview"
-              className="w-full max-h-48 object-contain rounded-lg"
+              className={styles.previewImage}
             />
             <button
               type="button"
@@ -81,7 +75,7 @@ export default function UploadInput({
                 e.stopPropagation();
                 handleClear();
               }}
-              className="absolute top-1 end-1 p-1 bg-danger text-white rounded-full hover:bg-danger/80 transition-colors"
+              className={styles.removeBtn}
               aria-label="Remove"
             >
               <X size={14} />
@@ -89,19 +83,19 @@ export default function UploadInput({
           </div>
         ) : (
           <>
-            <Upload size={24} className="text-muted mb-2" />
-            <p className="text-sm text-muted">
-              <span className="text-primary font-medium">{t('browse_files')}</span>{' '}
+            <Upload size={24} className={styles.uploadIcon} />
+            <p className={styles.uploadText}>
+              <span className={styles.browseLink}>{t('browse_files')}</span>{' '}
               {t('or_drag')}
             </p>
             {fileName && (
-              <p className="text-xs text-muted mt-1">{fileName}</p>
+              <p className={styles.fileName}>{fileName}</p>
             )}
           </>
         )}
       </div>
       {error && (
-        <p className="text-xs text-danger font-medium">{error}</p>
+        <p className={styles.errorText}>{error}</p>
       )}
     </div>
   );

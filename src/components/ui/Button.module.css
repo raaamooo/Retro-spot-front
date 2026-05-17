@@ -3,16 +3,14 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none;
+  transition: all var(--transition-base);
   user-select: none;
-  border: 1px solid transparent;
-  gap: 0.5rem;
-  border-radius: 2px;
+  font-family: var(--font-body);
 }
 
 .button:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
 }
 
 .button:disabled {
@@ -28,41 +26,45 @@
 
 /* Variants */
 .filled {
-  background-color: var(--color-text-primary);
-  color: var(--color-surface);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid transparent;
 }
-
 .filled:hover {
-  transform: translateY(-2px);
-  opacity: 0.95;
+  background-color: var(--primary-hover);
 }
 
 .ghost {
   background-color: transparent;
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--accent);
+  border: 1px solid transparent;
+}
+.ghost:hover {
+  background-color: rgba(196, 153, 63, 0.1);
 }
 
-.ghost:hover {
-  background-color: var(--color-accent);
-  color: var(--color-bg);
-  transform: translateY(-2px);
+.outline {
+  background-color: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+.outline:hover {
+  background-color: var(--surface-elevated);
+  border-color: var(--foreground);
 }
 
 /* Sizes */
-.sm { padding: 0.375rem 1rem; font-size: 0.75rem; }
-.md { padding: 0.625rem 1.25rem; font-size: 0.875rem; }
-.lg { padding: 0.75rem 1.75rem; font-size: 1rem; border-radius: 4px; }
-.xl { padding: 1rem 2.25rem; font-size: 1.125rem; border-radius: 4px; }
+.sm { padding: 6px 16px; font-size: 12px; border-radius: var(--radius-sm); gap: 6px; }
+.md { padding: 10px 20px; font-size: 14px; border-radius: var(--radius-sm); gap: 8px; }
+.lg { padding: 12px 28px; font-size: 16px; border-radius: var(--radius-md); gap: 10px; }
+.xl { padding: 16px 36px; font-size: 18px; border-radius: var(--radius-md); gap: 12px; }
 
-.fullWidth {
-  width: 100%;
-}
+.fullWidth { width: 100%; }
 
 .spinner {
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
+  width: 16px;
+  height: 16px;
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
