@@ -254,6 +254,7 @@ function MenuContent() {
       id: `${flavorModalItem.id}_${flavorsText.replace(/\s+/g, '')}`
     };
     addToCart(customizedItem);
+    setNotes(prev => prev ? `${prev} | ${flavorModalItem.name}: ${flavorsText}` : `${flavorModalItem.name}: ${flavorsText}`);
     setFlavorModalItem(null);
   };
 
