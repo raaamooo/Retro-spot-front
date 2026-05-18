@@ -120,7 +120,7 @@ function MenuContent() {
 
         const enrichedData = allItems.map((d: any) => ({
           ...d,
-          tags: d.tags ? (typeof d.tags === 'string' ? d.tags.split(',') : d.tags) : ['hot', 'coffee'],
+          tags: d.tags ? (typeof d.tags === 'string' ? d.tags.split(',') : d.tags) : [],
         }));
         setMenuItems(enrichedData);
         setIsLoading(false);
@@ -228,9 +228,22 @@ function MenuContent() {
     }
     
     const itemAdditions = getAdditionsForItem(item);
-    const hasMilksOrSyrups = item.tags?.includes('coffee') || item.tags?.includes('tea');
+    const itemCategory = item.category.toLowerCase();
+    const itemTags = item.tags || [];
 
-    if (itemAdditions.length > 0 || hasMilksOrSyrups) {
+    const supportsMilk = itemCategory.includes('coffee') || 
+                         itemCategory.includes('tea') || 
+                         itemCategory.includes('frappe') || 
+                         itemTags.includes('milk');
+
+    const supportsSweetness = itemCategory.includes('coffee') || 
+                              itemCategory.includes('tea') || 
+                              itemCategory.includes('frappe') || 
+                              itemCategory.includes('juice') || 
+                              itemCategory.includes('mojito') || 
+                              itemCategory.includes('smoothie');
+
+    if (itemAdditions.length > 0 || supportsMilk || supportsSweetness) {
       setCustomizingItem(item);
       setModalQuantity(1);
       setModalSelectedAdditions([]);
@@ -748,49 +761,60 @@ function MenuContent() {
                 </div>
               </div>
 
-              {/* Coffee Custom Preferences */}
-              {(customizingItem.tags?.includes('coffee') || customizingItem.tags?.includes('tea')) && (
-                <>
-                  <div className={styles.optionGroup}>
-                    <span className={styles.optionLabel}>Sweetness Level</span>
-                    <div className={styles.optionGrid}>
-                      {[
-                        { label: 'Standard Sweetness', value: 'standard' },
-                        { label: 'Half Sugar', value: 'half' },
-                        { label: 'No Sugar', value: 'none' }
-                      ].map(opt => (
-                        <button
-                          key={opt.value}
-                          onClick={() => setSweetness(opt.value as any)}
-                          className={`${styles.customizationPill} ${sweetness === opt.value ? styles.customizationPillActive : ''}`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              {/* Custom Preferences */}
+              {(() => {
+                const cat = customizingItem.category.toLowerCase();
+                const tags = customizingItem.tags || [];
+                const showMilk = cat.includes('coffee') || cat.includes('tea') || cat.includes('frappe') || tags.includes('milk');
+                const showSweetness = cat.includes('coffee') || cat.includes('tea') || cat.includes('frappe') || cat.includes('juice') || cat.includes('mojito') || cat.includes('smoothie');
 
-                  <div className={styles.optionGroup}>
-                    <span className={styles.optionLabel}>Milk Preferences</span>
-                    <div className={styles.optionGrid}>
-                      {[
-                        { label: 'No Milk', value: 'none' },
-                        { label: 'Full Cream', value: 'full' },
-                        { label: 'Oat Milk (+15 EGP)', value: 'oat' },
-                        { label: 'Almond Milk (+15 EGP)', value: 'almond' }
-                      ].map(opt => (
-                        <button
-                          key={opt.value}
-                          onClick={() => setMilk(opt.value as any)}
-                          className={`${styles.customizationPill} ${milk === opt.value ? styles.customizationPillActive : ''}`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
+                return (
+                  <>
+                    {showSweetness && (
+                      <div className={styles.optionGroup}>
+                        <span className={styles.optionLabel}>Sweetness Level</span>
+                        <div className={styles.optionGrid}>
+                          {[
+                            { label: 'Standard Sweetness', value: 'standard' },
+                            { label: 'Half Sugar', value: 'half' },
+                            { label: 'No Sugar', value: 'none' }
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setSweetness(opt.value as any)}
+                              className={`${styles.customizationPill} ${sweetness === opt.value ? styles.customizationPillActive : ''}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {showMilk && (
+                      <div className={styles.optionGroup}>
+                        <span className={styles.optionLabel}>Milk Preferences</span>
+                        <div className={styles.optionGrid}>
+                          {[
+                            { label: 'No Milk', value: 'none' },
+                            { label: 'Full Cream', value: 'full' },
+                            { label: 'Oat Milk (+15 EGP)', value: 'oat' },
+                            { label: 'Almond Milk (+15 EGP)', value: 'almond' }
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => setMilk(opt.value as any)}
+                              className={`${styles.customizationPill} ${milk === opt.value ? styles.customizationPillActive : ''}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               {/* Compatible Extra Additions */}
               {customizingItemAdditions.length > 0 && (
