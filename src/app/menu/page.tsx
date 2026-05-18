@@ -79,16 +79,22 @@ function MenuContent() {
   useEffect(() => {
     setMounted(true);
     const table = searchParams.get('locationId');
-    if (table) {
-      setTableId(table);
-      fetch(`${API_URL}/api/locations`)
-        .then(res => res.json())
-        .then(data => {
+    
+    fetch(`${API_URL}/api/locations`)
+      .then(res => res.json())
+      .then(data => {
+        if (table) {
+          setTableId(table);
           const loc = data.find((l: any) => l.id === table);
           if (loc) setTableName(loc.name);
-        })
-        .catch(console.error);
-    }
+        } else if (data.length > 0) {
+          // Default to the first available location's UUID to prevent foreign key errors
+          const defaultLoc = data.find((l: any) => l.name === 'Table 1') || data[0];
+          setTableId(defaultLoc.id);
+          setTableName(defaultLoc.name);
+        }
+      })
+      .catch(console.error);
 
     fetch(`${API_URL}/api/menu`)
       .then((res) => {
