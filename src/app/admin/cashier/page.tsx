@@ -74,6 +74,18 @@ export default function CashierPage() {
   const [posCategory, setPosCategory] = useState<string>('All');
   const [isSendingPos, setIsSendingPos] = useState<boolean>(false);
 
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/orders?status=cashier`);
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch orders:', err);
+    }
+  };
+
   // --- FETCH INITIAL DATA ---
   useEffect(() => {
     Promise.all([
@@ -280,9 +292,12 @@ export default function CashierPage() {
           body: JSON.stringify(payload)
         });
       }
+      await fetchOrders();
+      addToast('Order successfully updated!', 'success');
       setEditingLocation(null);
     } catch (err) {
       console.error('Failed to save edits', err);
+      addToast('Failed to save order edits', 'error');
     } finally {
       setSaving(false);
     }
