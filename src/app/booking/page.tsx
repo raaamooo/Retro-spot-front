@@ -301,7 +301,7 @@ export default function BookingPage() {
         <>
           {/* ═══ STEP 1: TABLE or ROOM ═══ */}
           {step === 1 && (
-            <div className={styles.stepWrapper}>
+            <div key="step-1" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
                   {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
@@ -348,7 +348,7 @@ export default function BookingPage() {
 
           {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
           {step === 2 && (
-            <div className={styles.stepWrapper}>
+            <div key="step-2" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
                   {formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
@@ -464,7 +464,7 @@ export default function BookingPage() {
 
           {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
           {step === 3 && (
-            <div className={styles.stepWrapper}>
+            <div key="step-3" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
                   {isRtl ? 'بيانات الحجز' : 'Details'}
@@ -561,7 +561,7 @@ export default function BookingPage() {
 
           {/* ═══ STEP 4: PAYMENT ═══ */}
           {step === 4 && (
-            <div className={styles.stepWrapper}>
+            <div key="step-4" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
                   {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}

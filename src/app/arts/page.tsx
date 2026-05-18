@@ -235,7 +235,7 @@ export default function ArtsPage() {
 
                     {bidForm.paymentMethod === 'Card' && (
                       <div className={styles.paymentDetails}>
-                        <p style={{ fontSize: '14px', color: 'var(--muted)' }}>You will be redirected to the secure payment gateway.</p>
+                        <p className={styles.paymentRedirectText}>You will be redirected to the secure payment gateway.</p>
                       </div>
                     )}
 
@@ -278,7 +278,7 @@ export default function ArtsPage() {
             SECTION 2: SUBMIT YOUR ART 
             ========================================= */}
         <section>
-          <div className={styles.sectionHeader} style={{ marginTop: '32px' }}>
+          <div className={`${styles.sectionHeader} ${styles.marginTopLg}`}>
             <span className={styles.sectionSubtitle}>
               {isRtl ? 'هل أنت فنان؟ شارك إبداعك' : 'For the Artists'}
             </span>
@@ -309,7 +309,7 @@ export default function ArtsPage() {
                 
                 <Textarea label="Artwork Description / Story" rows={4} value={artistForm.description} onChange={e => setArtistForm({...artistForm, description: e.target.value})} />
                 
-                <div style={{ marginTop: '24px' }}>
+                <div className={styles.marginTopMd}>
                   <label className={styles.paymentDetailLabel}>High-Quality Photo of Artwork</label>
                   <UploadInput 
                     label="Upload image"
@@ -320,8 +320,7 @@ export default function ArtsPage() {
                 <Button 
                   variant="filled" 
                   size="lg" 
-                  className={styles.buttonPrimary} 
-                  style={{ marginTop: '32px' }}
+                  className={`${styles.buttonPrimary} ${styles.marginTopLg}`}
                   onClick={submitArtistRequest} 
                   loading={isSubmittingArtist}
                 >

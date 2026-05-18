@@ -454,9 +454,9 @@ function MenuContent() {
       {/* Premium Header */}
       <header className={styles.header}>
         <div className={styles.title}>
-          Retro <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Menu</span>
+          Retro <span className={styles.retroMenuSpan}>Menu</span>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className={styles.headerActions}>
           {tableId && (
             <div className={styles.tableInfo}>
               {tableName || 'Loading...'}
@@ -465,16 +465,14 @@ function MenuContent() {
           {mounted && (
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} 
-              className="focus-ring" 
-              style={{ padding: '8px', color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              className={`focus-ring ${styles.headerBtn}`}
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           )}
           <button 
             onClick={toggleLanguage} 
-            className="focus-ring" 
-            style={{ padding: '8px', color: 'var(--muted)', fontWeight: 700, fontSize: '12px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            className={`focus-ring ${styles.headerBtn} ${styles.headerBtnBold}`}
           >
             {language === 'en' ? 'AR' : 'EN'}
           </button>
@@ -632,7 +630,7 @@ function MenuContent() {
                     <div className={styles.cartItemDetails}>
                       <div className={styles.cartItemName}>{item.name}</div>
                       {item.selectedAdditions && item.selectedAdditions.map(a => (
-                        <div key={a.id} style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
+                        <div key={a.id} className={styles.cartItemOption}>
                           + {a.name} ({a.price.toFixed(2)} EGP)
                         </div>
                       ))}
@@ -642,7 +640,7 @@ function MenuContent() {
                     </div>
                     <div className={styles.cartItemControls}>
                       <button onClick={() => updateQuantity(idx, -1)} className={styles.quantityBtn}>-</button>
-                      <span style={{ fontSize: '14px', fontWeight: 700, width: '20px', textAlign: 'center' }}>{item.cartQuantity}</span>
+                      <span className={styles.cartItemQty}>{item.cartQuantity}</span>
                       <button onClick={() => updateQuantity(idx, 1)} className={styles.quantityBtn}>+</button>
                     </div>
                   </div>
@@ -650,7 +648,7 @@ function MenuContent() {
               </div>
 
               {/* Checkout Details */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className={styles.cartItemsList}>
                 <FormInput 
                   label="Customer Name (Optional)" 
                   value={customerName} 
@@ -688,7 +686,7 @@ function MenuContent() {
                       </button>
                     ))}
                   </div>
-                  <div style={{ marginTop: '8px' }}>
+                  <div className={styles.cartNotesWrap}>
                     <FormInput
                       placeholder="Custom Tip Amount (EGP)"
                       value={customTipVal}
@@ -708,12 +706,12 @@ function MenuContent() {
               <span>{cartTotal.toFixed(2)} EGP</span>
             </div>
             {tip > 0 && (
-              <div className={styles.cartTotalRow} style={{ fontSize: '15px', color: 'var(--muted)', fontWeight: 600 }}>
+              <div className={`${styles.cartTotalRow} ${styles.cartTotalRowMuted}`}>
                 <span>Tip</span>
                 <span>{tip.toFixed(2)} EGP</span>
               </div>
             )}
-            <div className={styles.cartTotalRow} style={{ borderTop: '1px dashed var(--border-subtle)', paddingTop: '8px', fontSize: '20px' }}>
+            <div className={`${styles.cartTotalRow} ${styles.cartGrandTotalRow}`}>
               <span>Total</span>
               <span>{finalTotal.toFixed(2)} EGP</span>
             </div>
@@ -740,8 +738,8 @@ function MenuContent() {
 
             <div className={styles.modalBody}>
               {/* Product Info Summary */}
-              <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
-                <div className={styles.itemImageWrap} style={{ width: '70px', height: '70px' }}>
+              <div className={styles.modalItemHeader}>
+                <div className={styles.modalItemImageWrap}>
                   <img 
                     src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || ''} 
                     alt={customizingItem.name} 
@@ -752,10 +750,10 @@ function MenuContent() {
                   />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}>
+                  <h3 className={styles.modalItemTitle}>
                     {customizingItem.name}
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>
+                  <p className={styles.modalItemDesc}>
                     {customizingItem.price.toFixed(2)} EGP
                   </p>
                 </div>
@@ -839,8 +837,8 @@ function MenuContent() {
               )}
 
               {/* Product Quantity Incrementor */}
-              <div className={styles.optionGroup} style={{ marginTop: '16px' }}>
-                <span className={styles.optionLabel} style={{ textAlign: 'center' }}>Quantity</span>
+              <div className={`${styles.optionGroup} ${styles.modalQuantityGroup}`}>
+                <span className={`${styles.optionLabel} ${styles.modalQuantityLabel}`}>Quantity</span>
                 <div className={styles.modalQuantityContainer}>
                   <button 
                     onClick={() => setModalQuantity(q => Math.max(1, q - 1))} 
@@ -848,7 +846,7 @@ function MenuContent() {
                   >
                     <Minus size={14} />
                   </button>
-                  <span style={{ fontSize: '18px', fontWeight: 700, width: '30px', textAlign: 'center' }}>
+                  <span className={styles.modalQuantityValue}>
                     {modalQuantity}
                   </span>
                   <button 
@@ -888,8 +886,8 @@ function MenuContent() {
             </div>
 
             <div className={styles.modalBody}>
-              <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
-                <div className={styles.itemImageWrap} style={{ width: '70px', height: '70px' }}>
+              <div className={styles.modalItemHeader}>
+                <div className={styles.modalItemImageWrap}>
                   <img 
                     src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || ''} 
                     alt={flavorModalItem.name} 
@@ -900,16 +898,16 @@ function MenuContent() {
                   />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--foreground)' }}>
+                  <h3 className={styles.modalItemTitle}>
                     {flavorModalItem.name}
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '4px' }}>
+                  <p className={styles.modalItemDesc}>
                     Choose your ice cream scoop options below.
                   </p>
                 </div>
               </div>
 
-              <div className={styles.optionGroup} style={{ marginTop: '8px' }}>
+              <div className={`${styles.optionGroup} ${styles.cartNotesWrap}`}>
                 <span className={styles.optionLabel}>Ice Cream Flavors</span>
                 <div className={styles.optionGrid}>
                   {ICE_CREAM_FLAVORS.map(f => {

@@ -529,8 +529,143 @@
 
 .cartFooter {
   padding: var(--space-lg);
+  padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border-subtle);
   background-color: var(--surface);
+}
+
+/* ---------- Replaced Inline Styles ---------- */
+.retroMenuSpan {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.headerBtn {
+  padding: 8px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.headerBtnBold {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.mainContainer {
+  margin-top: 24px;
+}
+
+.outOfStockBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.requestCheckText {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.requestCheckTotal {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.requestCheckBtn {
+  border-color: var(--primary-foreground);
+  color: var(--primary-foreground);
+}
+
+.cartItemOption {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.cartItemQty {
+  font-size: 14px;
+  font-weight: 700;
+  width: 20px;
+  text-align: center;
+}
+
+.cartItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cartNotesWrap {
+  margin-top: 8px;
+}
+
+.cartTotalRowMuted {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.cartGrandTotalRow {
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 8px;
+  font-size: 20px;
+}
+
+.modalItemHeader {
+  display: flex;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 16px;
+}
+
+.modalItemImageWrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--surface-elevated);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.modalItemTitle {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--foreground);
+}
+
+.modalItemDesc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.modalQuantityGroup {
+  margin-top: 16px;
+}
+
+.modalQuantityLabel {
+  text-align: center;
+}
+
+.modalQuantityValue {
+  font-size: 18px;
+  font-weight: 700;
+  width: 30px;
+  text-align: center;
 }
 
 .cartTotalRow {

@@ -79,6 +79,14 @@
   gap: var(--space-md);
 }
 
+.actions button {
+  transition: transform var(--transition-fast) ease;
+}
+
+.actions button:active {
+  transform: scale(0.96);
+}
+
 .featureBox {
   grid-column: span 4;
   display: flex;
@@ -162,7 +170,8 @@
 
 /* Section */
 .section {
-  padding: var(--space-section) var(--space-xl);
+  padding: var(--space-section) 0;
+  scroll-margin-top: 120px;
 }
 
 .bgSurface {
