@@ -83,10 +83,14 @@ function MenuContent() {
     fetch(`${API_URL}/api/locations`)
       .then(res => res.json())
       .then(data => {
+        let foundLoc = null;
         if (table) {
-          setTableId(table);
-          const loc = data.find((l: any) => l.id === table);
-          if (loc) setTableName(loc.name);
+          foundLoc = data.find((l: any) => l.id === table);
+        }
+        
+        if (foundLoc) {
+          setTableId(foundLoc.id);
+          setTableName(foundLoc.name);
         } else if (data.length > 0) {
           // Default to the first available location's UUID to prevent foreign key errors
           const defaultLoc = data.find((l: any) => l.name === 'Table 1') || data[0];
@@ -352,12 +356,12 @@ function MenuContent() {
 
   const submitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cart.length === 0) return;
+    if (cart.length === 0 || !tableId) return;
     setIsSubmitting(true);
     try {
       const orderData = {
         type: 'dine_in',
-        locationId: tableId || 'Table 1',
+        locationId: tableId,
         customerName: customerName || 'Guest',
         items: cart.map(i => ({
           menuItemId: i.id,
@@ -392,11 +396,12 @@ function MenuContent() {
   };
 
   const requestCheck = async () => {
+    if (!tableId) return;
     try {
       await fetch(`${API_URL}/api/orders/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationId: tableId || 'Table 1' })
+        body: JSON.stringify({ locationId: tableId })
       });
       addToast('Check requested! Staff will be with you shortly.', 'success');
     } catch (err) {
