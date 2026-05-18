@@ -7,6 +7,7 @@ import { Calendar, Users, MapPin, CheckCircle2, Copy, Check, PartyPopper, Briefc
 import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 import { API_URL } from '@/lib/constants';
+import styles from './Booking.module.css';
 
 // --- Types ---
 type BookingType = 'table' | 'room';
@@ -270,461 +271,431 @@ export default function BookingPage() {
     URL.revokeObjectURL(url);
   };
 
-  const anim = { initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 } };
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* MAIN */}
-      <main className="flex-1 flex flex-col items-center px-4 sm:px-8 py-16">
-        <div className="w-full max-w-2xl">
-
-          {/* Progress */}
-          {step < 5 && (
-            <div className="mb-12">
-              <div className="flex justify-between mb-3">
-                {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(i => (
-                  <div key={i} className={`text-xs uppercase tracking-widest font-bold transition-colors ${step >= i ? 'text-accent' : 'text-muted/60'}`}>
-                    {t('step') || 'Step'} {i}
-                  </div>
-                ))}
-              </div>
-              <div className="h-[2px] bg-border/20 rounded-full overflow-hidden">
+    <div className={styles.container}>
+      <main className="py-16">
+        {/* Progress */}
+        {step < 5 && (
+          <div className={styles.progressContainer}>
+            <div className={styles.progressLabelRow}>
+              {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(i => (
                 <div
-                  className="h-full bg-accent transition-all duration-500 ease-out"
-                  style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-                />
+                  key={i}
+                  className={`${styles.stepLabel} ${step >= i ? styles.stepLabelActive : ''}`}
+                >
+                  {t('step') || 'Step'} {i}
+                </div>
+              ))}
+            </div>
+            <div className={styles.progressBarTrack}>
+              <div
+                className={styles.progressBarFill}
+                style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <>
+          {/* ═══ STEP 1: TABLE or ROOM ═══ */}
+          {step === 1 && (
+            <div className={styles.stepWrapper}>
+              <div className={styles.headerBlock}>
+                <span className={styles.kicker}>
+                  {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
+                </span>
+                <h1 className={styles.title}>{t('what_are_you_booking')}</h1>
+                <p className={styles.subtitle}>{t('select_booking_type')}</p>
+              </div>
+
+              <div className={styles.bookingGrid}>
+                {/* Table Booking */}
+                <Card
+                  onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
+                  className={styles.optionCard}
+                >
+                  <div className={styles.optionCardInner}>
+                    <div className={styles.iconWrapper}>
+                      <LayoutGrid size={28} />
+                    </div>
+                    <div>
+                      <h3 className={styles.cardTitle}>{t('table_booking')}</h3>
+                      <p className={styles.cardDesc}>{t('table_booking_desc')}</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Room Booking */}
+                <Card
+                  onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
+                  className={styles.optionCard}
+                >
+                  <div className={styles.optionCardInner}>
+                    <div className={styles.iconWrapper}>
+                      <MapPin size={28} />
+                    </div>
+                    <div>
+                      <h3 className={styles.cardTitle}>{t('room_booking')}</h3>
+                      <p className={styles.cardDesc}>{t('room_booking_desc')}</p>
+                    </div>
+                  </div>
+                </Card>
               </div>
             </div>
           )}
 
-          <>
-            {/* ═══ STEP 1: TABLE or ROOM ═══ */}
-            {step === 1 && (
-              <div key="step1" {...anim} className="space-y-8">
-                <div className="space-y-2 border-b border-border/20 pb-4">
-                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
-                    {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
-                  </span>
-                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground tracking-tight">{t('what_are_you_booking')}</h1>
-                  <p className="text-sm text-muted leading-relaxed max-w-md">{t('select_booking_type')}</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                  {/* Table Booking */}
-                  <Card
-                    onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
-                    className="p-8 md:p-10 cursor-pointer border border-border bg-surface hover:border-accent transition-all duration-300 rounded-sm group relative"
-                  >
-                    <div className="absolute inset-0 bg-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                    <div className="flex flex-col items-center text-center gap-6 relative z-10">
-                      <div className="w-16 h-16 rounded-full border border-border flex items-center justify-center bg-background group-hover:border-accent transition-colors duration-300">
-                        <LayoutGrid size={28} className="text-accent" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-display font-light text-2xl text-foreground group-hover:text-accent transition-colors duration-300">{t('table_booking')}</h3>
-                        <p className="text-xs text-muted leading-relaxed uppercase tracking-wider">{t('table_booking_desc')}</p>
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Room Booking */}
-                  <Card
-                    onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
-                    className="p-8 md:p-10 cursor-pointer border border-border bg-surface hover:border-accent transition-all duration-300 rounded-sm group relative"
-                  >
-                    <div className="absolute inset-0 bg-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                    <div className="flex flex-col items-center text-center gap-6 relative z-10">
-                      <div className="w-16 h-16 rounded-full border border-border flex items-center justify-center bg-background group-hover:border-accent transition-colors duration-300">
-                        <MapPin size={28} className="text-accent" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-display font-light text-2xl text-foreground group-hover:text-accent transition-colors duration-300">{t('room_booking')}</h3>
-                        <p className="text-xs text-muted leading-relaxed uppercase tracking-wider">{t('room_booking_desc')}</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
+          {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
+          {step === 2 && (
+            <div className={styles.stepWrapper}>
+              <div className={styles.headerBlock}>
+                <span className={styles.kicker}>
+                  {formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
+                </span>
+                <h1 className={styles.title}>{t('booking_details')}</h1>
+                <p className={styles.subtitle}>{t('tell_us_more')}</p>
               </div>
-            )}
 
-            {/* ═══ STEP 2: DETAILS (tables/people + purpose) ═══ */}
-            {step === 2 && (
-              <div key="step2" {...anim} className="space-y-8">
-                <div className="space-y-2 border-b border-border/20 pb-4">
-                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
-                    {formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}
-                  </span>
-                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('booking_details')}</h1>
-                  <p className="text-sm text-muted leading-relaxed">{t('tell_us_more')}</p>
-                </div>
-
-                <Card className="p-8 space-y-8 border border-border bg-surface rounded-sm">
-                  {/* Table selection — only for table booking */}
-                  {formData.bookingType === 'table' && (
-                    <div className="space-y-4">
-                      <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('select_your_tables')}</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {TABLE_OPTIONS.map((tbl) => {
-                          const isSelected = selectedTables.includes(tbl.id);
-                          return (
-                            <button
-                              key={tbl.id}
-                              type="button"
-                              onClick={() => toggleTable(tbl.id)}
-                              className={`relative flex flex-col items-center gap-4 p-6 rounded-sm border transition-all duration-300 ${
-                                isSelected
-                                  ? 'border-accent bg-accent/5'
-                                  : 'border-border bg-background hover:border-accent/60'
-                              }`}
-                            >
-                                           {isSelected && (
-                                <div className="absolute top-2 right-2">
-                                  <CheckCircle2 size={16} className="text-accent" />
-                                </div>
-                              )}
-                              <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${
-                                isSelected ? 'border-accent bg-accent/10' : 'border-border bg-surface'
-                              }`}>
-                                <UserRound size={20} className={isSelected ? 'text-accent' : 'text-muted'} />
-                              </div>
-                              <span className={`text-xs uppercase tracking-wider font-semibold ${
-                                isSelected ? 'text-accent font-bold' : 'text-foreground'
-                              }`}>
-                                {t(tbl.label)}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {selectedTables.length > 0 && (
-                        <p className="mt-3 text-xs uppercase tracking-wider text-muted text-center">
-                          {selectedTables.length} {selectedTables.length === 1 ? 'table' : 'tables'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Room selection — only for room booking */}
-                  {formData.bookingType === 'room' && (
-                    <div className="space-y-4">
-                      <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('select_your_room')}</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {ROOM_OPTIONS.map((room) => {
-                          const isSelected = selectedRooms.includes(room.id);
-                          return (
-                            <button
-                              key={room.id}
-                              type="button"
-                              onClick={() => toggleRoom(room.id)}
-                              className={`relative flex flex-col items-center gap-4 p-6 rounded-sm border transition-all duration-300 ${
-                                isSelected
-                                  ? 'border-accent bg-accent/5'
-                                  : 'border-border bg-background hover:border-accent/60'
-                              }`}
-                            >
-                              {isSelected && (
-                                <div className="absolute top-2 right-2">
-                                  <CheckCircle2 size={16} className="text-accent" />
-                                </div>
-                              )}
-                              <div className={`w-12 h-12 rounded-full border flex items-center justify-center ${
-                                isSelected ? 'border-accent bg-accent/10' : 'border-border bg-surface'
-                              }`}>
-                                <Users size={20} className={isSelected ? 'text-accent' : 'text-muted'} />
-                              </div>
-                              <span className={`text-xs uppercase tracking-wider font-semibold ${
-                                isSelected ? 'text-accent font-bold' : 'text-foreground'
-                              }`}>
-                                {t(room.label)}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {selectedRooms.length > 0 && (
-                        <p className="mt-3 text-xs uppercase tracking-wider text-muted text-center">
-                          {selectedRooms.length} {selectedRooms.length === 1 ? 'room' : 'rooms'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Event Purpose */}
+              <Card className="p-8 space-y-8 border border-border bg-surface rounded-sm">
+                {/* Table selection — only for table booking */}
+                {formData.bookingType === 'table' && (
                   <div className="space-y-4">
-                    <label className="block text-xs uppercase tracking-widest font-bold text-accent">{t('event_purpose')}</label>
-                    <div className="grid grid-cols-2 gap-4">
-                      {EVENT_PURPOSES.map(purpose => {
-                        const Icon = purpose.icon;
-                        const selected = formData.eventPurpose === purpose.id;
+                    <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('select_your_tables')}</label>
+                    <div className={styles.detailGrid}>
+                      {TABLE_OPTIONS.map((tbl) => {
+                        const isSelected = selectedTables.includes(tbl.id);
                         return (
                           <button
-                            key={purpose.id}
+                            key={tbl.id}
                             type="button"
-                            onClick={() => setFormData({ ...formData, eventPurpose: purpose.id })}
-                            className={`flex items-center gap-4 p-5 rounded-sm border transition-all duration-300 text-start ${
-                              selected
-                                ? 'border-accent bg-accent/5 text-accent font-bold'
-                                : 'border-border bg-background hover:border-accent/60 text-foreground'
-                            }`}
+                            onClick={() => toggleTable(tbl.id)}
+                            className={`${styles.selectionButton} ${isSelected ? styles.selectionButtonActive : ''}`}
                           >
-                            <Icon size={20} className={selected ? 'text-accent' : 'text-muted'} />
-                            <span className="text-xs uppercase tracking-wider font-semibold">{t(purpose.translationKey)}</span>
+                            {isSelected && (
+                              <div className={styles.checkIndicator}>
+                                <CheckCircle2 size={16} className="text-accent" />
+                              </div>
+                            )}
+                            <div className={styles.circleIcon}>
+                              <UserRound size={20} />
+                            </div>
+                            <span className={styles.buttonLabel}>
+                              {t(tbl.label)}
+                            </span>
                           </button>
                         );
                       })}
                     </div>
-                  </div>
-                </Card>
-
-                <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
-                  <Button variant="filled" onClick={() => { if (validateStep2()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
-                </div>
-              </div>
-            )}
-
-            {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
-            {step === 3 && (
-              <div key="step3" {...anim} className="space-y-8">
-                <div className="space-y-2 border-b border-border/20 pb-4">
-                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
-                    {isRtl ? 'بيانات الحجز' : 'Details'}
-                  </span>
-                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('contact_and_date')}</h1>
-                  <p className="text-sm text-muted leading-relaxed">{t('your_info_and_timing')}</p>
-                </div>
-
-                <Card className="p-8 space-y-6 border border-border bg-surface rounded-sm">
-                  <FormInput
-                    label={t('your_name')}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    placeholder={language === 'ar' ? 'محمد أحمد' : 'John Doe'}
-                  />
-
-                  <FormInput
-                    label={t('contact_number')}
-                    type="tel"
-                    value={formData.contactNumber}
-                    onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                    required
-                    placeholder="01xxxxxxxxx"
-                  />
-
-                  <hr className="border-border/20 my-6" />
-
-                  <FormInput
-                    label={t('date')}
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    required
-                  />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormInput
-                      label={t('start_time')}
-                      type="time"
-                      value={formData.startTime}
-                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                      required
-                    />
-                    <FormInput
-                      label={t('end_time')}
-                      type="time"
-                      value={formData.endTime}
-                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="bg-surface-elevated border border-border/30 text-muted p-4 rounded-sm text-xs leading-relaxed">
-                    <strong className="text-accent uppercase tracking-wider">{language === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {t('time_slot_note')}
-                  </div>
-
-                  <Textarea
-                    label={t('notes_special_requests')}
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder={language === 'ar' ? 'مثلاً: محتاجين بروجكتور، أو حفلة مفاجأة!' : 'E.g., We need a projector, or it\'s a surprise party!'}
-                    rows={3}
-                  />
-
-                  {calculatedPrices.total > 0 && (
-                    <div className="bg-surface-elevated border border-border p-6 rounded-sm flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                      <div>
-                        <p className="text-[10px] text-muted font-bold uppercase tracking-widest mb-1">
-                          {language === 'ar' ? 'التكلفة الإجمالية' : 'Estimated Total Cost'}
-                        </p>
-                        <p className="text-3xl font-display font-light text-foreground">{calculatedPrices.total} <span className="text-sm font-sans font-bold">EGP</span></p>
-                      </div>
-                      <div className="sm:text-right">
-                        <p className="text-[10px] text-accent font-bold uppercase tracking-widest mb-1">
-                          {language === 'ar' ? 'المقدم المطلوب (50%)' : 'Required Deposit (50%)'}
-                        </p>
-                        <p className="text-2xl font-display font-bold text-accent">{calculatedPrices.deposit} <span className="text-xs font-sans font-bold">EGP</span></p>
-                      </div>
-                    </div>
-                  )}
-                </Card>
-
-                <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('back')}</Button>
-                  <Button variant="filled" onClick={() => { if (validateStep3()) handleNext(); }} className="flex-1 uppercase tracking-widest text-xs font-bold h-12">{t('next')}</Button>
-                </div>
-              </div>
-            )}
-
-            {/* ═══ STEP 4: PAYMENT ═══ */}
-            {step === 4 && (
-              <div key="step4" {...anim} className="space-y-8">
-                <div className="space-y-2 border-b border-border/20 pb-4">
-                  <span className="text-xs uppercase tracking-widest text-accent font-bold">
-                    {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}
-                  </span>
-                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('payment')}</h1>
-                  <p className="text-sm text-muted leading-relaxed">{t('secure_your_booking')}</p>
-                </div>
-
-                <div className="flex bg-surface-elevated p-1 rounded-sm border border-border mb-6">
-                  {(['Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
-                    <button
-                      key={method}
-                      onClick={() => setFormData({ ...formData, paymentMethod: method })}
-                      className={`flex-1 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-all ${
-                        formData.paymentMethod === method
-                          ? 'bg-accent text-[#2C1A0E] shadow-sm'
-                          : 'text-muted hover:text-foreground'
-                      }`}
-                    >
-                      {t(method.toLowerCase().replace(' ', '_'))}
-                    </button>
-                  ))}
-                </div>
-
-                <Card className="p-8 border border-border bg-surface rounded-sm">
-                  {calculatedPrices.deposit > 0 && (
-                    <div className="w-full mb-8 text-center bg-accent/5 text-accent py-4 rounded-sm font-bold border border-accent/20 uppercase tracking-wider text-xs">
-                      {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
-                    </div>
-                  )}
-                  
-                  {formData.paymentMethod === 'Instapay' && (
-                    <div className="space-y-6 animate-in fade-in">
-                      <p className="text-center text-xs text-muted uppercase tracking-wider leading-relaxed">
-                        {t('transfer_via_instapay')}
+                    {selectedTables.length > 0 && (
+                      <p className="mt-4 text-xs uppercase tracking-wider text-muted text-center font-bold">
+                        {selectedTables.length} {selectedTables.length === 1 ? 'table' : 'tables'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
                       </p>
+                    )}
+                  </div>
+                )}
 
-                      <div className="w-full flex justify-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <code className="text-lg font-mono bg-surface-elevated px-4 py-2 border border-border rounded-sm">{config.instapayPhone}</code>
+                {/* Room selection — only for room booking */}
+                {formData.bookingType === 'room' && (
+                  <div className="space-y-4">
+                    <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('select_your_room')}</label>
+                    <div className={styles.detailGrid}>
+                      {ROOM_OPTIONS.map((room) => {
+                        const isSelected = selectedRooms.includes(room.id);
+                        return (
                           <button
-                            onClick={() => copyToClipboard(config.instapayPhone)}
-                            className="p-2.5 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors duration-200"
+                            key={room.id}
+                            type="button"
+                            onClick={() => toggleRoom(room.id)}
+                            className={`${styles.selectionButton} ${isSelected ? styles.selectionButtonActive : ''}`}
                           >
-                            {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
+                            {isSelected && (
+                              <div className={styles.checkIndicator}>
+                                <CheckCircle2 size={16} className="text-accent" />
+                              </div>
+                            )}
+                            <div className={styles.circleIcon}>
+                              <Users size={20} />
+                            </div>
+                            <span className={styles.buttonLabel}>
+                              {t(room.label)}
+                            </span>
                           </button>
-                        </div>
-                      </div>
-
-                      <div className="w-full pt-6 border-t border-border/20">
-                        <UploadInput
-                          label={t('upload_transaction')}
-                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
-                        />
-                      </div>
+                        );
+                      })}
                     </div>
-                  )}
-
-                  {formData.paymentMethod === 'Mobile wallet' && (
-                    <div className="space-y-6 animate-in fade-in">
-                      <p className="text-center text-xs text-muted uppercase tracking-wider leading-relaxed">
-                        {t('transfer_via_wallet')}
+                    {selectedRooms.length > 0 && (
+                      <p className="mt-4 text-xs uppercase tracking-wider text-muted text-center font-bold">
+                        {selectedRooms.length} {selectedRooms.length === 1 ? 'room' : 'rooms'} · {formData.peopleCount} {language === 'ar' ? 'شخص' : 'people'}
                       </p>
+                    )}
+                  </div>
+                )}
 
-                      <div className="w-full flex justify-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <code className="text-lg font-mono bg-surface-elevated px-4 py-2 border border-border rounded-sm">{config.mobileWalletPhone}</code>
-                          <button
-                            onClick={() => copyToClipboard(config.mobileWalletPhone)}
-                            className="p-2.5 bg-surface hover:bg-surface-elevated border border-border text-foreground rounded-sm transition-colors duration-200"
-                          >
-                            {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
-                          </button>
-                        </div>
-                      </div>
+                {/* Event Purpose */}
+                <div className="space-y-4 pt-6 border-t border-border-subtle">
+                  <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('event_purpose')}</label>
+                  <div className={styles.purposeGrid}>
+                    {EVENT_PURPOSES.map(purpose => {
+                      const Icon = purpose.icon;
+                      const selected = formData.eventPurpose === purpose.id;
+                      return (
+                        <button
+                          key={purpose.id}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, eventPurpose: purpose.id })}
+                          className={`${styles.purposeButton} ${selected ? styles.purposeButtonActive : ''}`}
+                        >
+                          <Icon size={20} className={selected ? 'text-accent' : 'text-muted'} />
+                          <span className={styles.purposeLabel}>{t(purpose.translationKey)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Card>
 
-                      <div className="w-full pt-6 border-t border-border/20">
-                        <UploadInput
-                          label={t('upload_transaction')}
-                          onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
-                        />
-                      </div>
+              <div className={styles.controlsRow}>
+                <Button variant="outline" onClick={handleBack} className={styles.flexButton}>{t('back')}</Button>
+                <Button variant="filled" onClick={() => { if (validateStep2()) handleNext(); }} className={styles.flexButton}>{t('next')}</Button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 3: NAME, CONTACT, DATE ═══ */}
+          {step === 3 && (
+            <div className={styles.stepWrapper}>
+              <div className={styles.headerBlock}>
+                <span className={styles.kicker}>
+                  {isRtl ? 'بيانات الحجز' : 'Details'}
+                </span>
+                <h1 className={styles.title}>{t('contact_and_date')}</h1>
+                <p className={styles.subtitle}>{t('your_info_and_timing')}</p>
+              </div>
+
+              <Card className="p-8 space-y-6 border border-border bg-surface rounded-sm">
+                <FormInput
+                  label={t('your_name')}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  placeholder={language === 'ar' ? 'محمد أحمد' : 'John Doe'}
+                />
+
+                <FormInput
+                  label={t('contact_number')}
+                  type="tel"
+                  value={formData.contactNumber}
+                  onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+                  required
+                  placeholder="01xxxxxxxxx"
+                />
+
+                <hr className="border-border/20 my-6" />
+
+                <FormInput
+                  label={t('date')}
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label={t('start_time')}
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    required
+                  />
+                  <FormInput
+                    label={t('end_time')}
+                    type="time"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className={styles.infoBox}>
+                  <strong className={styles.infoBoxTitle}>{language === 'ar' ? 'ملاحظة:' : 'Note:'}</strong> {t('time_slot_note')}
+                </div>
+
+                <Textarea
+                  label={t('notes_special_requests')}
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder={language === 'ar' ? 'مثلاً: محتاجين بروجكتور، أو حفلة مفاجأة!' : 'E.g., We need a projector, or it\'s a surprise party!'}
+                  rows={3}
+                />
+
+                {calculatedPrices.total > 0 && (
+                  <div className={styles.priceCard}>
+                    <div>
+                      <p className={styles.priceBlockTitle}>
+                        {language === 'ar' ? 'التكلفة الإجمالية' : 'Estimated Total Cost'}
+                      </p>
+                      <p className={styles.priceValue}>
+                        {calculatedPrices.total} <span className={styles.currency}>EGP</span>
+                      </p>
                     </div>
-                  )}
-
-                  {!formData.paymentMethod && (
-                    <div className="text-center py-12 text-xs uppercase tracking-widest text-muted">
-                      {t('select_payment_method')}
+                    <div>
+                      <p className={styles.priceBlockTitle}>
+                        {language === 'ar' ? 'المقدم المطلوب (50%)' : 'Required Deposit (50%)'}
+                      </p>
+                      <p className={styles.depositValue}>
+                        {calculatedPrices.deposit} <span className={styles.depositCurrency}>EGP</span>
+                      </p>
                     </div>
-                  )}
-                </Card>
+                  </div>
+                )}
+              </Card>
 
-                <div className="flex gap-4 pt-4">
-                  <Button variant="outline" onClick={handleBack} className="flex-1 uppercase tracking-widest text-xs font-bold h-12" disabled={isSubmitting}>{t('back')}</Button>
-                  <Button
-                    variant="filled"
-                    onClick={submitBooking}
-                    className="flex-1 uppercase tracking-widest text-xs font-bold h-12"
-                    loading={isSubmitting}
-                    disabled={!formData.paymentMethod}
+              <div className={styles.controlsRow}>
+                <Button variant="outline" onClick={handleBack} className={styles.flexButton}>{t('back')}</Button>
+                <Button variant="filled" onClick={() => { if (validateStep3()) handleNext(); }} className={styles.flexButton}>{t('next')}</Button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 4: PAYMENT ═══ */}
+          {step === 4 && (
+            <div className={styles.stepWrapper}>
+              <div className={styles.headerBlock}>
+                <span className={styles.kicker}>
+                  {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}
+                </span>
+                <h1 className={styles.title}>{t('payment')}</h1>
+                <p className={styles.subtitle}>{t('secure_your_booking')}</p>
+              </div>
+
+              <div className={styles.paymentSwitcher}>
+                {(['Instapay', 'Mobile wallet'] as PaymentMethod[]).map(method => (
+                  <button
+                    key={method}
+                    onClick={() => setFormData({ ...formData, paymentMethod: method })}
+                    className={`${styles.paymentTab} ${formData.paymentMethod === method ? styles.paymentTabActive : ''}`}
                   >
-                    {t('confirm_booking')}
-                  </Button>
-                </div>
+                    {t(method.toLowerCase().replace(' ', '_'))}
+                  </button>
+                ))}
               </div>
-            )}
 
-            {/* ═══ STEP 5: SUCCESS ═══ */}
-            {step === 5 && (
-              <div
-                key="step5"
-                className="text-center py-16 space-y-8"
-              >
-                <div className="w-20 h-20 bg-accent/10 text-accent rounded-full border border-accent/20 flex items-center justify-center mx-auto">
-                  <CheckCircle2 size={40} />
-                </div>
+              <Card className="p-8 border border-border bg-surface rounded-sm">
+                {calculatedPrices.deposit > 0 && (
+                  <div className="w-full mb-8 text-center bg-accent/5 text-accent py-4 rounded-sm font-bold border border-accent/20 uppercase tracking-wider text-xs">
+                    {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
+                  </div>
+                )}
                 
-                <div className="space-y-2">
-                  <h1 className="text-4xl md:text-5xl font-display font-light text-foreground">{t('booking_success')}</h1>
-                  <p className="text-xs text-muted uppercase tracking-widest">
-                    {t('enjoy_event')} <span className="text-accent font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
-                  </p>
-                </div>
+                {formData.paymentMethod === 'Instapay' && (
+                  <div className="space-y-6">
+                    <p className={styles.transferNotice}>
+                      {t('transfer_via_instapay')}
+                    </p>
 
-                <div className="space-y-3 max-w-sm mx-auto pt-6">
-                  <Button
-                    variant="filled"
-                    size="lg"
-                    className="w-full uppercase tracking-widest text-xs font-bold h-12"
-                    onClick={generatePDF}
-                  >
-                    {t('download_summary')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full uppercase tracking-widest text-xs font-bold h-12"
-                    onClick={() => window.location.href = '/'}
-                  >
-                    {t('back_to_home')}
-                  </Button>
-                </div>
+                    <div className={styles.codePanel}>
+                      <code className={styles.codeDisplay}>{config.instapayPhone}</code>
+                      <button
+                        onClick={() => copyToClipboard(config.instapayPhone)}
+                        className={styles.copyButton}
+                      >
+                        {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
+                      </button>
+                    </div>
+
+                    <div className="w-full pt-6 border-t border-border/20">
+                      <UploadInput
+                        label={t('upload_transaction')}
+                        onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {formData.paymentMethod === 'Mobile wallet' && (
+                  <div className="space-y-6">
+                    <p className={styles.transferNotice}>
+                      {t('transfer_via_wallet')}
+                    </p>
+
+                    <div className={styles.codePanel}>
+                      <code className={styles.codeDisplay}>{config.mobileWalletPhone}</code>
+                      <button
+                        onClick={() => copyToClipboard(config.mobileWalletPhone)}
+                        className={styles.copyButton}
+                      >
+                        {copied ? <Check size={18} className="text-accent" /> : <Copy size={18} />}
+                      </button>
+                    </div>
+
+                    <div className="w-full pt-6 border-t border-border/20">
+                      <UploadInput
+                        label={t('upload_transaction')}
+                        onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!formData.paymentMethod && (
+                  <div className="text-center py-12 text-xs uppercase tracking-widest text-muted">
+                    {t('select_payment_method')}
+                  </div>
+                )}
+              </Card>
+
+              <div className={styles.controlsRow}>
+                <Button variant="outline" onClick={handleBack} className={styles.flexButton} disabled={isSubmitting}>{t('back')}</Button>
+                <Button
+                  variant="filled"
+                  onClick={submitBooking}
+                  className={styles.flexButton}
+                  loading={isSubmitting}
+                  disabled={!formData.paymentMethod}
+                >
+                  {t('confirm_booking')}
+                </Button>
               </div>
-            )}
-          </>
-        </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 5: SUCCESS ═══ */}
+          {step === 5 && (
+            <div className={styles.successBlock}>
+              <div className={styles.successIconCircle}>
+                <CheckCircle2 size={40} />
+              </div>
+              
+              <div>
+                <h1 className={styles.title}>{t('booking_success')}</h1>
+                <p className="text-xs text-muted uppercase tracking-widest mt-2">
+                  {t('enjoy_event')} <span className="text-accent font-bold">{formData.bookingType === 'table' ? t('table_booking') : t('room_booking')}</span>!
+                </p>
+              </div>
+
+              <div className={styles.btnGroup}>
+                <Button
+                  variant="filled"
+                  size="lg"
+                  className={styles.flexButton}
+                  onClick={generatePDF}
+                >
+                  {t('download_summary')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className={styles.flexButton}
+                  onClick={() => window.location.href = '/'}
+                >
+                  {t('back_to_home')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       </main>
     </div>
   );

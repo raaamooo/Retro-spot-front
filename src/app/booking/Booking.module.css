@@ -1,0 +1,497 @@
+/* ═══════════════════════════════════════════════════════════════
+   RETRO SPOT PREMIUM BOOKING PAGE CSS MODULE
+   ═══════════════════════════════════════════════════════════════ */
+
+.container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Progress Tracker */
+.progressContainer {
+  margin-bottom: var(--space-xl);
+}
+
+.progressLabelRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.stepLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color var(--transition-base);
+}
+
+.stepLabelActive {
+  color: var(--accent);
+}
+
+.progressBarTrack {
+  height: 2px;
+  background-color: var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: var(--accent);
+  transition: width var(--transition-slow) ease-out;
+}
+
+/* Page Headers */
+.headerBlock {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.kicker {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 44px);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-sm);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Section Cards & Form Layouts */
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  animation: slideIn var(--transition-slow) forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bookingGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 640px) {
+  .bookingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Option Selection Card (Dine-in / Room) */
+.optionCard {
+  position: relative;
+  padding: var(--space-xl) var(--space-lg);
+  cursor: pointer;
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  overflow: hidden;
+  text-align: center;
+}
+
+.optionCard:hover {
+  border-color: var(--accent);
+  background-color: var(--surface-elevated);
+  transform: translateY(-2px);
+}
+
+.optionCardInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  position: relative;
+  z-index: 2;
+}
+
+.iconWrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background);
+  color: var(--accent);
+  transition: border-color var(--transition-base);
+}
+
+.optionCard:hover .iconWrapper {
+  border-color: var(--accent);
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--foreground);
+  margin-bottom: var(--space-xs);
+}
+
+.cardDesc {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Detail Tables/Rooms Grid */
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+@media (min-width: 520px) {
+  .detailGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.selectionButton {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background-color: var(--background);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.selectionButton:hover {
+  border-color: var(--accent);
+  background-color: var(--surface);
+}
+
+.selectionButtonActive {
+  border-color: var(--accent);
+  background-color: rgba(196, 153, 63, 0.08);
+}
+
+.circleIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface);
+  color: var(--muted);
+  transition: all var(--transition-base);
+}
+
+.selectionButtonActive .circleIcon {
+  border-color: var(--accent);
+  background-color: rgba(196, 153, 63, 0.15);
+  color: var(--accent);
+}
+
+.buttonLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.selectionButtonActive .buttonLabel {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.checkIndicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+/* Event Purpose Panel */
+.purposeGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+
+@media (min-width: 480px) {
+  .purposeGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.purposeButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background-color: var(--background);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+  text-align: left;
+}
+
+.purposeButton:hover {
+  border-color: var(--accent);
+  background-color: var(--surface);
+}
+
+.purposeButtonActive {
+  border-color: var(--accent);
+  background-color: rgba(196, 153, 63, 0.08);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.purposeLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+/* Pricing Display Card */
+.priceCard {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border);
+  padding: var(--space-lg);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+@media (min-width: 520px) {
+  .priceCard {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.priceBlockTitle {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: var(--space-xs);
+}
+
+.priceValue {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 300;
+  color: var(--foreground);
+}
+
+.currency {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: var(--space-xs);
+}
+
+.depositValue {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.8vw, 32px);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.depositCurrency {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: var(--space-xs);
+}
+
+/* Payment Switcher & Upload */
+.paymentSwitcher {
+  display: flex;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: var(--space-lg);
+}
+
+.paymentTab {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+}
+
+.paymentTabActive {
+  background-color: var(--accent);
+  color: var(--primary-foreground);
+}
+
+.transferNotice {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+}
+
+.codePanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.codeDisplay {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: 700;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+}
+
+.copyButton {
+  padding: 10px;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.copyButton:hover {
+  background-color: var(--surface-elevated);
+  color: var(--accent);
+}
+
+/* Success Layout */
+.successBlock {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+  animation: fadeIn var(--transition-slow) forwards;
+}
+
+.successIconCircle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: rgba(196, 153, 63, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(196, 153, 63, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--space-md);
+}
+
+/* Nav / Control Buttons */
+.controlsRow {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.flexButton {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  font-weight: 700;
+  height: 48px;
+}
+
+/* Info Banner */
+.infoBox {
+  background-color: var(--surface-elevated);
+  border: 1px solid rgba(61, 32, 16, 0.15);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.infoBoxTitle {
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 4px;
+}
+
+/* Alignment fixes for LTR / RTL */
+.textStart {
+  text-align: left;
+}
+
+[dir="rtl"] .textStart {
+  text-align: right;
+}

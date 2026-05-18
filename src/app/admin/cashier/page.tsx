@@ -77,14 +77,23 @@ export default function CashierPage() {
   // --- FETCH INITIAL DATA ---
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/api/orders?status=cashier`).then(r => r.json()),
-      fetch(`${API_URL}/api/menu-items`).then(r => r.json()),
-      fetch(`${API_URL}/api/locations`).then(r => r.json()).catch(() => [])
+      fetch(`${API_URL}/api/orders?status=cashier`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => Array.isArray(data) ? data : [])
+        .catch(() => []),
+      fetch(`${API_URL}/api/menu-items`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => Array.isArray(data) ? data : [])
+        .catch(() => []),
+      fetch(`${API_URL}/api/locations`)
+        .then(r => r.ok ? r.json() : [])
+        .then(data => Array.isArray(data) ? data : [])
+        .catch(() => [])
     ])
       .then(([ordersData, menuData, locationsData]) => {
         setOrders(ordersData);
         setMenuItems(menuData);
-        setLocations(locationsData.filter((l: any) => l.active));
+        setLocations(locationsData.filter((l: any) => l && l.active));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -107,16 +116,20 @@ export default function CashierPage() {
   });
 
   // --- GROUPING LOGIC ---
-  const cashierOrders = orders.filter(o => o.status === 'cashier');
+  const cashierOrders = Array.isArray(orders) ? orders.filter(o => o && o.status === 'cashier') : [];
   
-  const locationNames = locations.map(l => l.name);
+  const locationNames = Array.isArray(locations)
+    ? locations.filter(l => l && l.name).map(l => l.name)
+    : [];
   
   // Create a map of Location -> Orders
   const groupedOrders: Record<string, Order[]> = {};
-  locationNames.forEach(loc => groupedOrders[loc] = []);
+  locationNames.forEach(loc => {
+    if (loc) groupedOrders[loc] = [];
+  });
   
   cashierOrders.forEach(order => {
-    const locName = order.location?.name || 'Unknown';
+    const locName = order?.location?.name || 'Unknown';
     if (!groupedOrders[locName]) {
       groupedOrders[locName] = [];
     }
@@ -355,10 +368,11 @@ export default function CashierPage() {
   };
 
   // Derive categories and filtered menu items for POS view
-  const posCategories = ['All', ...Array.from(new Set(menuItems.map(item => item.category?.nameEn || 'Other').filter(Boolean)))];
+  const safeMenuItems = Array.isArray(menuItems) ? menuItems.filter(item => item && item.id) : [];
+  const posCategories = ['All', ...Array.from(new Set(safeMenuItems.map(item => item.category?.nameEn || 'Other').filter(Boolean)))];
   const filteredMenuItems = posCategory === 'All' 
-    ? menuItems 
-    : menuItems.filter(item => item.category?.nameEn === posCategory);
+    ? safeMenuItems 
+    : safeMenuItems.filter(item => item.category?.nameEn === posCategory);
 
   // --- PRINT RECEIPT COMPONENT ---
   const renderPrintReceipt = () => {
@@ -569,7 +583,7 @@ export default function CashierPage() {
                             className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary"
                           >
                             <option value="" disabled>+ Select menu item to add...</option>
-                            {menuItems.map(m => (
+                            {safeMenuItems.map(m => (
                               <option key={m.id} value={m.id}>
                                 {m.nameEn} ({m.price} EGP)
                               </option>
