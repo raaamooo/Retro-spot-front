@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/contexts/ToastContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Printer, CheckCircle2, Receipt, Coffee, Edit, Plus, Minus, Trash2, X } from 'lucide-react';
+import { Printer, CheckCircle2, Receipt, Coffee, Edit, Plus, Minus, Trash2, X, ShoppingCart, Send } from 'lucide-react';
 import { Button, PageContainer, ScrollReveal } from '@/components';
 import { API_URL } from '@/lib/constants';
 
@@ -47,6 +48,7 @@ interface Location {
 
 export default function CashierPage() {
   const { t } = useLanguage();
+  const { addToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -57,6 +59,20 @@ export default function CashierPage() {
   const [editingLocation, setEditingLocation] = useState<string | null>(null);
   const [editOrdersState, setEditOrdersState] = useState<Order[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // POS System States
+  const [posCart, setPosCart] = useState<Array<{
+    menuItemId: string;
+    nameEn: string;
+    price: number;
+    quantity: number;
+    additions: string;
+  }>>([]);
+  const [posLocationId, setPosLocationId] = useState<string>('');
+  const [posCustomerName, setPosCustomerName] = useState<string>('');
+  const [posNotes, setPosNotes] = useState<string>('');
+  const [posCategory, setPosCategory] = useState<string>('All');
+  const [isSendingPos, setIsSendingPos] = useState<boolean>(false);
 
   // --- FETCH INITIAL DATA ---
   useEffect(() => {
@@ -258,6 +274,91 @@ export default function CashierPage() {
       setSaving(false);
     }
   };
+
+  // --- POS CART HANDLERS ---
+  const handleAddPosCartItem = (item: MenuItem) => {
+    setPosCart(prev => {
+      const existing = prev.find(i => i.menuItemId === item.id);
+      if (existing) {
+        return prev.map(i => i.menuItemId === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { menuItemId: item.id, nameEn: item.nameEn, price: item.price, quantity: 1, additions: '' }];
+    });
+  };
+
+  const handleUpdatePosCartQty = (index: number, delta: number) => {
+    setPosCart(prev => {
+      const updated = [...prev];
+      const newQty = updated[index].quantity + delta;
+      if (newQty <= 0) {
+        updated.splice(index, 1);
+      } else {
+        updated[index] = { ...updated[index], quantity: newQty };
+      }
+      return updated;
+    });
+  };
+
+  const handleUpdatePosCartAdditions = (index: number, additions: string) => {
+    setPosCart(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], additions };
+      return updated;
+    });
+  };
+
+  const handleSendToBarista = async () => {
+    if (posCart.length === 0 || !posLocationId) return;
+    setIsSendingPos(true);
+    
+    const cartTotal = posCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    
+    try {
+      const payload = {
+        type: 'dine_in',
+        locationId: posLocationId,
+        customerName: posCustomerName || 'Counter POS',
+        items: posCart.map(item => ({
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          additions: item.additions || null,
+          itemPriceAtTime: item.price,
+          notes: null
+        })),
+        subtotal: cartTotal,
+        total: cartTotal,
+        paymentMethod: 'cash',
+        tipAmount: 0,
+        notes: posNotes
+      };
+
+      const res = await fetch(`${API_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Failed to create POS order');
+
+      addToast('POS order created and sent to barista!', 'success');
+      
+      // Reset state
+      setPosCart([]);
+      setPosCustomerName('');
+      setPosNotes('');
+    } catch (err) {
+      console.error('POS order error:', err);
+      addToast('Failed to send order to barista', 'error');
+    } finally {
+      setIsSendingPos(false);
+    }
+  };
+
+  // Derive categories and filtered menu items for POS view
+  const posCategories = ['All', ...Array.from(new Set(menuItems.map(item => item.category?.nameEn || 'Other').filter(Boolean)))];
+  const filteredMenuItems = posCategory === 'All' 
+    ? menuItems 
+    : menuItems.filter(item => item.category?.nameEn === posCategory);
 
   // --- PRINT RECEIPT COMPONENT ---
   const renderPrintReceipt = () => {
@@ -647,6 +748,219 @@ export default function CashierPage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* POS SYSTEM SECTION */}
+          <div className="space-y-6 pt-12 border-t border-border mt-12 print:hidden">
+            <div className="flex items-center gap-3 bg-primary/10 text-primary px-4 py-3 rounded-xl border border-primary/20 w-max">
+              <ShoppingCart size={24} />
+              <h2 className="text-2xl font-black uppercase tracking-wider">POS System (Create Order)</h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-surface p-6 rounded-3xl border border-border shadow-xl">
+              {/* LEFT: Menu Picker (7 cols) */}
+              <div className="lg:col-span-7 flex flex-col space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-black uppercase tracking-wider text-muted-foreground">Menu Items</h3>
+                  <span className="text-xs bg-background border border-border px-3 py-1 rounded-full text-foreground font-bold">
+                    {filteredMenuItems.length} Items
+                  </span>
+                </div>
+
+                {/* Category selector pills */}
+                <div className="flex flex-wrap gap-2 pb-2">
+                  {posCategories.map(cat => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setPosCategory(cat)}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 border ${
+                        posCategory === cat
+                          ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105'
+                          : 'bg-background hover:bg-surface-elevated text-muted-foreground border-border hover:border-muted'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Item cards list grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                  {filteredMenuItems.length === 0 ? (
+                    <div className="col-span-full py-12 flex flex-col items-center justify-center text-muted-foreground">
+                      <Coffee size={40} className="mb-2 opacity-50" />
+                      <p className="font-bold">No items found</p>
+                    </div>
+                  ) : (
+                    filteredMenuItems.map(item => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleAddPosCartItem(item)}
+                        className="group text-left bg-background hover:bg-surface-elevated p-4 rounded-2xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-36 relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500" />
+                        
+                        <div className="space-y-1 relative z-10">
+                          <h4 className="font-black text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                            {item.nameEn}
+                          </h4>
+                          <span className="text-xs text-muted-foreground block">
+                            {item.category?.nameEn || 'Other'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center w-full relative z-10 pt-2 border-t border-dashed border-border/80">
+                          <span className="font-black text-sm text-primary">
+                            {item.price.toFixed(2)} EGP
+                          </span>
+                          <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                            <Plus size={16} />
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT: Ticket Builder / Cart (5 cols) */}
+              <div className="lg:col-span-5 flex flex-col space-y-6 border-t lg:border-t-0 lg:border-l border-border pt-6 lg:pt-0 lg:pl-8">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-black uppercase tracking-wider text-muted-foreground">Current Ticket</h3>
+                  <span className="bg-primary/15 text-primary text-xs font-black px-3 py-1 rounded-full border border-primary/20">
+                    {posCart.reduce((acc, curr) => acc + curr.quantity, 0)} Items
+                  </span>
+                </div>
+
+                {/* Cart Items list */}
+                <div className="flex-1 bg-background rounded-2xl border border-border p-4 min-h-[220px] max-h-[300px] overflow-y-auto space-y-3 custom-scrollbar">
+                  {posCart.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-12">
+                      <Receipt size={32} className="opacity-40 mb-2" />
+                      <p className="text-xs font-bold text-center px-4">
+                        Ticket is empty.<br />Tap menu items to start building.
+                      </p>
+                    </div>
+                  ) : (
+                    posCart.map((item, index) => (
+                      <div key={index} className="flex flex-col gap-2 p-3 bg-surface rounded-xl border border-border/80 shadow-sm">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-0.5">
+                            <h5 className="font-bold text-sm text-foreground">{item.nameEn}</h5>
+                            <span className="text-xs text-primary font-bold">
+                              {(item.price * item.quantity).toFixed(2)} EGP
+                            </span>
+                          </div>
+                          
+                          {/* Quantity Adjusters */}
+                          <div className="flex items-center gap-1.5 bg-background border border-border px-2 py-1 rounded-lg">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdatePosCartQty(index, -1)}
+                              className="text-muted-foreground hover:text-primary transition-colors hover:scale-110 active:scale-95 transition-transform"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="text-xs font-black w-4 text-center">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdatePosCartQty(index, 1)}
+                              className="text-muted-foreground hover:text-primary transition-colors hover:scale-110 active:scale-95 transition-transform"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Additions / Custom Notes input field directly inside Cart Item */}
+                        <input
+                          type="text"
+                          placeholder="Additions (e.g. Oat milk, Extra shot)"
+                          value={item.additions}
+                          onChange={(e) => handleUpdatePosCartAdditions(index, e.target.value)}
+                          className="w-full bg-background/50 hover:bg-background focus:bg-background text-xs px-3 py-1.5 rounded-lg border border-border focus:outline-none focus:border-primary transition-all placeholder:text-muted-foreground/60"
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Order Fields */}
+                <div className="space-y-4">
+                  {/* Location Selection Dropdown */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                      Table / Location <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      value={posLocationId}
+                      onChange={(e) => setPosLocationId(e.target.value)}
+                      className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary font-bold shadow-sm"
+                    >
+                      <option value="" disabled>-- Select Table/Location --</option>
+                      {locations.map(loc => (
+                        <option key={loc.id} value={loc.id}>
+                          {loc.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Customer Name */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                        Customer Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Guest"
+                        value={posCustomerName}
+                        onChange={(e) => setPosCustomerName(e.target.value)}
+                        className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary shadow-sm"
+                      />
+                    </div>
+
+                    {/* Special Notes */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                        Special Notes
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Order instructions..."
+                        value={posNotes}
+                        onChange={(e) => setPosNotes(e.target.value)}
+                        className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary shadow-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial calculations */}
+                <div className="bg-background p-4 rounded-2xl border border-border space-y-3 text-sm">
+                  <div className="flex justify-between items-center text-base font-black text-foreground pt-1">
+                    <span>Grand Total</span>
+                    <span className="text-primary text-xl font-black">
+                      {posCart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)} EGP
+                    </span>
+                  </div>
+                </div>
+
+                {/* Send Button */}
+                <Button
+                  type="button"
+                  onClick={handleSendToBarista}
+                  disabled={isSendingPos || posCart.length === 0 || !posLocationId}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <Send size={18} />
+                  {isSendingPos ? 'Sending...' : 'Send to Barista'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </ScrollReveal>
