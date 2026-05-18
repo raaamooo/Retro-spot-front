@@ -139,7 +139,7 @@ export default function CashierPage() {
     });
 
     return (
-      <div className="hidden print:block w-[80mm] mx-auto text-black bg-white p-4 font-mono text-sm">
+      <div className="hidden print:block text-black bg-white font-mono text-sm">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-black uppercase mb-1">Retro Spot</h1>
           <p className="text-xs">Cafe & Workspace</p>

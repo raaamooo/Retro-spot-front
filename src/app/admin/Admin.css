@@ -353,10 +353,25 @@ th, td {
 
 /* ---------- Print Controls ---------- */
 @media print {
+  @page {
+    margin: 0;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    background-color: white !important;
+  }
   .print\:hidden {
     display: none !important;
   }
   .print\:block {
     display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 4mm !important;
   }
 }
