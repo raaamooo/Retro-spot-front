@@ -34,6 +34,7 @@ type MenuItem = {
 type CartItem = MenuItem & {
   cartQuantity: number;
   selectedAdditions?: MenuItem[];
+  customizations?: string;
 };
 
 function MenuContent() {
@@ -265,17 +266,25 @@ function MenuContent() {
     if (sweetness !== 'standard') {
       details.push(sweetness === 'half' ? 'Half Sweet' : 'Unsweetened');
     }
+    
+    let extraMilkPrice = 0;
     if (milk !== 'none') {
       details.push(`${milk.toUpperCase()} Milk`);
+      if (milk === 'oat' || milk === 'almond') {
+        extraMilkPrice = 15;
+      }
     }
+    
     if (modalSelectedAdditions.length > 0) {
       details.push(modalSelectedAdditions.map(a => a.name).join(', '));
     }
     
     const finalItem: CartItem = {
       ...customizingItem,
+      price: customizingItem.price + extraMilkPrice,
       cartQuantity: modalQuantity,
       selectedAdditions: modalSelectedAdditions,
+      customizations: details.length > 0 ? details.join(' • ') : undefined,
       description: details.length > 0 ? `${customizingItem.description} (${details.join(' • ')})` : customizingItem.description
     };
     
@@ -310,6 +319,7 @@ function MenuContent() {
     const finalItem: CartItem = {
       ...flavorModalItem,
       cartQuantity: 1,
+      customizations: flavorsDesc,
       description: `${flavorModalItem.description}\n${flavorsDesc}`
     };
     setCart(prev => [...prev, finalItem]);
@@ -364,14 +374,8 @@ function MenuContent() {
         locationId: tableId,
         customerName: customerName || 'Guest',
         items: cart.map(i => {
-          let customNotes = '';
-          if (i.description && i.description.includes('Flavors:')) {
-            const match = i.description.match(/Flavors:\s*(.*)$/);
-            if (match) customNotes = match[0];
-          } else if (i.description && i.description.includes('(')) {
-            const match = i.description.match(/\(([^)]+)\)$/);
-            if (match) customNotes = match[1];
-          } else if (i.selectedAdditions && i.selectedAdditions.length > 0) {
+          let customNotes = i.customizations || '';
+          if (!customNotes && i.selectedAdditions && i.selectedAdditions.length > 0) {
             customNotes = i.selectedAdditions.map(a => a.nameEn || a.name).join(', ');
           }
 
@@ -429,7 +433,7 @@ function MenuContent() {
 
   const customizingItemAdditions = customizingItem ? getAdditionsForItem(customizingItem) : [];
   const customizingItemSubtotal = customizingItem 
-    ? (customizingItem.price + modalSelectedAdditions.reduce((sum, a) => sum + a.price, 0)) * modalQuantity 
+    ? (customizingItem.price + (milk === 'oat' || milk === 'almond' ? 15 : 0) + modalSelectedAdditions.reduce((sum, a) => sum + a.price, 0)) * modalQuantity 
     : 0;
 
   return (
