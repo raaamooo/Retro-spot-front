@@ -9,6 +9,7 @@ import { Button } from '@/components';
 import { API_URL } from '@/lib/constants';
 import { getItemImage } from '@/lib/itemImages';
 import MenuManage from './MenuManage';
+import InventoryManagement from './InventoryManagement';
 
 interface Ingredient { id: string; nameEn: string; nameAr: string; unit: string; quantityAvailable: number; lowStockThreshold: number; }
 interface Category { id: string; nameEn: string; nameAr: string; sortOrder: number; }
@@ -116,57 +117,7 @@ export default function InventoryPage() {
 
       {/* ── INGREDIENTS ── */}
       {tab==='ingredients'&&(
-        <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-success/10 border border-success/30 rounded-2xl p-6 text-center"><CheckCircle2 size={32} className="text-success mx-auto mb-2"/><p className="text-3xl font-black text-success">{inStock}</p><p className="text-xs font-bold text-success/80 uppercase tracking-wider">{t('in_stock')}</p></div>
-            <div className="bg-warning/10 border border-warning/30 rounded-2xl p-6 text-center"><AlertTriangle size={32} className="text-warning mx-auto mb-2"/><p className="text-3xl font-black text-warning">{lowStock}</p><p className="text-xs font-bold text-warning/80 uppercase tracking-wider">{t('low_stock')}</p></div>
-            <div className="bg-danger/10 border border-danger/30 rounded-2xl p-6 text-center"><PackageSearch size={32} className="text-danger mx-auto mb-2"/><p className="text-3xl font-black text-danger">{outOfStock}</p><p className="text-xs font-bold text-danger/80 uppercase tracking-wider">{t('out_of_stock')}</p></div>
-          </div>
-          {loading?<div className="text-center py-10 text-muted-foreground animate-pulse">Loading...</div>:(
-            <div className="space-y-3">
-              <>
-                {ingredients.map(ing=>{
-                  const st=ss(ing);const sc2=sc(st);const isExp=expandedId===ing.id;
-                  return(
-                    <div key={ing.id}
-                      className={`bg-surface rounded-2xl border overflow-hidden ${st==='out'?'border-danger/50':st==='low'?'border-warning/50':'border-border'}`}>
-                      <button onClick={()=>toggleExpand(ing.id)} className="w-full p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors text-left">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${sc2}`}><Package size={20}/></div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-lg truncate">{ing.nameEn}</h3>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${sc2}`}>{sl(st)}</span>
-                            <span className="text-sm text-muted-foreground">Threshold: {ing.lowStockThreshold} {ing.unit}</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-2xl font-black ${st==='out'?'text-danger':st==='low'?'text-warning':'text-foreground'}`}>{ing.quantityAvailable}</p>
-                          <p className="text-xs text-muted-foreground font-medium">{ing.unit}</p>
-                        </div>
-                        <div className="ml-2 text-muted-foreground">{isExp?<ChevronUp size={20}/>:<ChevronDown size={20}/>}</div>
-                      </button>
-                      <>
-                        {isExp&&(
-                          <div className="border-t border-border overflow-hidden">
-                            <div className="p-4 bg-surface-elevated space-y-4">
-                              <p className="text-sm text-muted-foreground font-medium">Set new stock level:</p>
-                              <div className="flex items-center gap-3 justify-center">
-                                <button onClick={()=>setAdjustValues(p=>({...p,[ing.id]:Math.max(0,(p[ing.id]||0)-10)}))} className="w-12 h-12 rounded-xl bg-surface border border-border flex items-center justify-center hover:bg-danger/10 hover:border-danger/30 transition-colors"><Minus size={20}/></button>
-                                <input type="number" value={adjustValues[ing.id]??ing.quantityAvailable} onChange={e=>setAdjustValues(p=>({...p,[ing.id]:Math.max(0,parseInt(e.target.value)||0)}))} className="w-28 h-12 text-center text-2xl font-black bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"/>
-                                <button onClick={()=>setAdjustValues(p=>({...p,[ing.id]:(p[ing.id]||0)+10}))} className="w-12 h-12 rounded-xl bg-surface border border-border flex items-center justify-center hover:bg-success/10 hover:border-success/30 transition-colors"><Plus size={20}/></button>
-                              </div>
-                              <Button className="w-full bg-primary hover:bg-primary/90" onClick={()=>adjustStock(ing.id)} loading={saving===ing.id} disabled={saving===ing.id}><RefreshCw size={18}/> Update Stock</Button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    </div>
-                  );
-                })}
-              </>
-            </div>
-          )}
-        </div>
+        <InventoryManagement />
       )}
 
       {/* ── MENU CONTROL ── */}

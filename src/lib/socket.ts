@@ -21,6 +21,8 @@ export const EVENTS = {
   // ── Orders ──
   ORDER_NEW: 'order:new',
   ORDER_STATUS_UPDATED: 'order:status_updated',
+  ORDER_ITEM_STATUS_UPDATED: 'order_item:status_updated',
+  ORDER_RUSH_FLAGGED: 'order:rush_flagged',
 
   // ── Waiter Calls ──
   WAITER_CALL_NEW: 'waiter_call:new',
@@ -30,6 +32,7 @@ export const EVENTS = {
   INVENTORY_UPDATED: 'inventory:updated',
   INVENTORY_LOW_STOCK: 'inventory:low_stock',
   MENU_AVAILABILITY: 'menu:availability',
+  STOCK_CHANGE_LOGGED: 'inventory:stock_change_logged',
 
   // ── Bookings ──
   BOOKING_NEW: 'booking:new',

@@ -204,3 +204,187 @@ p, .body-text {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+
+/* ── Additional Design Tokens ── */
+:root {
+  --warning: #D4A017;
+  --warning-bg: rgba(212, 160, 23, 0.1);
+  --info: #2980b9;
+  --info-bg: rgba(41, 128, 185, 0.1);
+  --teal: #2C7A7B;
+  --teal-bg: rgba(44, 122, 123, 0.1);
+  --retro-cream: #F5E8D5;
+  --retro-sepia: #D4B896;
+  --retro-amber: #C4993F;
+}
+
+.dark {
+  --warning: #E8C547;
+  --warning-bg: rgba(232, 197, 71, 0.12);
+  --info: #5DADE2;
+  --info-bg: rgba(93, 173, 226, 0.12);
+  --teal: #48C9B0;
+  --teal-bg: rgba(72, 201, 176, 0.12);
+}
+
+/* ── Additional Animation Keyframes ── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 64, 47, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(196, 64, 47, 0); }
+}
+
+@keyframes countdownTick {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes kanbanDrop {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes rushPulse {
+  0%, 100% { border-color: var(--danger); }
+  50% { border-color: transparent; }
+}
+
+/* ── Kanban Layout ── */
+.kanban-board {
+  display: flex;
+  gap: 16px;
+  height: calc(100vh - 160px);
+  overflow-x: auto;
+}
+
+.kanban-column {
+  flex: 1;
+  min-width: 280px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.kanban-column-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.kanban-column-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kanban-card {
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  animation: kanbanDrop 200ms ease-out;
+  transition: box-shadow 200ms, border-color 200ms;
+}
+
+.kanban-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.kanban-card.rush {
+  border-left: 3px solid var(--danger);
+  animation: rushPulse 2s ease-in-out infinite, kanbanDrop 200ms ease-out;
+}
+
+/* ── Table Map Grid ── */
+.table-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.table-card {
+  background-color: var(--surface-elevated);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 200ms;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.table-card.available { border-color: var(--success); }
+.table-card.occupied { border-color: var(--warning); }
+.table-card.reserved { border-color: var(--info); }
+.table-card.attention { border-color: var(--danger); animation: pulseGlow 2s infinite; }
+
+/* ── Numpad Grid ── */
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.numpad-btn {
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 150ms;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.numpad-btn:hover {
+  background-color: var(--surface);
+}
+
+.numpad-btn:active {
+  transform: scale(0.97);
+}
+
