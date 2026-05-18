@@ -38,17 +38,18 @@ interface MenuItem {
   category?: { nameEn: string; nameAr: string };
 }
 
-// Fixed venue locations
-const ALL_LOCATIONS = [
-  'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5',
-  'Room A', 'Room B', 'Room C',
-  'Workspace Seats'
-];
+interface Location {
+  id: string;
+  name: string;
+  type: string;
+  active: boolean;
+}
 
 export default function CashierPage() {
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [activeReceiptLocation, setActiveReceiptLocation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,11 +62,13 @@ export default function CashierPage() {
   useEffect(() => {
     Promise.all([
       fetch(`${API_URL}/api/orders?status=cashier`).then(r => r.json()),
-      fetch(`${API_URL}/api/menu-items`).then(r => r.json())
+      fetch(`${API_URL}/api/menu-items`).then(r => r.json()),
+      fetch(`${API_URL}/api/locations`).then(r => r.json()).catch(() => [])
     ])
-      .then(([ordersData, menuData]) => {
+      .then(([ordersData, menuData, locationsData]) => {
         setOrders(ordersData);
         setMenuItems(menuData);
+        setLocations(locationsData.filter((l: any) => l.active));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -90,9 +93,11 @@ export default function CashierPage() {
   // --- GROUPING LOGIC ---
   const cashierOrders = orders.filter(o => o.status === 'cashier');
   
+  const locationNames = locations.map(l => l.name);
+  
   // Create a map of Location -> Orders
   const groupedOrders: Record<string, Order[]> = {};
-  ALL_LOCATIONS.forEach(loc => groupedOrders[loc] = []);
+  locationNames.forEach(loc => groupedOrders[loc] = []);
   
   cashierOrders.forEach(order => {
     const locName = order.location?.name || 'Unknown';
@@ -102,7 +107,7 @@ export default function CashierPage() {
     groupedOrders[locName].push(order);
   });
 
-  const displayLocations = Array.from(new Set([...ALL_LOCATIONS, ...Object.keys(groupedOrders)]));
+  const displayLocations = Array.from(new Set([...locationNames, ...Object.keys(groupedOrders)]));
 
   // --- ACTIONS ---
   const markDone = async (locationName: string) => {
