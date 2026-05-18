@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Printer, CheckCircle2, Receipt, Coffee } from 'lucide-react';
+import { Printer, CheckCircle2, Receipt, Coffee, Edit, Plus, Minus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components';
 
 import { API_URL } from '@/lib/constants';
@@ -32,6 +32,14 @@ interface Order {
   }[];
 }
 
+interface MenuItem {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  price: number;
+  category?: { nameEn: string; nameAr: string };
+}
+
 // Fixed venue locations
 const ALL_LOCATIONS = [
   'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5',
@@ -42,15 +50,24 @@ const ALL_LOCATIONS = [
 export default function CashierPage() {
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [activeReceiptLocation, setActiveReceiptLocation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Edit Modal States
+  const [editingLocation, setEditingLocation] = useState<string | null>(null);
+  const [editOrdersState, setEditOrdersState] = useState<Order[]>([]);
+  const [saving, setSaving] = useState(false);
+
   // --- FETCH INITIAL DATA ---
   useEffect(() => {
-    fetch(`${API_URL}/api/orders?status=cashier`)
-      .then(r => r.json())
-      .then(data => {
-        setOrders(data);
+    Promise.all([
+      fetch(`${API_URL}/api/orders?status=cashier`).then(r => r.json()),
+      fetch(`${API_URL}/api/menu-items`).then(r => r.json())
+    ])
+      .then(([ordersData, menuData]) => {
+        setOrders(ordersData);
+        setMenuItems(menuData);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -59,9 +76,11 @@ export default function CashierPage() {
   // --- SOCKET LISTENERS ---
   useSocketEvent<Order>(EVENTS.ORDER_STATUS_UPDATED, (order) => {
     if (order.status === 'cashier') {
-      // New order arrived from waiter
+      // New order arrived from waiter or updated
       setOrders(prev => {
-        if (prev.some(o => o.id === order.id)) return prev;
+        if (prev.some(o => o.id === order.id)) {
+          return prev.map(o => o.id === order.id ? order : o);
+        }
         return [order, ...prev];
       });
     } else {
@@ -116,6 +135,125 @@ export default function CashierPage() {
       window.print();
       setActiveReceiptLocation(null);
     }, 100);
+  };
+
+  // --- EDIT MODAL HANDLERS ---
+  const openEditModal = (locationName: string) => {
+    const locationOrders = groupedOrders[locationName] || [];
+    const cloned = JSON.parse(JSON.stringify(locationOrders));
+    setEditOrdersState(cloned);
+    setEditingLocation(locationName);
+  };
+
+  const handleUpdateQuantity = (orderId: string, itemIdx: number, delta: number) => {
+    setEditOrdersState(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const updatedItems = [...order.items];
+      const currentQty = updatedItems[itemIdx].quantity;
+      const newQty = currentQty + delta;
+      if (newQty <= 0) {
+        updatedItems.splice(itemIdx, 1);
+      } else {
+        updatedItems[itemIdx] = { ...updatedItems[itemIdx], quantity: newQty };
+      }
+      
+      let subtotal = 0;
+      updatedItems.forEach(item => {
+        subtotal += item.itemPriceAtTime * item.quantity;
+      });
+      const total = subtotal + (order.tipAmount || 0);
+
+      return { ...order, items: updatedItems, subtotal, total };
+    }));
+  };
+
+  const handleUpdatePrice = (orderId: string, itemIdx: number, newPrice: number) => {
+    setEditOrdersState(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const updatedItems = [...order.items];
+      updatedItems[itemIdx] = { ...updatedItems[itemIdx], itemPriceAtTime: newPrice };
+      
+      let subtotal = 0;
+      updatedItems.forEach(item => {
+        subtotal += item.itemPriceAtTime * item.quantity;
+      });
+      const total = subtotal + (order.tipAmount || 0);
+
+      return { ...order, items: updatedItems, subtotal, total };
+    }));
+  };
+
+  const handleUpdateAdditions = (orderId: string, itemIdx: number, additions: string) => {
+    setEditOrdersState(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const updatedItems = [...order.items];
+      updatedItems[itemIdx] = { ...updatedItems[itemIdx], additions: additions || null };
+      return { ...order, items: updatedItems };
+    }));
+  };
+
+  const handleAddItem = (orderId: string, menuItemId: string) => {
+    const selectedMenu = menuItems.find(m => m.id === menuItemId);
+    if (!selectedMenu) return;
+
+    setEditOrdersState(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const newItem = {
+        id: 'temp-' + Date.now() + Math.random(),
+        quantity: 1,
+        additions: null,
+        itemPriceAtTime: selectedMenu.price,
+        menuItem: selectedMenu
+      };
+      const updatedItems = [...order.items, newItem];
+      
+      let subtotal = 0;
+      updatedItems.forEach(item => {
+        subtotal += item.itemPriceAtTime * item.quantity;
+      });
+      const total = subtotal + (order.tipAmount || 0);
+
+      return { ...order, items: updatedItems, subtotal, total };
+    }));
+  };
+
+  const handleUpdateTip = (orderId: string, tipAmount: number) => {
+    setEditOrdersState(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const total = order.subtotal + (tipAmount || 0);
+      return { ...order, tipAmount: tipAmount || 0, total };
+    }));
+  };
+
+  const handleSaveEdits = async () => {
+    setSaving(true);
+    try {
+      for (const order of editOrdersState) {
+        const payload = {
+          subtotal: order.subtotal,
+          total: order.total,
+          tipAmount: order.tipAmount,
+          items: order.items.map(item => ({
+            menuItemId: item.menuItem.id,
+            quantity: item.quantity,
+            additions: item.additions,
+            itemPriceAtTime: item.itemPriceAtTime,
+            notes: ''
+          }))
+        };
+
+        await fetch(`${API_URL}/api/orders/${order.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      setEditingLocation(null);
+    } catch (err) {
+      console.error('Failed to save edits', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // --- PRINT RECEIPT COMPONENT ---
@@ -212,6 +350,191 @@ export default function CashierPage() {
     <>
       {renderPrintReceipt()}
 
+      {/* EDIT MODAL */}
+      {editingLocation && (
+        <div className="bg-background/80 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 bg-primary text-primary-foreground flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black tracking-tight">Edit Order(s)</h3>
+                <p className="text-xs opacity-90">{editingLocation}</p>
+              </div>
+              <button 
+                onClick={() => setEditingLocation(null)}
+                className="text-primary-foreground/80 hover:text-primary-foreground p-1 transition-colors"
+                title="Close"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-8 flex-1">
+              {editOrdersState.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No active orders found for this table.</p>
+              ) : (
+                editOrdersState.map((order) => (
+                  <div key={order.id} className="bg-surface-elevated border border-border rounded-xl p-6 space-y-6 shadow-sm">
+                    <div className="flex justify-between items-center border-b border-border pb-4">
+                      <h4 className="text-lg font-black text-foreground">
+                        Order #{order.id.slice(-6).toUpperCase()} {order.customerName ? `(${order.customerName})` : ''}
+                      </h4>
+                      <span className="text-xs font-bold px-3 py-1 bg-primary/10 text-primary rounded-full">
+                        {order.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Items List */}
+                    <div className="space-y-4">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('items') || 'Items'}</h5>
+                      {order.items.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">No items in this order.</p>
+                      ) : (
+                        order.items.map((item, idx) => (
+                          <div key={item.id || idx} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-background rounded-xl border border-border">
+                            <div className="flex-1 space-y-1">
+                              <div className="font-bold text-foreground text-base">
+                                {item.menuItem.nameEn} <span className="text-xs text-muted-foreground">({item.menuItem.nameAr})</span>
+                              </div>
+                              <div className="flex items-center gap-2 pt-1">
+                                <span className="text-xs text-muted-foreground">Additions:</span>
+                                <input 
+                                  type="text" 
+                                  value={item.additions || ''} 
+                                  onChange={(e) => handleUpdateAdditions(order.id, idx, e.target.value)}
+                                  placeholder="e.g. Oat milk, caramel..." 
+                                  className="bg-surface text-xs text-foreground px-2 py-1 rounded border border-border focus:outline-none focus:border-primary w-48"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 sm:gap-6">
+                              {/* Price Input */}
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground">Price:</span>
+                                <input 
+                                  type="number" 
+                                  value={item.itemPriceAtTime} 
+                                  onChange={(e) => handleUpdatePrice(order.id, idx, parseFloat(e.target.value) || 0)}
+                                  className="bg-surface text-sm font-bold text-foreground px-2 py-1 rounded border border-border focus:outline-none focus:border-primary w-20 text-right"
+                                />
+                                <span className="text-xs text-muted-foreground">EGP</span>
+                              </div>
+
+                              {/* Quantity Controls */}
+                              <div className="flex items-center gap-2 bg-surface px-2 py-1 rounded-lg border border-border">
+                                <button 
+                                  onClick={() => handleUpdateQuantity(order.id, idx, -1)}
+                                  className="text-muted-foreground hover:text-danger p-1 transition-colors"
+                                  title="Decrease quantity / Remove"
+                                >
+                                  <Minus size={16} />
+                                </button>
+                                <span className="font-black text-sm px-2 text-foreground">{item.quantity}</span>
+                                <button 
+                                  onClick={() => handleUpdateQuantity(order.id, idx, 1)}
+                                  className="text-muted-foreground hover:text-success p-1 transition-colors"
+                                  title="Increase quantity"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              </div>
+
+                              {/* Remove Item Button */}
+                              <button 
+                                onClick={() => handleUpdateQuantity(order.id, idx, -item.quantity)}
+                                className="text-muted-foreground hover:text-danger p-2 transition-colors"
+                                title="Remove item"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Add New Item Section */}
+                    <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 border-t border-border">
+                      <div className="flex-1">
+                        <select 
+                          id={`select-${order.id}`}
+                          defaultValue=""
+                          className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary"
+                        >
+                          <option value="" disabled>+ Select menu item to add...</option>
+                          {menuItems.map(m => (
+                            <option key={m.id} value={m.id}>
+                              {m.nameEn} ({m.price} EGP)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <Button 
+                        type="button"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
+                        onClick={() => {
+                          const selectEl = document.getElementById(`select-${order.id}`) as HTMLSelectElement;
+                          if (selectEl && selectEl.value) {
+                            handleAddItem(order.id, selectEl.value);
+                            selectEl.value = "";
+                          }
+                        }}
+                      >
+                        <Plus size={18} className="mr-1" /> Add Item
+                      </Button>
+                    </div>
+
+                    {/* Financial Summary & Tip */}
+                    <div className="bg-background p-4 rounded-xl border border-border space-y-3 text-sm">
+                      <div className="flex justify-between items-center text-muted-foreground">
+                        <span>Subtotal</span>
+                        <span className="font-bold text-foreground">{order.subtotal.toFixed(2)} EGP</span>
+                      </div>
+                      <div className="flex justify-between items-center text-muted-foreground">
+                        <span className="flex items-center gap-2">
+                          Tip Amount:
+                          <input 
+                            type="number" 
+                            value={order.tipAmount} 
+                            onChange={(e) => handleUpdateTip(order.id, parseFloat(e.target.value) || 0)}
+                            className="bg-surface text-sm font-bold text-foreground px-2 py-1 rounded border border-border focus:outline-none focus:border-primary w-24 text-right"
+                          />
+                          EGP
+                        </span>
+                        <span className="font-bold text-foreground">{order.tipAmount.toFixed(2)} EGP</span>
+                      </div>
+                      <div className="flex justify-between items-center text-base font-black text-foreground pt-2 border-t border-border">
+                        <span>Total</span>
+                        <span className="text-primary">{order.total.toFixed(2)} EGP</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 bg-surface-elevated border-t border-border flex justify-end gap-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setEditingLocation(null)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="bg-success hover:bg-success/90 text-white shadow-md"
+                onClick={handleSaveEdits}
+                disabled={saving || editOrdersState.length === 0}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6 print:hidden">
         
         <div className="flex items-center gap-3 bg-primary/10 text-primary px-4 py-3 rounded-xl border border-primary/20 w-max">
@@ -295,19 +618,26 @@ export default function CashierPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="p-4 grid grid-cols-2 gap-2 bg-surface-elevated border-t border-border mt-auto">
+                <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-2 bg-surface-elevated border-t border-border mt-auto">
                   <Button 
                     variant="outline" 
-                    className="w-full text-foreground hover:bg-foreground hover:text-background transition-colors"
+                    className="w-full text-foreground hover:bg-foreground hover:text-background transition-colors text-xs py-2 px-2"
                     onClick={() => triggerPrint(locationName)}
                   >
-                    <Printer size={18} /> {t('print_receipt')}
+                    <Printer size={16} className="mr-1" /> {t('print_receipt')}
                   </Button>
                   <Button 
-                    className="w-full bg-success hover:bg-success/90 text-white shadow-md"
+                    variant="outline"
+                    className="w-full border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground transition-colors text-xs py-2 px-2"
+                    onClick={() => openEditModal(locationName)}
+                  >
+                    <Edit size={16} className="mr-1" /> {t('edit') || 'Edit'}
+                  </Button>
+                  <Button 
+                    className="w-full bg-success hover:bg-success/90 text-white shadow-md text-xs py-2 px-2"
                     onClick={() => markDone(locationName)}
                   >
-                    <CheckCircle2 size={18} /> {t('mark_done')}
+                    <CheckCircle2 size={16} className="mr-1" /> {t('mark_done')}
                   </Button>
                 </div>
               </div>
