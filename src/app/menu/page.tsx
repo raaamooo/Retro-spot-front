@@ -47,6 +47,7 @@ function MenuContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableId, setTableId] = useState<string>('');
+  const [tableName, setTableName] = useState<string>('');
   
   const [quizHighlight, setQuizHighlight] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('');
@@ -78,7 +79,16 @@ function MenuContent() {
   useEffect(() => {
     setMounted(true);
     const table = searchParams.get('locationId');
-    if (table) setTableId(table);
+    if (table) {
+      setTableId(table);
+      fetch(`${API_URL}/api/locations`)
+        .then(res => res.json())
+        .then(data => {
+          const loc = data.find((l: any) => l.id === table);
+          if (loc) setTableName(loc.name);
+        })
+        .catch(console.error);
+    }
 
     fetch(`${API_URL}/api/menu`)
       .then((res) => {
@@ -405,7 +415,7 @@ function MenuContent() {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {tableId && (
             <div className={styles.tableInfo}>
-              {tableId.replace(/_/g, ' ')}
+              {tableName || 'Loading...'}
             </div>
           )}
           {mounted && (
