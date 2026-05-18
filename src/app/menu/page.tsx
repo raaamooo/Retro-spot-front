@@ -363,12 +363,28 @@ function MenuContent() {
         type: 'dine_in',
         locationId: tableId,
         customerName: customerName || 'Guest',
-        items: cart.map(i => ({
-          menuItemId: i.id,
-          quantity: i.cartQuantity,
-          notes: i.selectedAdditions ? `Additions: ${i.selectedAdditions.map(a => a.nameEn || a.name).join(', ')}` : ''
-        })),
-        totalAmount: finalTotal,
+        items: cart.map(i => {
+          let customNotes = '';
+          if (i.description && i.description.includes('Flavors:')) {
+            const match = i.description.match(/Flavors:\s*(.*)$/);
+            if (match) customNotes = match[0];
+          } else if (i.description && i.description.includes('(')) {
+            const match = i.description.match(/\(([^)]+)\)$/);
+            if (match) customNotes = match[1];
+          } else if (i.selectedAdditions && i.selectedAdditions.length > 0) {
+            customNotes = i.selectedAdditions.map(a => a.nameEn || a.name).join(', ');
+          }
+
+          return {
+            menuItemId: i.id,
+            quantity: i.cartQuantity,
+            additions: customNotes || null,
+            itemPriceAtTime: i.price + (i.selectedAdditions?.reduce((s, a) => s + a.price, 0) || 0),
+            notes: null
+          };
+        }),
+        subtotal: cartTotal,
+        total: finalTotal,
         paymentMethod,
         tipAmount: tip,
         notes
@@ -398,10 +414,10 @@ function MenuContent() {
   const requestCheck = async () => {
     if (!tableId) return;
     try {
-      await fetch(`${API_URL}/api/orders/check`, {
+      await fetch(`${API_URL}/api/waitercalls`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationId: tableId })
+        body: JSON.stringify({ locationId: tableId, type: 'check' })
       });
       addToast('Check requested! Staff will be with you shortly.', 'success');
     } catch (err) {
