@@ -72,7 +72,7 @@ export default function InventoryManagement() {
       const [ingRes, supRes, logRes] = await Promise.all([
         fetch(`${API_URL}/api/ingredients`),
         fetch(`${API_URL}/api/suppliers`),
-        fetch(`${API_URL}/api/audit-logs?action=STOCK_ADJUSTMENT,RESTOCK`)
+        fetch(`${API_URL}/api/inventory/logs`)
       ]);
       
       const ing = await ingRes.json();
@@ -186,7 +186,7 @@ export default function InventoryManagement() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/api/inventory/restock`, {
+      const res = await fetch(`${API_URL}/api/ingredients/batch-restock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: validItems })
