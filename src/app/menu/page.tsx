@@ -185,8 +185,10 @@ function MenuContent() {
       if (currentActive && currentActive !== activeCategory) {
         setActiveCategory(currentActive);
         const pillEl = document.getElementById(`pill-${currentActive}`);
-        if (pillEl) {
-          pillEl.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+        if (pillEl && pillEl.parentElement) {
+          const container = pillEl.parentElement;
+          const scrollLeft = pillEl.offsetLeft - (container.clientWidth / 2) + (pillEl.clientWidth / 2);
+          container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
         }
       }
     };

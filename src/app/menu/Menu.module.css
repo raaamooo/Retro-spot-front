@@ -68,6 +68,7 @@
 }
 
 .categoryNavScroll {
+  position: relative;
   display: flex;
   gap: 8px;
   overflow-x: auto;
