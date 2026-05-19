@@ -51,6 +51,7 @@ function MenuContent() {
   const [tableName, setTableName] = useState<string>('');
   const [takeawayLocationId, setTakeawayLocationId] = useState<string>('');
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in');
+  const [hasTableQR, setHasTableQR] = useState<boolean>(false);
   
   const [quizHighlight, setQuizHighlight] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('');
@@ -82,6 +83,9 @@ function MenuContent() {
   useEffect(() => {
     setMounted(true);
     const table = searchParams.get('locationId');
+    if (table) {
+      setHasTableQR(true);
+    }
     
     fetch(`${API_URL}/api/locations`)
       .then(res => res.json())
@@ -401,6 +405,7 @@ function MenuContent() {
     try {
       const orderData = {
         type: isTakeaway ? 'takeaway' : 'dine_in',
+        orderType: isTakeaway ? 'takeaway' : 'dine_in',
         locationId: isTakeaway && takeawayLocationId ? takeawayLocationId : tableId,
         customerName: customerName || 'Guest',
         items: cart.map(i => {
@@ -671,10 +676,16 @@ function MenuContent() {
                   label="Dining Option"
                   value={orderType}
                   onChange={e => setOrderType(e.target.value as 'dine_in' | 'takeaway')}
-                  options={[
-                    { label: 'Dine In (Eat Here)', value: 'dine_in' },
-                    { label: 'Takeaway (Pickup)', value: 'takeaway' },
-                  ]}
+                  options={
+                    hasTableQR
+                      ? [
+                          { label: 'Dine In (Eat Here)', value: 'dine_in' },
+                          { label: 'Takeaway (Pickup)', value: 'takeaway' }
+                        ]
+                      : [
+                          { label: 'Takeaway (Pickup)', value: 'takeaway' }
+                        ]
+                  }
                 />
                 <FormInput 
                   label={orderType === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"} 
