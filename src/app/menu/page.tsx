@@ -93,8 +93,9 @@ function MenuContent() {
           setTableId(foundLoc.id);
           setTableName(foundLoc.name);
         } else if (data.length > 0) {
-          // Default to the first available location's UUID to prevent foreign key errors
-          const defaultLoc = data.find((l: any) => l.name === 'Table 1') || data[0];
+          // Default to Takeaway location if accessed directly (without a QR code scan)
+          const takeawayLoc = data.find((l: any) => l.name.toLowerCase() === 'takeaway' || l.type === 'takeaway');
+          const defaultLoc = takeawayLoc || data.find((l: any) => l.name === 'Table 1') || data[0];
           setTableId(defaultLoc.id);
           setTableName(defaultLoc.name);
         }
@@ -382,10 +383,17 @@ function MenuContent() {
   const submitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0 || !tableId) return;
+
+    const isTakeaway = tableName?.toLowerCase() === 'takeaway';
+    if (isTakeaway && !customerName.trim()) {
+      addToast('Please enter your name so we can identify your takeaway order!', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const orderData = {
-        type: 'dine_in',
+        type: isTakeaway ? 'takeaway' : 'dine_in',
         locationId: tableId,
         customerName: customerName || 'Guest',
         items: cart.map(i => {
@@ -601,7 +609,7 @@ function MenuContent() {
       )}
 
       {/* Staff Check request alert */}
-      {hasActiveOrder && cart.length === 0 && !isCartOpen && (
+      {hasActiveOrder && cart.length === 0 && !isCartOpen && tableName?.toLowerCase() !== 'takeaway' && (
         <div className={styles.requestCheckBar}>
           <span style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {t('active_order')}
@@ -653,7 +661,7 @@ function MenuContent() {
               {/* Checkout Details */}
               <div className={styles.cartItemsList}>
                 <FormInput 
-                  label="Customer Name (Optional)" 
+                  label={tableName?.toLowerCase() === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"} 
                   value={customerName} 
                   onChange={e => setCustomerName(e.target.value)} 
                 />
