@@ -774,7 +774,7 @@ export default function ManagerPage() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           
           {/* KPI Cards Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="p-6 relative overflow-hidden border-border bg-gradient-to-br from-surface to-surface-elevated">
               <div className="absolute top-4 right-4 p-2 bg-success/10 rounded-lg text-success">
                 <TrendingUp size={20} />
@@ -855,7 +855,7 @@ export default function ManagerPage() {
           </Card>
 
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Stock Alerts Card */}
             <Card className="p-6 border-border">
@@ -919,7 +919,7 @@ export default function ManagerPage() {
       {activeTab === 'analytics' && (
         <div className="space-y-6 animate-in fade-in">
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Sales Hourly Trend Pure SVG Bar Chart */}
             <Card className="p-6 border-border">

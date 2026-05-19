@@ -394,10 +394,10 @@ export default function CashierManagement() {
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-pulse font-bold text-xl text-primary">Loading POS...</div></div>;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] w-full max-w-[1600px] mx-auto pb-6">
+    <div className="flex flex-col md:flex-row gap-6 h-full md:h-[calc(100vh-120px)] w-full max-w-[1600px] mx-auto pb-6">
       
       {/* ── LEFT PANEL: TICKET BUILDER ── */}
-      <div className="w-full lg:w-[400px] xl:w-[450px] flex flex-col bg-surface border border-border shadow-lg rounded-2xl overflow-hidden shrink-0">
+      <div className="w-full md:w-[320px] lg:w-[400px] xl:w-[450px] flex flex-col bg-surface border border-border shadow-lg rounded-2xl overflow-hidden shrink-0">
         
         {/* Ticket Header */}
         <div className="bg-primary text-primary-foreground p-4 flex flex-col gap-3">

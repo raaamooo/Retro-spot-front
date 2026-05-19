@@ -381,10 +381,10 @@ export default function WaiterPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-full">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start h-full">
         
         {/* LEFT COLUMN: VISUAL TABLE GRID MAP */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="md:col-span-7 space-y-6">
           <div className="bg-surface p-4 rounded-2xl border border-border flex justify-between items-center">
             <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
               <MapPin size={20} className="text-primary" />
@@ -467,7 +467,7 @@ export default function WaiterPage() {
         </div>
 
         {/* RIGHT COLUMN: FOCUSED TABLE OPERATIONAL PANEL */}
-        <div className="lg:col-span-5">
+        <div className="md:col-span-5">
           {selectedLocationId ? (
             <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-lg flex flex-col">
               

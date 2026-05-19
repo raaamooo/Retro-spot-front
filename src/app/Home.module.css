@@ -79,6 +79,17 @@
   gap: var(--space-md);
 }
 
+@media (max-width: 520px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .actions > a,
+  .actions button {
+    width: 100%;
+  }
+}
+
 .actions button {
   transition: transform var(--transition-fast) ease;
 }
@@ -119,8 +130,8 @@
 }
 
 .vinyl {
-  width: 192px;
-  height: 192px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: radial-gradient(circle at center, #111 0%, #222 100%);
   border: 6px solid #3D2010;
@@ -131,20 +142,34 @@
   animation: spin 15s linear infinite;
 }
 
+@media (min-width: 1024px) {
+  .vinyl {
+    width: 192px;
+    height: 192px;
+  }
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 .vinylLabel {
-  width: 64px;
-  height: 64px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background-color: var(--background);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(61, 32, 16, 0.4);
+}
+
+@media (min-width: 1024px) {
+  .vinylLabel {
+    width: 64px;
+    height: 64px;
+  }
 }
 
 .vinylHole {
@@ -302,10 +327,16 @@
 }
 
 .storyImageWrapper {
-  aspect-ratio: 4/5;
+  aspect-ratio: 1.5; /* 3/2 crop for mobile devices */
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-sm);
+}
+
+@media (min-width: 768px) {
+  .storyImageWrapper {
+    aspect-ratio: 4/5;
+  }
 }
 
 .storyImage {

@@ -327,7 +327,7 @@ export default function BaristaPage() {
       )}
 
       {/* OPERATIONAL SUMMARY BAR */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-info/10 text-info flex items-center justify-center font-bold">
             <Coffee size={24} />

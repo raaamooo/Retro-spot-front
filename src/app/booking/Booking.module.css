@@ -181,6 +181,12 @@
   gap: var(--space-sm);
 }
 
+@media (max-width: 375px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (min-width: 520px) {
   .detailGrid {
     grid-template-columns: repeat(3, 1fr);
