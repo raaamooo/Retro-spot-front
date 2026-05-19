@@ -671,7 +671,17 @@ function OrderCard({
           <div className="text-muted-foreground/60 cursor-grab"><GripVertical size={16} /></div>
           <div>
             <h4 className="text-base font-black text-foreground tracking-tight">#{order.id.slice(-5).toUpperCase()}</h4>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">{order.orderType || 'dine_in'}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              {order.orderType === 'takeaway' ? (
+                <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/20">
+                  Takeaway
+                </span>
+              ) : (
+                <span className="bg-primary/10 text-primary dark:bg-primary/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary/20">
+                  Dine In
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5">

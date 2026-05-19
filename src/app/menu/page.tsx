@@ -49,6 +49,8 @@ function MenuContent() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [tableId, setTableId] = useState<string>('');
   const [tableName, setTableName] = useState<string>('');
+  const [takeawayLocationId, setTakeawayLocationId] = useState<string>('');
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in');
   
   const [quizHighlight, setQuizHighlight] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('');
@@ -84,6 +86,11 @@ function MenuContent() {
     fetch(`${API_URL}/api/locations`)
       .then(res => res.json())
       .then(data => {
+        const takeawayLoc = data.find((l: any) => l.name.toLowerCase() === 'takeaway' || l.type === 'takeaway');
+        if (takeawayLoc) {
+          setTakeawayLocationId(takeawayLoc.id);
+        }
+
         let foundLoc = null;
         if (table) {
           foundLoc = data.find((l: any) => l.id === table);
@@ -92,12 +99,12 @@ function MenuContent() {
         if (foundLoc) {
           setTableId(foundLoc.id);
           setTableName(foundLoc.name);
+          setOrderType('dine_in');
         } else if (data.length > 0) {
-          // Default to Takeaway location if accessed directly (without a QR code scan)
-          const takeawayLoc = data.find((l: any) => l.name.toLowerCase() === 'takeaway' || l.type === 'takeaway');
           const defaultLoc = takeawayLoc || data.find((l: any) => l.name === 'Table 1') || data[0];
           setTableId(defaultLoc.id);
           setTableName(defaultLoc.name);
+          setOrderType('takeaway');
         }
       })
       .catch(console.error);
@@ -384,7 +391,7 @@ function MenuContent() {
     e.preventDefault();
     if (cart.length === 0 || !tableId) return;
 
-    const isTakeaway = tableName?.toLowerCase() === 'takeaway';
+    const isTakeaway = orderType === 'takeaway';
     if (isTakeaway && !customerName.trim()) {
       addToast('Please enter your name so we can identify your takeaway order!', 'error');
       return;
@@ -394,7 +401,7 @@ function MenuContent() {
     try {
       const orderData = {
         type: isTakeaway ? 'takeaway' : 'dine_in',
-        locationId: tableId,
+        locationId: isTakeaway && takeawayLocationId ? takeawayLocationId : tableId,
         customerName: customerName || 'Guest',
         items: cart.map(i => {
           let customNotes = i.customizations || '';
@@ -469,7 +476,7 @@ function MenuContent() {
         <div className={styles.headerActions}>
           {tableId && (
             <div className={styles.tableInfo}>
-              {tableName || 'Loading...'}
+              {orderType === 'takeaway' ? 'Takeaway' : (tableName || 'Loading...')}
             </div>
           )}
           {mounted && (
@@ -609,7 +616,7 @@ function MenuContent() {
       )}
 
       {/* Staff Check request alert */}
-      {hasActiveOrder && cart.length === 0 && !isCartOpen && tableName?.toLowerCase() !== 'takeaway' && (
+      {hasActiveOrder && cart.length === 0 && !isCartOpen && orderType !== 'takeaway' && (
         <div className={styles.requestCheckBar}>
           <span style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {t('active_order')}
@@ -660,8 +667,17 @@ function MenuContent() {
 
               {/* Checkout Details */}
               <div className={styles.cartItemsList}>
+                <Select
+                  label="Dining Option"
+                  value={orderType}
+                  onChange={e => setOrderType(e.target.value as 'dine_in' | 'takeaway')}
+                  options={[
+                    { label: 'Dine In (Eat Here)', value: 'dine_in' },
+                    { label: 'Takeaway (Pickup)', value: 'takeaway' },
+                  ]}
+                />
                 <FormInput 
-                  label={tableName?.toLowerCase() === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"} 
+                  label={orderType === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"} 
                   value={customerName} 
                   onChange={e => setCustomerName(e.target.value)} 
                 />

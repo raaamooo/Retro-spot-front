@@ -852,7 +852,10 @@ export default function CashierManagement() {
           <div className="flex flex-col h-full">
             <div className="flex-1 flex flex-col items-center bg-white text-black p-6 font-mono text-sm shadow-inner rounded-lg mb-6 border border-gray-200" id="receipt-preview">
               <h1 className="text-2xl font-black uppercase mb-1 tracking-tighter">Retro Spot</h1>
-              <p className="text-xs mb-4">Order #{lastCompletedOrder.id.slice(-6).toUpperCase()}</p>
+              <p className="text-xs mb-1">Order #{lastCompletedOrder.id.slice(-6).toUpperCase()}</p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-4 bg-gray-100 px-2 py-0.5 rounded inline-block">
+                Type: {lastCompletedOrder.orderType || 'dine_in'}
+              </p>
               
               <div className="w-full border-b border-dashed border-black mb-4"></div>
               

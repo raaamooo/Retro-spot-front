@@ -525,11 +525,22 @@ export default function WaiterPage() {
                   {/* Customer / Timing Metadata */}
                   <div className="grid grid-cols-2 gap-4 border-b border-border/60 pb-4">
                     <div>
-                      <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Customer</span>
-                      <p className="font-bold text-sm text-foreground flex items-center gap-1.5 mt-0.5">
-                        <User size={14} className="text-muted-foreground" />
-                        {activeOrderForSelected.customerName || 'Guest'}
-                      </p>
+                      <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Customer / Order Type</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                          <User size={14} className="text-muted-foreground" />
+                          {activeOrderForSelected.customerName || 'Guest'}
+                        </p>
+                        {activeOrderForSelected.orderType === 'takeaway' ? (
+                          <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/20">
+                            Takeaway
+                          </span>
+                        ) : (
+                          <span className="bg-primary/10 text-primary dark:bg-primary/20 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary/20">
+                            Dine In
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {calculateEstimatedWait(activeOrderForSelected) > 0 && (
                       <div className="text-right">
