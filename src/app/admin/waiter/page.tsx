@@ -115,11 +115,26 @@ export default function WaiterPage() {
 
   // --- UPSELL PROMPTS SELECTOR ---
   const getUpsellPrompt = (order: Order) => {
-    const hasBeverage = order.items.some(it => 
-      it.menuItem?.nameEn?.toLowerCase().includes('coffee') || 
-      it.menuItem?.nameEn?.toLowerCase().includes('tea') || 
-      it.menuItem?.nameEn?.toLowerCase().includes('latte')
-    );
+    const hasBeverage = order.items.some(it => {
+      const name = it.menuItem?.nameEn?.toLowerCase() || '';
+      return name.includes('coffee') || 
+             name.includes('tea') || 
+             name.includes('latte') ||
+             name.includes('espresso') ||
+             name.includes('macchiato') ||
+             name.includes('cortado') ||
+             name.includes('americano') ||
+             name.includes('flat white') ||
+             name.includes('cappuccino') ||
+             name.includes('mocha') ||
+             name.includes('brew') ||
+             name.includes('nescafé') ||
+             name.includes('ahwa') ||
+             name.includes('smoothie') ||
+             name.includes('juice') ||
+             name.includes('mojito') ||
+             name.includes('soda');
+    });
     const hasDessert = order.items.some(it => 
       it.menuItem?.nameEn?.toLowerCase().includes('cake') || 
       it.menuItem?.nameEn?.toLowerCase().includes('cookie') || 

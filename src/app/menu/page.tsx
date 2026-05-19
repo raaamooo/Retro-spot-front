@@ -245,12 +245,23 @@ function MenuContent() {
     const itemCategory = item.category.toLowerCase();
     const itemTags = item.tags || [];
 
-    const supportsMilk = itemCategory.includes('coffee') || 
+    const isCoffeeCat = (c: string) => {
+      return c.includes('coffee') || 
+             c.includes('espresso') || 
+             c.includes('milk-based') || 
+             c.includes('specialty') || 
+             c.includes('filter') || 
+             c.includes('pour-over') || 
+             c.includes('egyptian') || 
+             c.includes('traditional');
+    };
+
+    const supportsMilk = isCoffeeCat(itemCategory) || 
                          itemCategory.includes('tea') || 
                          itemCategory.includes('frappe') || 
                          itemTags.includes('milk');
 
-    const supportsSweetness = itemCategory.includes('coffee') || 
+    const supportsSweetness = isCoffeeCat(itemCategory) || 
                               itemCategory.includes('tea') || 
                               itemCategory.includes('frappe') || 
                               itemCategory.includes('juice') || 
@@ -541,13 +552,20 @@ function MenuContent() {
                 <div className={styles.categoryHeader}>
                   <h2 className={styles.categoryTitle}>{category}</h2>
                   <p className={styles.categoryDesc}>
-                    {category.toLowerCase().includes('coffee') && 'Artisanal roasts and classic blends.'}
+                    {(category.toLowerCase().includes('coffee') || 
+                      category.toLowerCase().includes('espresso') || 
+                      category.toLowerCase().includes('milk-based') || 
+                      category.toLowerCase().includes('specialty') || 
+                      category.toLowerCase().includes('filter') || 
+                      category.toLowerCase().includes('pour-over') || 
+                      category.toLowerCase().includes('egyptian') || 
+                      category.toLowerCase().includes('traditional')) && 'Artisanal roasts and classic blends.'}
                     {category.toLowerCase().includes('tea') && 'Fragrant infusions and aromatic spiced brews.'}
                     {category.toLowerCase().includes('frappe') && 'Sweet frosty blends of rich cream and flavor.'}
                     {category.toLowerCase().includes('juice') && 'Freshly squeezed premium raw fruits.'}
                     {category.toLowerCase().includes('waffle') && 'Warm golden delicacies with sweet premium toppings.'}
                     {category.toLowerCase().includes('yogurt') && 'Healthy light creations made fresh daily.'}
-                    {!['coffee', 'tea', 'frappe', 'juice', 'waffle', 'yogurt'].some(x => category.toLowerCase().includes(x)) && 'Delectable curated choices for your pleasure.'}
+                    {!['coffee', 'tea', 'frappe', 'juice', 'waffle', 'yogurt', 'espresso', 'milk-based', 'specialty', 'filter', 'pour-over', 'egyptian', 'traditional'].some(x => category.toLowerCase().includes(x)) && 'Delectable curated choices for your pleasure.'}
                   </p>
                 </div>
 
@@ -801,8 +819,18 @@ function MenuContent() {
               {(() => {
                 const cat = customizingItem.category.toLowerCase();
                 const tags = customizingItem.tags || [];
-                const showMilk = cat.includes('coffee') || cat.includes('tea') || cat.includes('frappe') || tags.includes('milk');
-                const showSweetness = cat.includes('coffee') || cat.includes('tea') || cat.includes('frappe') || cat.includes('juice') || cat.includes('mojito') || cat.includes('smoothie');
+                const isCoffeeCat = (c: string) => {
+                  return c.includes('coffee') || 
+                         c.includes('espresso') || 
+                         c.includes('milk-based') || 
+                         c.includes('specialty') || 
+                         c.includes('filter') || 
+                         c.includes('pour-over') || 
+                         c.includes('egyptian') || 
+                         c.includes('traditional');
+                };
+                const showMilk = isCoffeeCat(cat) || cat.includes('tea') || cat.includes('frappe') || tags.includes('milk');
+                const showSweetness = isCoffeeCat(cat) || cat.includes('tea') || cat.includes('frappe') || cat.includes('juice') || cat.includes('mojito') || cat.includes('smoothie');
 
                 return (
                   <>

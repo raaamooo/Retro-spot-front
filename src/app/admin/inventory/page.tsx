@@ -143,14 +143,14 @@ export default function InventoryPage() {
           </div>
           {menuLoading?<div className="text-center py-12 text-muted-foreground animate-pulse">Loading...</div>:(
             <div className="space-y-6">
-              {cats.map(cat=>{
-                const catItems=filtered.filter(i=>i.category.nameEn===cat);
+              {categories.map(cat=>{
+                const catItems=filtered.filter(i=>i.category.nameEn===cat.nameEn);
                 if(!catItems.length) return null;
                 const avail=catItems.filter(i=>i.available&&i.active).length;
                 return(
-                  <div key={cat}>
+                  <div key={cat.id}>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-black text-base flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-primary inline-block"/>{cat}</h3>
+                      <h3 className="font-black text-base flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-primary inline-block"/>{cat.nameEn}</h3>
                       <span className="text-xs text-muted-foreground">{avail}/{catItems.length} available</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
