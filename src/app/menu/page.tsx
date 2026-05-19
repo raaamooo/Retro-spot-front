@@ -502,10 +502,6 @@ function MenuContent() {
         </nav>
       )}
 
-      <div className="container">
-        <DrinkQuiz onSelectCategory={handleQuizComplete} />
-      </div>
-
       {/* Sequential Categories Layout */}
       <div className="container" style={{ marginTop: '24px' }}>
         <div className={styles.categoryList}>
@@ -585,6 +581,10 @@ function MenuContent() {
             );
           })}
         </div>
+      </div>
+
+      <div className="container" style={{ marginTop: '48px', marginBottom: '64px' }}>
+        <DrinkQuiz onSelectCategory={handleQuizComplete} />
       </div>
 
       {/* Floating Action Cart Button */}
