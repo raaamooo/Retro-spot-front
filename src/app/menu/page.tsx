@@ -186,7 +186,7 @@ function MenuContent() {
         setActiveCategory(currentActive);
         const pillEl = document.getElementById(`pill-${currentActive}`);
         if (pillEl) {
-          pillEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          pillEl.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
         }
       }
     };
@@ -486,6 +486,7 @@ function MenuContent() {
             {categories.map(category => (
               <button
                 key={category}
+                type="button"
                 id={`pill-${category}`}
                 className={`${styles.categoryPill} ${activeCategory === category ? styles.categoryPillActive : ''}`}
                 onClick={() => {

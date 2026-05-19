@@ -92,6 +92,7 @@
   border: 1px solid transparent;
   transition: all var(--transition-fast);
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .categoryPill:hover {
