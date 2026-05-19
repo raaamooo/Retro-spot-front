@@ -3,6 +3,11 @@
 import React, { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 
+/**
+ * Modal — Accessible dialog component.
+ * Uses inline styles matching the editorial design system (no Tailwind).
+ */
+
 interface ModalProps {
   open: boolean;
   onClose: () => void;
@@ -12,11 +17,11 @@ interface ModalProps {
   showClose?: boolean;
 }
 
-const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
+const SIZE_MAX_WIDTHS: Record<string, string> = {
+  sm: '384px',
+  md: '512px',
+  lg: '672px',
+  xl: '896px',
 };
 
 export default function Modal({
@@ -48,37 +53,90 @@ export default function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+      }}
+    >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
         onClick={onClose}
         aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          animation: 'fadeIn 200ms ease-out',
+        }}
       />
 
       {/* Panel */}
       <div
-        className={`
-          relative w-full ${sizeClasses[size]}
-          bg-surface border border-border rounded-2xl shadow-2xl
-          animate-[modalIn_0.25s_ease-out]
-          max-h-[85vh] flex flex-col
-        `}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: SIZE_MAX_WIDTHS[size],
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-xl)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          maxHeight: '85vh',
+          display: 'flex',
+          flexDirection: 'column',
+          animation: 'modalIn 250ms ease-out',
+        }}
       >
         {/* Header */}
         {(title || showClose) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle shrink-0">
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 24px',
+              borderBottom: '1px solid var(--border-subtle)',
+              flexShrink: 0,
+            }}
+          >
             {title && (
-              <h2 className="text-lg font-bold text-foreground">{title}</h2>
+              <h2
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  color: 'var(--foreground)',
+                  margin: 0,
+                }}
+              >
+                {title}
+              </h2>
             )}
             {showClose && (
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-elevated transition-colors focus-ring ms-auto"
                 aria-label="Close"
+                style={{
+                  padding: '6px',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  background: 'none',
+                  border: 'none',
+                  marginLeft: 'auto',
+                  transition: 'color 150ms, background-color 150ms',
+                }}
               >
                 <X size={20} />
               </button>
@@ -87,14 +145,13 @@ export default function Modal({
         )}
 
         {/* Body */}
-        <div className="overflow-y-auto px-6 py-5 flex-1">{children}</div>
+        <div style={{ overflowY: 'auto', padding: '20px 24px', flex: 1 }}>
+          {children}
+        </div>
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+      {/* Keyframe animations — defined in globals.css (fadeIn, modalIn) */}
+      <style>{`
         @keyframes modalIn {
           from { opacity: 0; transform: scale(0.95) translateY(8px); }
           to { opacity: 1; transform: scale(1) translateY(0); }

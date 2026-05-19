@@ -2,7 +2,7 @@
 export { default as Header } from './layout/Header';
 export { default as AdminHeader } from './layout/AdminHeader';
 export { default as Footer } from './layout/Footer';
-export { default as PageTransition } from './layout/PageTransition';
+// PageTransition removed — was a no-op pass-through (M1 fix)
 
 // UI components
 export { default as Button } from './ui/Button';

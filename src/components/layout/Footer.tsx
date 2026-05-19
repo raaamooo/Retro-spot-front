@@ -87,7 +87,13 @@ export default function Footer() {
                 ? 'اشترك للحصول على دعوات حصرية للفعاليات، أخبار المعرض الفني، وخصومات على حبوب القهوة.'
                 : 'Sign up for exclusive event invites, art gallery news, and whole bean discounts.'}
             </p>
-            <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
+            <form className={styles.form} onSubmit={(e) => {
+              e.preventDefault();
+              // Newsletter integration placeholder — shows user feedback
+              const input = e.currentTarget.querySelector('input');
+              if (input) input.value = '';
+              alert(isRtl ? 'النشرة الإخبارية قريباً! ترقبوا.' : 'Newsletter coming soon! Stay tuned.');
+            }}>
               <input 
                 type="email" 
                 placeholder={isRtl ? 'بريدك الإلكتروني' : 'your@email.com'}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
@@ -13,6 +13,7 @@ import { useToast } from '@/contexts/ToastContext';
 
 import { API_URL } from '@/lib/constants';
 import { getItemImage } from '@/lib/itemImages';
+import { isCoffeeCat, supportsMilk, supportsSweetness, getCategoryDescription, throttleRAF } from '@/lib/menuUtils';
 import DrinkQuiz from '@/components/ui/DrinkQuiz';
 import styles from './Menu.module.css';
 
@@ -167,8 +168,12 @@ function MenuContent() {
     if (data.locationId === tableId) checkActiveOrder(tableId);
   });
 
-  const categories = Array.from(new Set(menuItems.filter(i => !i.isAddition).map(i => i.category)));
-  const additions = menuItems.filter(i => i.isAddition);
+  // Memoize derived data to prevent infinite useEffect loops (M5 fix)
+  const categories = useMemo(
+    () => Array.from(new Set(menuItems.filter(i => !i.isAddition).map(i => i.category))),
+    [menuItems]
+  );
+  const additions = useMemo(() => menuItems.filter(i => i.isAddition), [menuItems]);
 
   // Set default active category once loaded
   useEffect(() => {
@@ -205,8 +210,10 @@ function MenuContent() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Throttle scroll handler with RAF to prevent jank (H6 fix)
+    const throttledScroll = throttleRAF(handleScroll);
+    window.addEventListener('scroll', throttledScroll);
+    return () => window.removeEventListener('scroll', throttledScroll);
   }, [categories, activeCategory]);
 
   const handleQuizComplete = (recommendedCategory: string) => {
@@ -245,30 +252,11 @@ function MenuContent() {
     const itemCategory = item.category.toLowerCase();
     const itemTags = item.tags || [];
 
-    const isCoffeeCat = (c: string) => {
-      return c.includes('coffee') || 
-             c.includes('espresso') || 
-             c.includes('milk-based') || 
-             c.includes('specialty') || 
-             c.includes('filter') || 
-             c.includes('pour-over') || 
-             c.includes('egyptian') || 
-             c.includes('traditional');
-    };
+    // Use shared helpers from menuUtils (H4 fix — was duplicated 3x)
+    const hasMilk = supportsMilk(itemCategory, itemTags);
+    const hasSweetness = supportsSweetness(itemCategory);
 
-    const supportsMilk = isCoffeeCat(itemCategory) || 
-                         itemCategory.includes('tea') || 
-                         itemCategory.includes('frappe') || 
-                         itemTags.includes('milk');
-
-    const supportsSweetness = isCoffeeCat(itemCategory) || 
-                              itemCategory.includes('tea') || 
-                              itemCategory.includes('frappe') || 
-                              itemCategory.includes('juice') || 
-                              itemCategory.includes('mojito') || 
-                              itemCategory.includes('smoothie');
-
-    if (itemAdditions.length > 0 || supportsMilk || supportsSweetness) {
+    if (itemAdditions.length > 0 || hasMilk || hasSweetness) {
       setCustomizingItem(item);
       setModalQuantity(1);
       setModalSelectedAdditions([]);
@@ -552,20 +540,7 @@ function MenuContent() {
                 <div className={styles.categoryHeader}>
                   <h2 className={styles.categoryTitle}>{category}</h2>
                   <p className={styles.categoryDesc}>
-                    {(category.toLowerCase().includes('coffee') || 
-                      category.toLowerCase().includes('espresso') || 
-                      category.toLowerCase().includes('milk-based') || 
-                      category.toLowerCase().includes('specialty') || 
-                      category.toLowerCase().includes('filter') || 
-                      category.toLowerCase().includes('pour-over') || 
-                      category.toLowerCase().includes('egyptian') || 
-                      category.toLowerCase().includes('traditional')) && 'Artisanal roasts and classic blends.'}
-                    {category.toLowerCase().includes('tea') && 'Fragrant infusions and aromatic spiced brews.'}
-                    {category.toLowerCase().includes('frappe') && 'Sweet frosty blends of rich cream and flavor.'}
-                    {category.toLowerCase().includes('juice') && 'Freshly squeezed premium raw fruits.'}
-                    {category.toLowerCase().includes('waffle') && 'Warm golden delicacies with sweet premium toppings.'}
-                    {category.toLowerCase().includes('yogurt') && 'Healthy light creations made fresh daily.'}
-                    {!['coffee', 'tea', 'frappe', 'juice', 'waffle', 'yogurt', 'espresso', 'milk-based', 'specialty', 'filter', 'pour-over', 'egyptian', 'traditional'].some(x => category.toLowerCase().includes(x)) && 'Delectable curated choices for your pleasure.'}
+                    {getCategoryDescription(category)}
                   </p>
                 </div>
 
@@ -630,8 +605,8 @@ function MenuContent() {
 
       {/* Floating Action Cart Button */}
       {cart.length > 0 && !isCartOpen && (
-        <button onClick={() => setIsCartOpen(true)} className={styles.cartButton}>
-          <div className={styles.cartBadge}>{cart.reduce((s, i) => s + i.cartQuantity, 0)}</div>
+        <button onClick={() => setIsCartOpen(true)} className={styles.cartButton} aria-label="Open cart">
+          <div className={styles.cartBadge} aria-label={`${cart.reduce((s, i) => s + i.cartQuantity, 0)} items in cart`}>{cart.reduce((s, i) => s + i.cartQuantity, 0)}</div>
           <span style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {t('view_cart')} • {cartTotal.toFixed(2)} EGP
           </span>
@@ -819,18 +794,9 @@ function MenuContent() {
               {(() => {
                 const cat = customizingItem.category.toLowerCase();
                 const tags = customizingItem.tags || [];
-                const isCoffeeCat = (c: string) => {
-                  return c.includes('coffee') || 
-                         c.includes('espresso') || 
-                         c.includes('milk-based') || 
-                         c.includes('specialty') || 
-                         c.includes('filter') || 
-                         c.includes('pour-over') || 
-                         c.includes('egyptian') || 
-                         c.includes('traditional');
-                };
-                const showMilk = isCoffeeCat(cat) || cat.includes('tea') || cat.includes('frappe') || tags.includes('milk');
-                const showSweetness = isCoffeeCat(cat) || cat.includes('tea') || cat.includes('frappe') || cat.includes('juice') || cat.includes('mojito') || cat.includes('smoothie');
+                // Use shared helpers from menuUtils (H4 fix — 3rd dedup)
+                const showMilk = supportsMilk(cat, tags);
+                const showSweetness = supportsSweetness(cat);
 
                 return (
                   <>

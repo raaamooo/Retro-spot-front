@@ -238,6 +238,59 @@ const translations: Record<string, { en: string; ar: string }> = {
   artist_submissions: { en: 'Artist Submissions', ar: 'تقديمات الفنانين' },
   verify_payment: { en: 'Verify Payment', ar: 'تأكيد الدفع' },
   end_bid: { en: 'End Bid', ar: 'إنهاء المزاد' },
+
+  // Menu Customization
+  customize_drink: { en: 'Customize Drink', ar: 'تخصيص المشروب' },
+  sweetness_level: { en: 'Sweetness Level', ar: 'مستوى الحلاوة' },
+  standard_sweetness: { en: 'Standard Sweetness', ar: 'حلاوة عادية' },
+  half_sugar: { en: 'Half Sugar', ar: 'نصف سكر' },
+  no_sugar: { en: 'No Sugar', ar: 'بدون سكر' },
+  milk_preferences: { en: 'Milk Preferences', ar: 'تفضيلات الحليب' },
+  no_milk: { en: 'No Milk', ar: 'بدون حليب' },
+  full_cream: { en: 'Full Cream', ar: 'حليب كامل الدسم' },
+  oat_milk: { en: 'Oat Milk (+15 EGP)', ar: 'حليب شوفان (+١٥ ج.م)' },
+  almond_milk: { en: 'Almond Milk (+15 EGP)', ar: 'حليب لوز (+١٥ ج.م)' },
+  compatible_additions: { en: 'Compatible Additions', ar: 'إضافات متوافقة' },
+  add_to_order: { en: 'Add to Order', ar: 'أضف للطلب' },
+  select_flavors: { en: 'Select Flavors', ar: 'اختر النكهات' },
+  confirm_flavors: { en: 'Confirm Flavors', ar: 'تأكيد النكهات' },
+  ice_cream_flavors: { en: 'Ice Cream Flavors', ar: 'نكهات الآيس كريم' },
+  item_added: { en: 'Item added to cart', ar: 'تم إضافة المنتج للسلة' },
+  order_placed: { en: 'Order placed successfully!', ar: 'تم تقديم الطلب بنجاح!' },
+  confirm_order: { en: 'Confirm Order', ar: 'تأكيد الطلب' },
+
+  // Cart & Checkout
+  view_cart: { en: 'View Cart', ar: 'عرض السلة' },
+  your_order: { en: 'Your Order', ar: 'طلبك' },
+  add: { en: 'Add', ar: 'أضف' },
+  dining_option: { en: 'Dining Option', ar: 'خيار التناول' },
+  dine_in: { en: 'Dine In (Eat Here)', ar: 'تناول بالمكان' },
+  takeaway_pickup: { en: 'Takeaway (Pickup)', ar: 'طلب خارجي (استلام)' },
+  customer_name_takeaway: { en: 'Your Name (Required for Takeaway)', ar: 'اسمك (مطلوب للطلب الخارجي)' },
+  customer_name_optional: { en: 'Customer Name (Optional)', ar: 'اسم العميل (اختياري)' },
+  order_notes: { en: 'Order Notes', ar: 'ملاحظات الطلب' },
+  add_tip: { en: 'Add Tip for Service', ar: 'إضافة بقشيش للخدمة' },
+  no_tip: { en: 'No Tip', ar: 'بدون بقشيش' },
+  custom_tip: { en: 'Custom Tip Amount (EGP)', ar: 'مبلغ بقشيش مخصص (ج.م)' },
+  cart_empty: { en: 'Cart is empty', ar: 'السلة فارغة' },
+  cart_empty_desc: { en: 'Add some items from the menu', ar: 'أضف بعض المنتجات من القائمة' },
+  out_of_stock_label: { en: 'Out of stock', ar: 'غير متوفر' },
+  active_order: { en: 'You have an active order', ar: 'لديك طلب نشط' },
+  request_check: { en: 'Request Check', ar: 'اطلب الحساب' },
+  check_requested: { en: 'Check requested! Staff will be with you shortly.', ar: 'تم طلب الحساب! سيأتيك أحد الموظفين قريباً.' },
+
+  // About / Story
+  about_us: { en: 'Our Story', ar: 'قصتنا' },
+  about_desc: { en: 'We are a unique space combining a cozy retro cafe with a productive workspace and an inspiring art gallery. Experience the perfect blend of nostalgia and creativity.', ar: 'نحن مساحة فريدة تجمع بين مقهى دافئ بتصميم كلاسيكي، ومساحة عمل مثمرة، ومعرض فني ملهم. اختبر المزيج المثالي بين الحنين والإبداع.' },
+  coffee: { en: 'Specialty Coffee', ar: 'قهوة مختصة' },
+  music: { en: 'Music & Vibes', ar: 'موسيقى وأجواء' },
+  art_gallery: { en: 'Art Gallery', ar: 'معرض فني' },
+
+  // Empty / Error states  
+  no_results: { en: 'No results found', ar: 'لم يتم العثور على نتائج' },
+
+  // Newsletter
+  newsletter_coming_soon: { en: 'Newsletter coming soon! Stay tuned.', ar: 'النشرة الإخبارية قريباً! ترقبوا.' },
 };
 
 /* ═══════════════════════════════════════════════════════════════
