@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
 import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles } from 'lucide-react';
@@ -88,7 +89,10 @@ function MenuContent() {
       setHasTableQR(true);
     }
     
-    fetch(`${API_URL}/api/locations`)
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    fetch(`${API_URL}/api/locations`, { signal })
       .then(res => res.json())
       .then(data => {
         const takeawayLoc = data.find((l: any) => l.name.toLowerCase() === 'takeaway' || l.type === 'takeaway');
@@ -112,9 +116,11 @@ function MenuContent() {
           setOrderType('takeaway');
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        if (err.name !== 'AbortError') console.error('Location fetch error:', err);
+      });
 
-    fetch(`${API_URL}/api/menu`)
+    fetch(`${API_URL}/api/menu`, { signal })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch menu');
         return res.json();
@@ -139,9 +145,15 @@ function MenuContent() {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error('Menu load error:', err);
-        setIsLoading(false);
+        if (err.name !== 'AbortError') {
+          console.error('Menu load error:', err);
+          setIsLoading(false);
+        }
       });
+      
+    return () => {
+      abortController.abort();
+    };
   }, [language, searchParams]);
 
   const checkActiveOrder = async (tid: string) => {
@@ -463,7 +475,20 @@ function MenuContent() {
     }
   };
 
-  if (isLoading) return <LoadingState fullHeight />;
+  if (isLoading) {
+    return (
+      <div className={styles.page}>
+        <div className="container" style={{ marginTop: '100px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{ height: '300px', backgroundColor: 'var(--surface)', borderRadius: '16px', opacity: 0.5, animation: 'pulse 1.5s infinite ease-in-out' }} />
+            ))}
+          </div>
+        </div>
+        <style dangerouslySetInnerHTML={{__html: `@keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }`}} />
+      </div>
+    );
+  }
 
   const customizingItemAdditions = customizingItem ? getAdditionsForItem(customizingItem) : [];
   const customizingItemSubtotal = customizingItem 
@@ -551,14 +576,14 @@ function MenuContent() {
                       className={styles.menuItem}
                       onClick={() => handleAddClick(item)}
                     >
-                      <div className={styles.itemImageWrap}>
-                        <img 
-                          src={item.image || getItemImage(item.nameEn || item.name) || ''} 
+                      <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
+                        <Image 
+                          src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'} 
                           alt={item.name} 
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
                           className={styles.itemImage}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
-                          }}
                         />
                       </div>
                       <div className={styles.itemContent}>
@@ -770,14 +795,13 @@ function MenuContent() {
             <div className={styles.modalBody}>
               {/* Product Info Summary */}
               <div className={styles.modalItemHeader}>
-                <div className={styles.modalItemImageWrap}>
-                  <img 
-                    src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || ''} 
+                <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
+                  <Image 
+                    src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'} 
                     alt={customizingItem.name} 
-                    className={styles.itemImage}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
-                    }}
+                    fill
+                    sizes="80px"
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <div>
@@ -919,14 +943,13 @@ function MenuContent() {
 
             <div className={styles.modalBody}>
               <div className={styles.modalItemHeader}>
-                <div className={styles.modalItemImageWrap}>
-                  <img 
-                    src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || ''} 
+                <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
+                  <Image 
+                    src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'} 
                     alt={flavorModalItem.name} 
-                    className={styles.itemImage}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop';
-                    }}
+                    fill
+                    sizes="80px"
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -51,7 +52,7 @@ export default function Header() {
           <div className={styles.headerContainer}>
             {/* Logo */}
             <Link href="/" className={styles.logo}>
-              <img src="/logo.jpeg" alt="Retro Spot" className={styles.logoImg} />
+              <Image src="/logo.jpeg" alt="Retro Spot" width={40} height={40} className={styles.logoImg} />
             </Link>
 
             {/* Desktop Nav */}
