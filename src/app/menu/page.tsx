@@ -114,10 +114,69 @@ function MenuContent() {
   const [sweetness, setSweetness] = useState<'standard' | 'half' | 'none'>('standard');
   const [milk, setMilk] = useState<'none' | 'full' | 'oat' | 'almond'>('none');
 
+  // New per-category customization states (cocktails / milkshakes)
+  const [modalSize, setModalSize] = useState('regular');
+  const [modalIceLevel, setModalIceLevel] = useState('normal');
+  const [modalSweetnessPct, setModalSweetnessPct] = useState(50);
+  const [modalMilkBase, setModalMilkBase] = useState('whole');
+  const [modalThickness, setModalThickness] = useState('medium');
+  const [modalToppings, setModalToppings] = useState<string[]>([]);
+  const [modalExtraShots, setModalExtraShots] = useState<string[]>([]);
+  const [modalTemperature, setModalTemperature] = useState('frozen');
+  const [modalSpecialInstructions, setModalSpecialInstructions] = useState('');
+
   // Flavor modal states for Ice Cream
   const [flavorModalItem, setFlavorModalItem] = useState<MenuItem | null>(null);
   const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
   const ICE_CREAM_FLAVORS = ['Vanilla', 'Chocolate', 'Mango', 'Strawberry'];
+
+  /* ═══════════════════════════════════════════════════════════════
+     PER-CATEGORY CUSTOMIZATION CONFIGS
+     ═══════════════════════════════════════════════════════════════ */
+  const getItemCustomizationType = (item: MenuItem): 'cocktail' | 'milkshake' | 'generic' | null => {
+    const cat = item.category.toLowerCase();
+    if (cat.includes('cocktail') || cat.includes('كوكتيل')) return 'cocktail';
+    if (cat.includes('milkshake') || cat.includes('ميلك شيك')) return 'milkshake';
+    return 'generic';
+  };
+
+  const COCKTAIL_ADDONS = [
+    { label: 'Extra Fruit', value: 'extra_fruit', price: 10 },
+    { label: 'Mint Leaves', value: 'mint_leaves', price: 10 },
+    { label: 'Coconut Flakes', value: 'coconut_flakes', price: 10 },
+    { label: 'Whipped Cream', value: 'whipped_cream', price: 10 },
+  ];
+  const MILKSHAKE_TOPPINGS = [
+    { label: 'Whipped Cream', value: 'whipped_cream', price: 10 },
+    { label: 'Crushed Oreo', value: 'crushed_oreo', price: 10 },
+    { label: 'Caramel Drizzle', value: 'caramel_drizzle', price: 10 },
+    { label: 'Chocolate Drizzle', value: 'chocolate_drizzle', price: 10 },
+    { label: 'Sprinkles', value: 'sprinkles', price: 10 },
+    { label: 'Crushed Nuts', value: 'crushed_nuts', price: 10 },
+    { label: 'Lotus Crumble', value: 'lotus_crumble', price: 10 },
+    { label: 'Fresh Fruit', value: 'fresh_fruit', price: 10 },
+  ];
+  const MILKSHAKE_EXTRA_SHOTS = [
+    { label: 'Extra Nutella', value: 'extra_nutella', price: 15 },
+    { label: 'Extra Caramel', value: 'extra_caramel', price: 15 },
+    { label: 'Extra Chocolate Sauce', value: 'extra_chocolate', price: 15 },
+  ];
+
+  const resetCustomizationDefaults = () => {
+    setModalSize('regular');
+    setModalIceLevel('normal');
+    setModalSweetnessPct(50);
+    setModalMilkBase('whole');
+    setModalThickness('medium');
+    setModalToppings([]);
+    setModalExtraShots([]);
+    setModalTemperature('frozen');
+    setModalSpecialInstructions('');
+    setModalQuantity(1);
+    setModalSelectedAdditions([]);
+    setSweetness('standard');
+    setMilk('none');
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -314,20 +373,25 @@ function MenuContent() {
       return;
     }
 
+    const custType = getItemCustomizationType(item);
+
+    // Cocktails & Milkshakes always open the customization modal
+    if (custType === 'cocktail' || custType === 'milkshake') {
+      resetCustomizationDefaults();
+      setCustomizingItem(item);
+      return;
+    }
+
+    // Generic items: check for additions / milk / sweetness support
     const itemAdditions = getAdditionsForItem(item);
     const itemCategory = item.category.toLowerCase();
     const itemTags = item.tags || [];
-
-    // Use shared helpers from menuUtils (H4 fix — was duplicated 3x)
     const hasMilk = supportsMilk(itemCategory, itemTags);
     const hasSweetness = supportsSweetness(itemCategory);
 
     if (itemAdditions.length > 0 || hasMilk || hasSweetness) {
+      resetCustomizationDefaults();
       setCustomizingItem(item);
-      setModalQuantity(1);
-      setModalSelectedAdditions([]);
-      setSweetness('standard');
-      setMilk('none');
     } else {
       setCart(prev => {
         const exists = prev.find(i => i.id === item.id && (!i.selectedAdditions || i.selectedAdditions.length === 0));
@@ -353,43 +417,82 @@ function MenuContent() {
 
   const confirmCustomization = () => {
     if (!customizingItem) return;
-
+    const custType = getItemCustomizationType(customizingItem);
     const details: string[] = [];
-    if (sweetness !== 'standard') {
-      details.push(sweetness === 'half' ? 'Half Sweet' : 'Unsweetened');
-    }
+    let extraPrice = 0;
 
-    let extraMilkPrice = 0;
-    if (milk !== 'none') {
-      details.push(`${milk.toUpperCase()} Milk`);
-      if (milk === 'oat' || milk === 'almond') {
-        extraMilkPrice = 15;
+    if (custType === 'cocktail') {
+      // Size
+      if (modalSize === 'large') { details.push('Large'); extraPrice += 15; }
+      else { details.push('Regular'); }
+      // Ice
+      if (modalIceLevel !== 'normal') details.push(modalIceLevel === 'none' ? 'No Ice' : modalIceLevel === 'light' ? 'Light Ice' : 'Extra Ice');
+      // Sweetness
+      if (modalSweetnessPct !== 50) details.push(`${modalSweetnessPct}% Sweet`);
+      // Add-ons
+      COCKTAIL_ADDONS.forEach(a => {
+        if (modalToppings.includes(a.value)) { details.push(a.label); extraPrice += a.price; }
+      });
+      // Special instructions
+      if (modalSpecialInstructions.trim()) details.push(`Note: ${modalSpecialInstructions.trim()}`);
+
+    } else if (custType === 'milkshake') {
+      // Size
+      if (modalSize === 'large') { details.push('Large'); extraPrice += 20; }
+      else if (modalSize === 'xl') { details.push('XL'); extraPrice += 35; }
+      else { details.push('Regular'); }
+      // Milk base
+      if (modalMilkBase === 'oat') { details.push('Oat Milk'); extraPrice += 10; }
+      else if (modalMilkBase === 'almond') { details.push('Almond Milk'); extraPrice += 10; }
+      else if (modalMilkBase === 'no_milk') { details.push('Sorbet Style'); }
+      // Thickness
+      if (modalThickness !== 'medium') details.push(`${modalThickness.charAt(0).toUpperCase() + modalThickness.slice(1)} Thickness`);
+      // Toppings
+      MILKSHAKE_TOPPINGS.forEach(t => {
+        if (modalToppings.includes(t.value)) { details.push(t.label); extraPrice += t.price; }
+      });
+      // Extra shots
+      MILKSHAKE_EXTRA_SHOTS.forEach(s => {
+        if (modalExtraShots.includes(s.value)) { details.push(s.label); extraPrice += s.price; }
+      });
+      // Temperature
+      if (modalTemperature === 'chilled') details.push('Chilled');
+      // Special instructions
+      if (modalSpecialInstructions.trim()) details.push(`Note: ${modalSpecialInstructions.trim()}`);
+
+    } else {
+      // Generic items (coffee, tea, etc.) — existing logic
+      if (sweetness !== 'standard') {
+        details.push(sweetness === 'half' ? 'Half Sweet' : 'Unsweetened');
+      }
+      if (milk !== 'none') {
+        details.push(`${milk.charAt(0).toUpperCase() + milk.slice(1)} Milk`);
+        if (milk === 'oat' || milk === 'almond') extraPrice += 15;
+      }
+      if (modalSelectedAdditions.length > 0) {
+        details.push(modalSelectedAdditions.map(a => a.name).join(', '));
+        extraPrice += modalSelectedAdditions.reduce((s, a) => s + a.price, 0);
       }
     }
 
-    if (modalSelectedAdditions.length > 0) {
-      details.push(modalSelectedAdditions.map(a => a.name).join(', '));
-    }
-
+    const customizationKey = details.join(' • ');
     const finalItem: CartItem = {
       ...customizingItem,
-      price: customizingItem.price + extraMilkPrice,
+      price: customizingItem.price + extraPrice,
       cartQuantity: modalQuantity,
-      selectedAdditions: modalSelectedAdditions,
-      customizations: details.length > 0 ? details.join(' • ') : undefined,
-      description: details.length > 0 ? `${customizingItem.description} (${details.join(' • ')})` : customizingItem.description
+      selectedAdditions: custType === 'generic' ? modalSelectedAdditions : undefined,
+      customizations: details.length > 0 ? customizationKey : undefined,
+      description: details.length > 0 ? `${customizingItem.description} (${customizationKey})` : customizingItem.description
     };
 
+    // Different customizations = different line items
     setCart(prev => {
       const exists = prev.find(i =>
         i.id === finalItem.id &&
-        JSON.stringify(i.selectedAdditions?.map(a => a.id)) === JSON.stringify(finalItem.selectedAdditions?.map(a => a.id)) &&
-        i.description === finalItem.description
+        i.customizations === finalItem.customizations
       );
       if (exists) {
-        return prev.map(i => (i.id === finalItem.id &&
-          JSON.stringify(i.selectedAdditions?.map(a => a.id)) === JSON.stringify(finalItem.selectedAdditions?.map(a => a.id)) &&
-          i.description === finalItem.description)
+        return prev.map(i => (i.id === finalItem.id && i.customizations === finalItem.customizations)
           ? { ...i, cartQuantity: i.cartQuantity + finalItem.cartQuantity }
           : i
         );
@@ -398,7 +501,7 @@ function MenuContent() {
     });
 
     setCustomizingItem(null);
-    addToast(t('item_added'), 'success');
+    addToast('✅ Added to your order!', 'success');
   };
 
   const addIceCreamToCart = () => {
@@ -545,9 +648,27 @@ function MenuContent() {
   }
 
   const customizingItemAdditions = customizingItem ? getAdditionsForItem(customizingItem) : [];
-  const customizingItemSubtotal = customizingItem
-    ? (customizingItem.price + (milk === 'oat' || milk === 'almond' ? 15 : 0) + modalSelectedAdditions.reduce((sum, a) => sum + a.price, 0)) * modalQuantity
-    : 0;
+  const custType = customizingItem ? getItemCustomizationType(customizingItem) : null;
+
+  // Real-time price calculation for the customization modal
+  const customizingItemSubtotal = (() => {
+    if (!customizingItem) return 0;
+    let extra = 0;
+    if (custType === 'cocktail') {
+      if (modalSize === 'large') extra += 15;
+      COCKTAIL_ADDONS.forEach(a => { if (modalToppings.includes(a.value)) extra += a.price; });
+    } else if (custType === 'milkshake') {
+      if (modalSize === 'large') extra += 20;
+      if (modalSize === 'xl') extra += 35;
+      if (modalMilkBase === 'oat' || modalMilkBase === 'almond') extra += 10;
+      MILKSHAKE_TOPPINGS.forEach(t => { if (modalToppings.includes(t.value)) extra += t.price; });
+      MILKSHAKE_EXTRA_SHOTS.forEach(s => { if (modalExtraShots.includes(s.value)) extra += s.price; });
+    } else {
+      if (milk === 'oat' || milk === 'almond') extra += 15;
+      extra += modalSelectedAdditions.reduce((s, a) => s + a.price, 0);
+    }
+    return (customizingItem.price + extra) * modalQuantity;
+  })();
 
   return (
     <div className={styles.page}>
@@ -723,14 +844,17 @@ function MenuContent() {
                 {cart.map((item, idx) => (
                   <div key={idx} className={styles.cartItem}>
                     <div className={styles.cartItemDetails}>
-                      <div className={styles.cartItemName}>{item.name}</div>
+                      <div className={styles.cartItemName}>{item.cartQuantity}x {item.name}</div>
+                      {item.customizations && (
+                        <div className={styles.cartItemOption}>{item.customizations}</div>
+                      )}
                       {item.selectedAdditions && item.selectedAdditions.map(a => (
                         <div key={a.id} className={styles.cartItemOption}>
                           + {a.name} ({a.price.toFixed(2)} EGP)
                         </div>
                       ))}
                       <div className={styles.cartItemPrice}>
-                        {((item.price + (item.selectedAdditions?.reduce((s, a) => s + a.price, 0) || 0)) * item.cartQuantity).toFixed(2)} EGP
+                        {(item.price * item.cartQuantity).toFixed(2)} EGP
                       </div>
                     </div>
                     <div className={styles.cartItemControls}>
@@ -832,19 +956,22 @@ function MenuContent() {
         )}
       </div>
 
-      {/* Brand New Customization / Additions Modal */}
+      {/* ═══ Category-Aware Customization Modal / Bottom Drawer ═══ */}
       <div
         className={`${styles.modalOverlay} ${customizingItem ? styles.modalOverlayOpen : ''}`}
         onClick={() => setCustomizingItem(null)}
         role="dialog"
         aria-modal="true"
-        aria-label={t('customize_drink')}
+        aria-label="Customize your drink"
       >
         {customizingItem && (
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            {/* Swipe handle (mobile) */}
+            <div className={styles.swipeHandle}><div className={styles.swipeBar} /></div>
+
             <div className={styles.modalHeader}>
-              <h2 className={styles.cartTitle}>{t('customize_drink')}</h2>
-              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton} aria-label={t('close')}>
+              <h2 className={styles.cartTitle}>Customize</h2>
+              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton} aria-label="Close">
                 <X size={24} />
               </button>
             </div>
@@ -862,122 +989,300 @@ function MenuContent() {
                   />
                 </div>
                 <div>
-                  <h3 className={styles.modalItemTitle}>
-                    {customizingItem.name}
-                  </h3>
-                  <p className={styles.modalItemDesc}>
-                    {customizingItem.price.toFixed(2)} EGP
-                  </p>
+                  <h3 className={styles.modalItemTitle}>{customizingItem.name}</h3>
+                  <p className={styles.modalItemDesc}>{customizingItem.description}</p>
+                  <p className={styles.modalItemPrice}>{customizingItem.price.toFixed(2)} EGP</p>
                 </div>
               </div>
 
-              {/* Custom Preferences */}
-              {(() => {
-                const cat = customizingItem.category.toLowerCase();
-                const tags = customizingItem.tags || [];
-                // Use shared helpers from menuUtils (H4 fix — 3rd dedup)
-                const showMilk = supportsMilk(cat, tags);
-                const showSweetness = supportsSweetness(cat);
-
-                return (
-                  <>
-                    {showSweetness && (
-                      <div className={styles.optionGroup}>
-                        <span className={styles.optionLabel}>Sweetness Level</span>
-                        <div className={styles.optionGrid}>
-                          {[
-                            { label: 'Standard Sweetness', value: 'standard' },
-                            { label: 'Half Sugar', value: 'half' },
-                            { label: 'No Sugar', value: 'none' }
-                          ].map(opt => (
-                            <button
-                              key={opt.value}
-                              onClick={() => setSweetness(opt.value as any)}
-                              className={`${styles.customizationPill} ${sweetness === opt.value ? styles.customizationPillActive : ''}`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {showMilk && (
-                      <div className={styles.optionGroup}>
-                        <span className={styles.optionLabel}>Milk Preferences</span>
-                        <div className={styles.optionGrid}>
-                          {[
-                            { label: 'No Milk', value: 'none' },
-                            { label: 'Full Cream', value: 'full' },
-                            { label: 'Oat Milk (+15 EGP)', value: 'oat' },
-                            { label: 'Almond Milk (+15 EGP)', value: 'almond' }
-                          ].map(opt => (
-                            <button
-                              key={opt.value}
-                              onClick={() => setMilk(opt.value as any)}
-                              className={`${styles.customizationPill} ${milk === opt.value ? styles.customizationPillActive : ''}`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-
-              {/* Compatible Extra Additions */}
-              {customizingItemAdditions.length > 0 && (
-                <div className={styles.optionGroup}>
-                  <span className={styles.optionLabel}>Compatible Additions</span>
-                  <div className={styles.optionGrid}>
-                    {customizingItemAdditions.map((add) => {
-                      const isSelected = modalSelectedAdditions.some(a => a.id === add.id);
-                      return (
-                        <button
-                          key={add.id}
-                          onClick={() => toggleModalAddition(add)}
-                          className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}
-                        >
-                          <span>{add.name}</span>
-                          <span className={styles.additionPrice}>+{add.price.toFixed(0)} EGP</span>
+              {/* ──── COCKTAIL OPTIONS ──── */}
+              {custType === 'cocktail' && (
+                <>
+                  {/* Size */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Size</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'Regular', value: 'regular', extra: '' },
+                        { label: 'Large', value: 'large', extra: '+15 EGP' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setModalSize(opt.value)}
+                          className={`${styles.customizationPill} ${modalSize === opt.value ? styles.customizationPillActive : ''}`}>
+                          <span>{opt.label}</span>
+                          {opt.extra && <span className={styles.additionPrice}>{opt.extra}</span>}
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  {/* Ice Level */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Ice Level</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'No Ice', value: 'none' },
+                        { label: 'Light Ice', value: 'light' },
+                        { label: 'Normal Ice', value: 'normal' },
+                        { label: 'Extra Ice', value: 'extra' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setModalIceLevel(opt.value)}
+                          className={`${styles.customizationPill} ${modalIceLevel === opt.value ? styles.customizationPillActive : ''}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Sweetness % */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Sweetness Level</span>
+                    <div className={styles.optionGrid}>
+                      {[0, 25, 50, 75, 100].map(pct => (
+                        <button key={pct} onClick={() => setModalSweetnessPct(pct)}
+                          className={`${styles.customizationPill} ${modalSweetnessPct === pct ? styles.customizationPillActive : ''}`}>
+                          {pct}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Add-ons */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Add-ons <span className={styles.optionLabelSub}>(+10 EGP each)</span></span>
+                    <div className={styles.optionGrid}>
+                      {COCKTAIL_ADDONS.map(addon => {
+                        const selected = modalToppings.includes(addon.value);
+                        return (
+                          <button key={addon.value} onClick={() => setModalToppings(prev => selected ? prev.filter(v => v !== addon.value) : [...prev, addon.value])}
+                            className={`${styles.customizationPill} ${selected ? styles.customizationPillActive : ''}`}>
+                            <span>{addon.label}</span>
+                            <span className={styles.additionPrice}>+{addon.price}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Special Instructions */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Special Instructions</span>
+                    <div className={styles.specialInstructionsWrap}>
+                      <textarea
+                        className={styles.specialInstructionsInput}
+                        value={modalSpecialInstructions}
+                        onChange={e => setModalSpecialInstructions(e.target.value.slice(0, 100))}
+                        placeholder="Any special requests?"
+                        maxLength={100}
+                        rows={2}
+                      />
+                      <span className={styles.charCounter}>{modalSpecialInstructions.length}/100</span>
+                    </div>
+                  </div>
+                </>
               )}
 
-              {/* Product Quantity Incrementor */}
+              {/* ──── MILKSHAKE OPTIONS ──── */}
+              {custType === 'milkshake' && (
+                <>
+                  {/* Size */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Size</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'Regular', value: 'regular', extra: '' },
+                        { label: 'Large', value: 'large', extra: '+20 EGP' },
+                        { label: 'XL', value: 'xl', extra: '+35 EGP' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setModalSize(opt.value)}
+                          className={`${styles.customizationPill} ${modalSize === opt.value ? styles.customizationPillActive : ''}`}>
+                          <span>{opt.label}</span>
+                          {opt.extra && <span className={styles.additionPrice}>{opt.extra}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Milk Base */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Milk Base</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'Whole Milk', value: 'whole', extra: '' },
+                        { label: 'Oat Milk', value: 'oat', extra: '+10 EGP' },
+                        { label: 'Almond Milk', value: 'almond', extra: '+10 EGP' },
+                        { label: 'No Milk (Sorbet)', value: 'no_milk', extra: '' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setModalMilkBase(opt.value)}
+                          className={`${styles.customizationPill} ${modalMilkBase === opt.value ? styles.customizationPillActive : ''}`}>
+                          <span>{opt.label}</span>
+                          {opt.extra && <span className={styles.additionPrice}>{opt.extra}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Thickness */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Thickness</span>
+                    <div className={styles.optionGrid}>
+                      {['thin', 'medium', 'thick', 'extra thick'].map(val => (
+                        <button key={val} onClick={() => setModalThickness(val)}
+                          className={`${styles.customizationPill} ${modalThickness === val ? styles.customizationPillActive : ''}`}>
+                          {val.charAt(0).toUpperCase() + val.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Toppings */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Toppings <span className={styles.optionLabelSub}>(+10 EGP each)</span></span>
+                    <div className={styles.optionGrid}>
+                      {MILKSHAKE_TOPPINGS.map(topping => {
+                        const selected = modalToppings.includes(topping.value);
+                        return (
+                          <button key={topping.value} onClick={() => setModalToppings(prev => selected ? prev.filter(v => v !== topping.value) : [...prev, topping.value])}
+                            className={`${styles.customizationPill} ${selected ? styles.customizationPillActive : ''}`}>
+                            <span>{topping.label}</span>
+                            <span className={styles.additionPrice}>+{topping.price}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Extra Shots */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Extra Shots <span className={styles.optionLabelSub}>(+15 EGP each)</span></span>
+                    <div className={styles.optionGrid}>
+                      {MILKSHAKE_EXTRA_SHOTS.map(shot => {
+                        const selected = modalExtraShots.includes(shot.value);
+                        return (
+                          <button key={shot.value} onClick={() => setModalExtraShots(prev => selected ? prev.filter(v => v !== shot.value) : [...prev, shot.value])}
+                            className={`${styles.customizationPill} ${selected ? styles.customizationPillActive : ''}`}>
+                            <span>{shot.label}</span>
+                            <span className={styles.additionPrice}>+{shot.price}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Temperature */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Temperature</span>
+                    <div className={styles.optionGrid}>
+                      {[
+                        { label: 'Frozen', value: 'frozen' },
+                        { label: 'Chilled', value: 'chilled' },
+                      ].map(opt => (
+                        <button key={opt.value} onClick={() => setModalTemperature(opt.value)}
+                          className={`${styles.customizationPill} ${modalTemperature === opt.value ? styles.customizationPillActive : ''}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Special Instructions */}
+                  <div className={styles.optionGroup}>
+                    <span className={styles.optionLabel}>Special Instructions</span>
+                    <div className={styles.specialInstructionsWrap}>
+                      <textarea
+                        className={styles.specialInstructionsInput}
+                        value={modalSpecialInstructions}
+                        onChange={e => setModalSpecialInstructions(e.target.value.slice(0, 100))}
+                        placeholder="Any special requests?"
+                        maxLength={100}
+                        rows={2}
+                      />
+                      <span className={styles.charCounter}>{modalSpecialInstructions.length}/100</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ──── GENERIC ITEM OPTIONS (Coffee, Tea, etc.) ──── */}
+              {custType === 'generic' && (
+                <>
+                  {(() => {
+                    const cat = customizingItem.category.toLowerCase();
+                    const tags = customizingItem.tags || [];
+                    const showMilk = supportsMilk(cat, tags);
+                    const showSweetness = supportsSweetness(cat);
+                    return (
+                      <>
+                        {showSweetness && (
+                          <div className={styles.optionGroup}>
+                            <span className={styles.optionLabel}>Sweetness Level</span>
+                            <div className={styles.optionGrid}>
+                              {[
+                                { label: 'Standard Sweetness', value: 'standard' },
+                                { label: 'Half Sugar', value: 'half' },
+                                { label: 'No Sugar', value: 'none' }
+                              ].map(opt => (
+                                <button key={opt.value} onClick={() => setSweetness(opt.value as any)}
+                                  className={`${styles.customizationPill} ${sweetness === opt.value ? styles.customizationPillActive : ''}`}>
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {showMilk && (
+                          <div className={styles.optionGroup}>
+                            <span className={styles.optionLabel}>Milk Preferences</span>
+                            <div className={styles.optionGrid}>
+                              {[
+                                { label: 'No Milk', value: 'none' },
+                                { label: 'Full Cream', value: 'full' },
+                                { label: 'Oat Milk (+15 EGP)', value: 'oat' },
+                                { label: 'Almond Milk (+15 EGP)', value: 'almond' }
+                              ].map(opt => (
+                                <button key={opt.value} onClick={() => setMilk(opt.value as any)}
+                                  className={`${styles.customizationPill} ${milk === opt.value ? styles.customizationPillActive : ''}`}>
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                  {customizingItemAdditions.length > 0 && (
+                    <div className={styles.optionGroup}>
+                      <span className={styles.optionLabel}>Compatible Additions</span>
+                      <div className={styles.optionGrid}>
+                        {customizingItemAdditions.map((add) => {
+                          const isSelected = modalSelectedAdditions.some(a => a.id === add.id);
+                          return (
+                            <button key={add.id} onClick={() => toggleModalAddition(add)}
+                              className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}>
+                              <span>{add.name}</span>
+                              <span className={styles.additionPrice}>+{add.price.toFixed(0)} EGP</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ──── Quantity Selector (all categories) ──── */}
               <div className={`${styles.optionGroup} ${styles.modalQuantityGroup}`}>
                 <span className={`${styles.optionLabel} ${styles.modalQuantityLabel}`}>Quantity</span>
                 <div className={styles.modalQuantityContainer}>
-                  <button
-                    onClick={() => setModalQuantity(q => Math.max(1, q - 1))}
-                    className={styles.quantityBtn}
-                  >
+                  <button onClick={() => setModalQuantity(q => Math.max(1, q - 1))} className={styles.quantityBtn} aria-label="Decrease quantity">
                     <Minus size={14} />
                   </button>
-                  <span className={styles.modalQuantityValue}>
-                    {modalQuantity}
-                  </span>
-                  <button
-                    onClick={() => setModalQuantity(q => q + 1)}
-                    className={styles.quantityBtn}
-                  >
+                  <span className={styles.modalQuantityValue}>{modalQuantity}</span>
+                  <button onClick={() => setModalQuantity(q => q + 1)} className={styles.quantityBtn} aria-label="Increase quantity">
                     <Plus size={14} />
                   </button>
                 </div>
               </div>
             </div>
 
+            {/* Sticky footer with live price */}
             <div className={styles.modalFooter}>
-              <Button variant="ghost" fullWidth onClick={() => setCustomizingItem(null)}>
-                Cancel
-              </Button>
+              <div className={styles.modalPriceLine}>
+                <span>{modalQuantity}x {customizingItem.name}</span>
+                <span className={styles.modalLivePrice}>{customizingItemSubtotal.toFixed(2)} EGP</span>
+              </div>
               <Button fullWidth onClick={confirmCustomization}>
-                Add to Order ({customizingItemSubtotal.toFixed(2)} EGP)
+                Add to Order — {customizingItemSubtotal.toFixed(2)} EGP
               </Button>
             </div>
           </div>
