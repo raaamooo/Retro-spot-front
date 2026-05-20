@@ -3,12 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/contexts/ToastContext';
 import { usePathname } from 'next/navigation';
 import { MapPin, Phone, Mail, Camera, Share2, MessageSquare } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
   const { t, isRtl } = useLanguage();
+  const { addToast } = useToast();
   const pathname = usePathname();
 
   if (
@@ -89,10 +91,10 @@ export default function Footer() {
             </p>
             <form className={styles.form} onSubmit={(e) => {
               e.preventDefault();
-              // Newsletter integration placeholder — shows user feedback
+              // Newsletter integration placeholder — shows user feedback via toast
               const input = e.currentTarget.querySelector('input');
               if (input) input.value = '';
-              alert(isRtl ? 'النشرة الإخبارية قريباً! ترقبوا.' : 'Newsletter coming soon! Stay tuned.');
+              addToast(isRtl ? 'النشرة الإخبارية قريباً! ترقبوا.' : 'Newsletter coming soon! Stay tuned.', 'info');
             }}>
               <input 
                 type="email" 

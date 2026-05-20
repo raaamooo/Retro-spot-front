@@ -18,6 +18,43 @@ import { isCoffeeCat, supportsMilk, supportsSweetness, getCategoryDescription, t
 import DrinkQuiz from '@/components/ui/DrinkQuiz';
 import styles from './Menu.module.css';
 
+/* ═══════════════════════════════════════════════════════════════
+   STATIC MENU DATA — Cocktails & Milkshakes
+   These items are displayed alongside API-fetched categories.
+   Prices are in EGP.
+   ═══════════════════════════════════════════════════════════════ */
+const STATIC_MENU_SECTIONS = [
+  {
+    category: 'Cocktails',
+    categoryAr: 'كوكتيلات',
+    items: [
+      { id: 'static-cocktail-1', nameEn: 'Banana Strawberry', nameAr: 'موز فراولة', price: 75, description: 'A tropical fusion of ripe banana and fresh strawberry.', descriptionAr: 'مزيج استوائي من الموز الناضج والفراولة الطازجة.' },
+      { id: 'static-cocktail-2', nameEn: 'Mango Kiwi', nameAr: 'مانجو كيوي', price: 85, description: 'Sweet mango paired with tangy kiwi for a refreshing twist.', descriptionAr: 'مانجو حلوة مع كيوي لاذع لمذاق منعش.' },
+      { id: 'static-cocktail-3', nameEn: 'Piña Colada', nameAr: 'بينا كولادا', price: 95, description: 'Classic pineapple and coconut cream blend.', descriptionAr: 'مزيج كلاسيكي من الأناناس وكريمة جوز الهند.' },
+    ],
+  },
+  {
+    category: 'Milkshakes',
+    categoryAr: 'ميلك شيك',
+    items: [
+      { id: 'static-shake-1',  nameEn: 'Nutella',    nameAr: 'نوتيلا',     price: 80, description: 'Rich hazelnut chocolate milkshake.', descriptionAr: 'ميلك شيك شوكولاتة بندق غني.' },
+      { id: 'static-shake-2',  nameEn: 'Oreo',       nameAr: 'أوريو',      price: 85, description: 'Crushed Oreo cookies blended with creamy milk.', descriptionAr: 'بسكويت أوريو مطحون مع الحليب الكريمي.' },
+      { id: 'static-shake-3',  nameEn: 'Caramel',    nameAr: 'كراميل',     price: 85, description: 'Buttery caramel swirled into cold creamy milk.', descriptionAr: 'كراميل زبدي ممزوج مع حليب بارد كريمي.' },
+      { id: 'static-shake-4',  nameEn: 'Chocolate',  nameAr: 'شوكولاتة',   price: 80, description: 'Classic chocolate milkshake with premium cocoa.', descriptionAr: 'ميلك شيك شوكولاتة كلاسيكي بكاكاو ممتاز.' },
+      { id: 'static-shake-5',  nameEn: 'Vanilla',    nameAr: 'فانيليا',    price: 80, description: 'Smooth vanilla bean milkshake.', descriptionAr: 'ميلك شيك فانيليا ناعم.' },
+      { id: 'static-shake-6',  nameEn: 'KitKat',     nameAr: 'كيت كات',    price: 85, description: 'Crunchy KitKat pieces in a smooth creamy base.', descriptionAr: 'قطع كيت كات مقرمشة في قاعدة كريمية.' },
+      { id: 'static-shake-7',  nameEn: 'Snickers',   nameAr: 'سنيكرز',     price: 85, description: 'Snickers-inspired shake with peanut and caramel.', descriptionAr: 'شيك بنكهة سنيكرز مع الفول السوداني والكراميل.' },
+      { id: 'static-shake-8',  nameEn: 'Pistachio',  nameAr: 'فستق',       price: 90, description: 'Premium pistachio milkshake with a nutty finish.', descriptionAr: 'ميلك شيك فستق فاخر بنكهة مكسرات.' },
+      { id: 'static-shake-9',  nameEn: 'Lotus',      nameAr: 'لوتس',       price: 80, description: 'Biscoff cookie spread blended with cold milk.', descriptionAr: 'بسكويت لوتس ممزوج مع الحليب البارد.' },
+      { id: 'static-shake-10', nameEn: 'Mix Berry',   nameAr: 'مكس بيري',   price: 85, description: 'A blend of mixed berries with creamy milk.', descriptionAr: 'مزيج توت مع حليب كريمي.' },
+      { id: 'static-shake-11', nameEn: 'Blueberry',   nameAr: 'توت أزرق',   price: 80, description: 'Fresh blueberry milkshake with a fruity kick.', descriptionAr: 'ميلك شيك توت أزرق طازج.' },
+      { id: 'static-shake-12', nameEn: 'Strawberry',  nameAr: 'فراولة',     price: 80, description: 'Sweet strawberry milkshake made with real fruit.', descriptionAr: 'ميلك شيك فراولة حلو بفواكه حقيقية.' },
+      { id: 'static-shake-13', nameEn: 'Peach',       nameAr: 'خوخ',        price: 80, description: 'Delicate peach milkshake with a summer vibe.', descriptionAr: 'ميلك شيك خوخ ناعم بنكهة صيفية.' },
+      { id: 'static-shake-14', nameEn: 'Mango',       nameAr: 'مانجو',      price: 80, description: 'Tropical mango milkshake, thick and creamy.', descriptionAr: 'ميلك شيك مانجو استوائي سميك وكريمي.' },
+    ],
+  },
+];
+
 // --- Types ---
 type MenuItem = {
   id: string;
@@ -141,7 +178,24 @@ function MenuContent() {
           ...d,
           tags: d.tags ? (typeof d.tags === 'string' ? d.tags.split(',') : d.tags) : [],
         }));
-        setMenuItems(enrichedData);
+
+        // Merge static Cocktails & Milkshakes into the item list
+        const staticItems: MenuItem[] = STATIC_MENU_SECTIONS.flatMap(section =>
+          section.items.map(item => ({
+            id: item.id,
+            name: language === 'ar' ? item.nameAr : item.nameEn,
+            nameEn: item.nameEn,
+            description: language === 'ar' ? item.descriptionAr : item.description,
+            price: item.price,
+            image: getItemImage(item.nameEn) || null,
+            category: language === 'ar' ? section.categoryAr : section.category,
+            available: true,
+            tags: [],
+            isAddition: false,
+          }))
+        );
+
+        setMenuItems([...enrichedData, ...staticItems]);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -645,7 +699,7 @@ function MenuContent() {
             {t('active_order')}
           </span>
           <Button variant="ghost" size="sm" onClick={requestCheck} style={{ borderColor: 'var(--primary-foreground)', color: 'var(--primary-foreground)' }}>
-            Request Check
+            {t('request_check')}
           </Button>
         </div>
       )}
@@ -782,12 +836,15 @@ function MenuContent() {
       <div 
         className={`${styles.modalOverlay} ${customizingItem ? styles.modalOverlayOpen : ''}`} 
         onClick={() => setCustomizingItem(null)}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('customize_drink')}
       >
         {customizingItem && (
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.cartTitle}>Customize Drink</h2>
-              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton}>
+              <h2 className={styles.cartTitle}>{t('customize_drink')}</h2>
+              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton} aria-label={t('close')}>
                 <X size={24} />
               </button>
             </div>
@@ -826,12 +883,12 @@ function MenuContent() {
                   <>
                     {showSweetness && (
                       <div className={styles.optionGroup}>
-                        <span className={styles.optionLabel}>Sweetness Level</span>
+                        <span className={styles.optionLabel}>{t('sweetness_level')}</span>
                         <div className={styles.optionGrid}>
                           {[
-                            { label: 'Standard Sweetness', value: 'standard' },
-                            { label: 'Half Sugar', value: 'half' },
-                            { label: 'No Sugar', value: 'none' }
+                            { label: t('standard_sweetness'), value: 'standard' },
+                            { label: t('half_sugar'), value: 'half' },
+                            { label: t('no_sugar'), value: 'none' }
                           ].map(opt => (
                             <button
                               key={opt.value}
@@ -847,13 +904,13 @@ function MenuContent() {
 
                     {showMilk && (
                       <div className={styles.optionGroup}>
-                        <span className={styles.optionLabel}>Milk Preferences</span>
+                        <span className={styles.optionLabel}>{t('milk_preferences')}</span>
                         <div className={styles.optionGrid}>
                           {[
-                            { label: 'No Milk', value: 'none' },
-                            { label: 'Full Cream', value: 'full' },
-                            { label: 'Oat Milk (+15 EGP)', value: 'oat' },
-                            { label: 'Almond Milk (+15 EGP)', value: 'almond' }
+                            { label: t('no_milk'), value: 'none' },
+                            { label: t('full_cream'), value: 'full' },
+                            { label: t('oat_milk'), value: 'oat' },
+                            { label: t('almond_milk'), value: 'almond' }
                           ].map(opt => (
                             <button
                               key={opt.value}
@@ -873,7 +930,7 @@ function MenuContent() {
               {/* Compatible Extra Additions */}
               {customizingItemAdditions.length > 0 && (
                 <div className={styles.optionGroup}>
-                  <span className={styles.optionLabel}>Compatible Additions</span>
+                  <span className={styles.optionLabel}>{t('compatible_additions')}</span>
                   <div className={styles.optionGrid}>
                     {customizingItemAdditions.map((add) => {
                       const isSelected = modalSelectedAdditions.some(a => a.id === add.id);
@@ -894,11 +951,12 @@ function MenuContent() {
 
               {/* Product Quantity Incrementor */}
               <div className={`${styles.optionGroup} ${styles.modalQuantityGroup}`}>
-                <span className={`${styles.optionLabel} ${styles.modalQuantityLabel}`}>Quantity</span>
+                <span className={`${styles.optionLabel} ${styles.modalQuantityLabel}`}>{t('quantity')}</span>
                 <div className={styles.modalQuantityContainer}>
                   <button 
                     onClick={() => setModalQuantity(q => Math.max(1, q - 1))} 
                     className={styles.quantityBtn}
+                    aria-label="Decrease quantity"
                   >
                     <Minus size={14} />
                   </button>
@@ -908,6 +966,7 @@ function MenuContent() {
                   <button 
                     onClick={() => setModalQuantity(q => q + 1)} 
                     className={styles.quantityBtn}
+                    aria-label="Increase quantity"
                   >
                     <Plus size={14} />
                   </button>
@@ -917,10 +976,10 @@ function MenuContent() {
 
             <div className={styles.modalFooter}>
               <Button variant="ghost" fullWidth onClick={() => setCustomizingItem(null)}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button fullWidth onClick={confirmCustomization}>
-                Add to Order ({customizingItemSubtotal.toFixed(2)} EGP)
+                {t('add_to_order')} ({customizingItemSubtotal.toFixed(2)} EGP)
               </Button>
             </div>
           </div>
@@ -931,12 +990,15 @@ function MenuContent() {
       <div 
         className={`${styles.modalOverlay} ${flavorModalItem ? styles.modalOverlayOpen : ''}`} 
         onClick={() => setFlavorModalItem(null)}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('select_flavors')}
       >
         {flavorModalItem && (
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.cartTitle}>Select Flavors</h2>
-              <button onClick={() => setFlavorModalItem(null)} className={styles.closeButton}>
+              <h2 className={styles.cartTitle}>{t('select_flavors')}</h2>
+              <button onClick={() => setFlavorModalItem(null)} className={styles.closeButton} aria-label={t('close')}>
                 <X size={24} />
               </button>
             </div>
@@ -963,7 +1025,7 @@ function MenuContent() {
               </div>
 
               <div className={`${styles.optionGroup} ${styles.cartNotesWrap}`}>
-                <span className={styles.optionLabel}>Ice Cream Flavors</span>
+                <span className={styles.optionLabel}>{t('ice_cream_flavors')}</span>
                 <div className={styles.optionGrid}>
                   {ICE_CREAM_FLAVORS.map(f => {
                     const isSelected = selectedFlavors.includes(f);
@@ -983,10 +1045,10 @@ function MenuContent() {
 
             <div className={styles.modalFooter}>
               <Button variant="ghost" fullWidth onClick={() => setFlavorModalItem(null)}>
-                Cancel
+                {t('cancel')}
               </Button>
               <Button fullWidth onClick={addIceCreamToCart}>
-                Confirm Flavors
+                {t('confirm_flavors')}
               </Button>
             </div>
           </div>

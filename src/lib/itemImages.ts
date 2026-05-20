@@ -114,6 +114,28 @@ const ITEM_IMAGE_MAP: Record<string, string> = {
   'ice cream 2 scoop': '/items/ice_cream/2scoops.jpeg',
   'ice cream 3 scoop': '/items/ice_cream/3scoops.jpeg',
   'ice cream 4 scoop': '/items/ice_cream/4scoops.jpeg',
+
+  // ── Cocktails (new) ──
+  'banana strawberry':    'https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=400&auto=format&fit=crop',
+  'mango kiwi':           'https://images.unsplash.com/photo-1546173159-315724a31696?q=80&w=400&auto=format&fit=crop',
+  'piña colada':          'https://images.unsplash.com/photo-1587223962930-cb7f31384c19?q=80&w=400&auto=format&fit=crop',
+  'pina colada':          'https://images.unsplash.com/photo-1587223962930-cb7f31384c19?q=80&w=400&auto=format&fit=crop',
+
+  // ── Milkshakes (new) ──
+  'nutella milkshake':    'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=400&auto=format&fit=crop',
+  'oreo milkshake':       'https://images.unsplash.com/photo-1568901839119-631418a3910d?q=80&w=400&auto=format&fit=crop',
+  'caramel milkshake':    'https://images.unsplash.com/photo-1541658016709-82535e94bc69?q=80&w=400&auto=format&fit=crop',
+  'chocolate milkshake':  'https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=400&auto=format&fit=crop',
+  'vanilla milkshake':    'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=400&auto=format&fit=crop',
+  'kitkat milkshake':     'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=400&auto=format&fit=crop',
+  'snickers milkshake':   'https://images.unsplash.com/photo-1572490122747-3968b75cc699?q=80&w=400&auto=format&fit=crop',
+  'pistachio milkshake':  'https://images.unsplash.com/photo-1541658016709-82535e94bc69?q=80&w=400&auto=format&fit=crop',
+  'lotus milkshake':      'https://images.unsplash.com/photo-1541658016709-82535e94bc69?q=80&w=400&auto=format&fit=crop',
+  'mix berry milkshake':  'https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=400&auto=format&fit=crop',
+  'blueberry milkshake':  'https://images.unsplash.com/photo-1553530666-ba11a7da3888?q=80&w=400&auto=format&fit=crop',
+  'strawberry milkshake': 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=400&auto=format&fit=crop',
+  'peach milkshake':      'https://images.unsplash.com/photo-1546173159-315724a31696?q=80&w=400&auto=format&fit=crop',
+  'mango milkshake':      'https://images.unsplash.com/photo-1546173159-315724a31696?q=80&w=400&auto=format&fit=crop',
 };
 
 /**

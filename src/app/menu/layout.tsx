@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     title: 'Menu | Retro Spot',
     description: 'Explore our curated selection of specialty coffee, pastries, milkshakes, and cocktails at Retro Spot.',
   },
+  alternates: {
+    canonical: 'https://retrospot.cafe/menu',
+  },
 };
 
 export default function MenuLayout({

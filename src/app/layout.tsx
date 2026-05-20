@@ -37,6 +37,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://retrospot.cafe',
+  },
 };
 
 export const viewport: Viewport = {
@@ -64,6 +67,41 @@ const jsonLd = {
   },
   servesCuisine: "Coffee, Beverages, Light Bites",
   priceRange: "$$",
+  hasMenu: {
+    "@type": "Menu",
+    name: "Retro Spot Menu",
+    hasMenuSection: [
+      {
+        "@type": "MenuSection",
+        name: "Cocktails",
+        hasMenuItem: [
+          { "@type": "MenuItem", name: "Banana Strawberry", offers: { "@type": "Offer", price: "75", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Mango Kiwi", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Piña Colada", offers: { "@type": "Offer", price: "95", priceCurrency: "EGP" } },
+        ],
+      },
+      {
+        "@type": "MenuSection",
+        name: "Milkshakes",
+        hasMenuItem: [
+          { "@type": "MenuItem", name: "Nutella", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Oreo", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Caramel", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Chocolate", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Vanilla", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "KitKat", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Snickers", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Pistachio", offers: { "@type": "Offer", price: "90", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Lotus", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Mix Berry", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Blueberry", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Strawberry", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Peach", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+          { "@type": "MenuItem", name: "Mango", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
+        ],
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

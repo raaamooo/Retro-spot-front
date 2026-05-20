@@ -53,7 +53,7 @@
 /* ---------- Category Scroll Navigation Bar ---------- */
 .categoryNav {
   position: sticky;
-  top: 0; /* Align directly to the viewport top */
+  top: 63px; /* Stack below the menu header bar */
   z-index: 40;
   background-color: rgba(245, 232, 213, 0.9);
   backdrop-filter: blur(8px);

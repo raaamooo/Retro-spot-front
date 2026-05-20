@@ -46,7 +46,9 @@ export function supportsSweetness(category: string): boolean {
     lower.includes('frappe') ||
     lower.includes('juice') ||
     lower.includes('mojito') ||
-    lower.includes('smoothie')
+    lower.includes('smoothie') ||
+    lower.includes('cocktail') ||
+    lower.includes('milkshake')
   );
 }
 
@@ -62,6 +64,8 @@ export function getCategoryDescription(category: string): string {
   if (lower.includes('juice')) return 'Freshly squeezed premium raw fruits.';
   if (lower.includes('waffle')) return 'Warm golden delicacies with sweet premium toppings.';
   if (lower.includes('yogurt')) return 'Healthy light creations made fresh daily.';
+  if (lower.includes('cocktail')) return 'Refreshing fruity blends to brighten your day.';
+  if (lower.includes('milkshake')) return 'Rich, creamy shakes with premium toppings and flavors.';
   return 'Delectable curated choices for your pleasure.';
 }
 
