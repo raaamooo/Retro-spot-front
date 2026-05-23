@@ -225,6 +225,7 @@ const translations: Record<string, { en: string; ar: string }> = {
   recipes: { en: 'Recipes', ar: 'الوصفات' },
   additions: { en: 'Additions', ar: 'الإضافات' },
   out_of_stock: { en: 'Out of Stock', ar: 'نفذت الكمية' },
+  coming_soon: { en: 'Coming Soon', ar: 'قريباً' },
   accounting: { en: 'Accounting', ar: 'الحسابات' },
   orders: { en: 'Orders', ar: 'الطلبات' },
   workers: { en: 'Workers', ar: 'العمال' },

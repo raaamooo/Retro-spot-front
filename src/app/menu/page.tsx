@@ -60,6 +60,7 @@ type MenuItem = {
   id: string;
   name: string;
   nameEn?: string;
+  nameAr?: string;
   description: string;
   price: number;
   image: string | null;
@@ -94,6 +95,7 @@ function MenuContent() {
 
   const [quizHighlight, setQuizHighlight] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [coffeeTypeTab, setCoffeeTypeTab] = useState<'hot' | 'iced'>('hot');
 
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
@@ -244,6 +246,7 @@ function MenuContent() {
             id: item.id,
             name: language === 'ar' ? item.nameAr : item.nameEn,
             nameEn: item.nameEn,
+            nameAr: item.nameAr,
             description: language === 'ar' ? item.descriptionAr : item.description,
             price: item.price,
             image: getItemImage(item.nameEn) || null,
@@ -731,6 +734,111 @@ function MenuContent() {
             const isHighlighted = quizHighlight === category;
             const catItems = menuItems.filter(i => i.category === category && !i.isAddition);
 
+            const isCoffee = category.toLowerCase() === 'coffee' || category === 'قهوة';
+            const isSweetCorner = category.toLowerCase().includes('sweet') || category.toLowerCase().includes('corner') || category === 'ركن الحلويات';
+
+            // Sorting helper: price asc, name asc, coming_soon at the bottom
+            const sortItems = (items: MenuItem[]) => {
+              return [...items].sort((a, b) => {
+                const aComing = a.tags?.includes('coming_soon');
+                const bComing = b.tags?.includes('coming_soon');
+
+                if (aComing && !bComing) return 1;
+                if (!aComing && bComing) return -1;
+
+                if (a.price !== b.price) {
+                  return a.price - b.price;
+                }
+                return (a.nameEn || a.name || '').localeCompare(b.nameEn || b.name || '');
+              });
+            };
+
+            // Sweet Corner sub-label helper
+            const getSweetSubLabel = (nameEn: string, nameAr: string) => {
+              const lowerEn = (nameEn || '').toLowerCase();
+              const lowerAr = (nameAr || '').toLowerCase();
+              if (lowerEn.includes('ice cream') || lowerAr.includes('ايس كريم')) return 'Ice Cream';
+              if (lowerEn.includes('waffle') || lowerAr.includes('وافل')) return 'Waffles';
+              if (lowerEn.includes('yogurt') || lowerAr.includes('زبادي')) return 'Yogurt';
+              return 'Other';
+            };
+
+            // Active category items based on filters (Hot/Iced tabs for Coffee)
+            const activeFilteredItems = isCoffee
+              ? catItems.filter(i => {
+                  const isHot = i.tags?.includes('hot');
+                  const isIced = i.tags?.includes('iced');
+                  if (coffeeTypeTab === 'hot') {
+                    return isHot || (!isHot && !isIced);
+                  } else {
+                    return isIced;
+                  }
+                })
+              : catItems;
+
+            const sortedItems = sortItems(activeFilteredItems);
+
+            const renderItemCard = (item: MenuItem) => {
+              const isComingSoon = item.tags?.includes('coming_soon');
+              return (
+                <div
+                  key={item.id}
+                  className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''}`}
+                  onClick={() => {
+                    if (isComingSoon) return;
+                    handleAddClick(item);
+                  }}
+                >
+                  <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
+                    <Image
+                      src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
+                      className={styles.itemImage}
+                    />
+                    {isComingSoon && (
+                      <div className={styles.comingSoonOverlay}>
+                        <span>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.itemContent}>
+                    <div>
+                      <h4 className={styles.itemName}>{item.name}</h4>
+                      <p className={styles.itemDesc}>{item.description}</p>
+                      {item.tags && item.tags.filter(t => t !== 'coming_soon').length > 0 && (
+                        <div className={styles.itemTags}>
+                          {item.tags.filter(t => t !== 'coming_soon').map(t => (
+                            <span key={t} className={styles.tag}>{t}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.itemFooter}>
+                      <span className={styles.itemPrice}>{Math.round(item.price)} EGP</span>
+                      {isComingSoon ? (
+                        <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                      ) : item.available ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddClick(item);
+                          }}
+                          className={styles.addButton}
+                        >
+                          {t('add')}
+                        </button>
+                      ) : (
+                        <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            };
+
             return (
               <section
                 key={category}
@@ -738,61 +846,61 @@ function MenuContent() {
                 className={`${styles.categorySection} ${isHighlighted ? styles.categoryCardHighlight : ''}`}
               >
                 <div className={styles.categoryHeader}>
-                  <h2 className={styles.categoryTitle}>{category}</h2>
+                  <h2 className={styles.categoryTitle}>
+                    {category}
+                    <span className={styles.categoryCountBadge}>{catItems.length}</span>
+                  </h2>
                   <p className={styles.categoryDesc}>
                     {getCategoryDescription(category)}
                   </p>
+
+                  {/* Hot / Iced tab switcher for Coffee */}
+                  {isCoffee && (
+                    <div className={styles.coffeeTabs}>
+                      <button
+                        type="button"
+                        className={`${styles.coffeeTab} ${coffeeTypeTab === 'hot' ? styles.coffeeTabActive : ''}`}
+                        onClick={() => setCoffeeTypeTab('hot')}
+                      >
+                        {language === 'ar' ? 'ساخن' : 'Hot'}
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.coffeeTab} ${coffeeTypeTab === 'iced' ? styles.coffeeTabActive : ''}`}
+                        onClick={() => setCoffeeTypeTab('iced')}
+                      >
+                        {language === 'ar' ? 'بارد' : 'Iced'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div className={styles.gridList}>
-                  {catItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className={styles.menuItem}
-                      onClick={() => handleAddClick(item)}
-                    >
-                      <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
-                        <Image
-                          src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
-                          alt={item.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                          className={styles.itemImage}
-                        />
-                      </div>
-                      <div className={styles.itemContent}>
-                        <div>
-                          <h4 className={styles.itemName}>{item.name}</h4>
-                          <p className={styles.itemDesc}>{item.description}</p>
-                          {item.tags && item.tags.length > 0 && (
-                            <div className={styles.itemTags}>
-                              {item.tags.map(t => (
-                                <span key={t} className={styles.tag}>{t}</span>
-                              ))}
-                            </div>
-                          )}
+                {isSweetCorner ? (
+                  <div className={styles.sweetCornerContainer}>
+                    {[
+                      { key: 'Ice Cream', labelEn: 'Ice Cream', labelAr: 'آيس كريم' },
+                      { key: 'Waffles', labelEn: 'Waffles', labelAr: 'وافل' },
+                      { key: 'Yogurt', labelEn: 'Yogurt', labelAr: 'زبادي' }
+                    ].map((group) => {
+                      const groupItems = sortItems(catItems.filter(i => getSweetSubLabel(i.nameEn || '', i.nameAr || '') === group.key));
+                      if (groupItems.length === 0) return null;
+                      return (
+                        <div key={group.key} className={styles.sweetGroup}>
+                          <h3 className={styles.sweetGroupTitle}>
+                            {language === 'ar' ? group.labelAr : group.labelEn}
+                          </h3>
+                          <div className={styles.gridList}>
+                            {groupItems.map(item => renderItemCard(item))}
+                          </div>
                         </div>
-                        <div className={styles.itemFooter}>
-                          <span className={styles.itemPrice}>{item.price.toFixed(2)} EGP</span>
-                          {item.available ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddClick(item);
-                              }}
-                              className={styles.addButton}
-                            >
-                              {t('add')}
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--danger)' }}>Out of stock</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className={styles.gridList}>
+                    {sortedItems.map(item => renderItemCard(item))}
+                  </div>
+                )}
               </section>
             );
           })}

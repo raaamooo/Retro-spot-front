@@ -62,6 +62,9 @@ export function getCategoryDescription(category: string): string {
   if (lower.includes('tea')) return 'Fragrant infusions and aromatic spiced brews.';
   if (lower.includes('frappe')) return 'Sweet frosty blends of rich cream and flavor.';
   if (lower.includes('juice')) return 'Freshly squeezed premium raw fruits.';
+  if (lower.includes('sweet') || lower.includes('corner') || lower.includes('حلويات')) {
+    return 'Premium waffles, artisanal ice creams, and fresh yogurt creations.';
+  }
   if (lower.includes('waffle')) return 'Warm golden delicacies with sweet premium toppings.';
   if (lower.includes('yogurt')) return 'Healthy light creations made fresh daily.';
   if (lower.includes('cocktail')) return 'Refreshing fruity blends to brighten your day.';

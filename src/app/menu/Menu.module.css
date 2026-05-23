@@ -985,3 +985,118 @@
   flex-direction: column;
   gap: 4px;
 }
+
+/* ---------- Category Count Badge ---------- */
+.categoryCountBadge {
+  font-size: 13px;
+  font-weight: 800;
+  vertical-align: middle;
+  background-color: var(--accent);
+  color: #1c0e06;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  margin-inline-start: 10px;
+  display: inline-block;
+  transform: translateY(-5px);
+  box-shadow: 0 2px 6px rgba(196, 153, 63, 0.2);
+}
+
+/* ---------- Coffee Tab Switcher ---------- */
+.coffeeTabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  background-color: var(--surface-elevated);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid var(--border-subtle);
+}
+
+.coffeeTab {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 20px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.coffeeTab:hover {
+  color: var(--foreground);
+}
+
+.coffeeTabActive {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: 0 2px 6px rgba(44, 26, 14, 0.12);
+}
+
+/* ---------- Coming Soon Items Styling ---------- */
+.comingSoonItem {
+  opacity: 0.65;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  filter: grayscale(20%);
+}
+
+.comingSoonOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(28, 14, 6, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(1.5px);
+  transition: all var(--transition-base);
+}
+
+.comingSoonOverlay span {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.comingSoonText {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Sweet Corner Grouping Styles ---------- */
+.sweetCornerContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.sweetGroup {
+  margin-top: 8px;
+}
+
+.sweetGroupTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border-subtle);
+  width: fit-content;
+}
