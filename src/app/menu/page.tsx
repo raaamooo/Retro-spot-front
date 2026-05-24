@@ -18,42 +18,8 @@ import { isCoffeeCat, supportsMilk, supportsSweetness, getCategoryDescription, t
 import DrinkQuiz from '@/components/ui/DrinkQuiz';
 import styles from './Menu.module.css';
 
-/* ═══════════════════════════════════════════════════════════════
-   STATIC MENU DATA — Cocktails & Milkshakes
-   These items are displayed alongside API-fetched categories.
-   Prices are in EGP.
-   ═══════════════════════════════════════════════════════════════ */
-const STATIC_MENU_SECTIONS = [
-  {
-    category: 'Cocktails',
-    categoryAr: 'كوكتيلات',
-    items: [
-      { id: 'static-cocktail-1', nameEn: 'Banana Strawberry', nameAr: 'موز فراولة', price: 75, description: 'A tropical fusion of ripe banana and fresh strawberry.', descriptionAr: 'مزيج استوائي من الموز الناضج والفراولة الطازجة.' },
-      { id: 'static-cocktail-2', nameEn: 'Mango Kiwi', nameAr: 'مانجو كيوي', price: 85, description: 'Sweet mango paired with tangy kiwi for a refreshing twist.', descriptionAr: 'مانجو حلوة مع كيوي لاذع لمذاق منعش.' },
-      { id: 'static-cocktail-3', nameEn: 'Piña Colada', nameAr: 'بينا كولادا', price: 95, description: 'Classic pineapple and coconut cream blend.', descriptionAr: 'مزيج كلاسيكي من الأناناس وكريمة جوز الهند.' },
-    ],
-  },
-  {
-    category: 'Milkshakes',
-    categoryAr: 'ميلك شيك',
-    items: [
-      { id: 'static-shake-1', nameEn: 'Nutella', nameAr: 'نوتيلا', price: 80, description: 'Rich hazelnut chocolate milkshake.', descriptionAr: 'ميلك شيك شوكولاتة بندق غني.' },
-      { id: 'static-shake-2', nameEn: 'Oreo', nameAr: 'أوريو', price: 85, description: 'Crushed Oreo cookies blended with creamy milk.', descriptionAr: 'بسكويت أوريو مطحون مع الحليب الكريمي.' },
-      { id: 'static-shake-3', nameEn: 'Caramel', nameAr: 'كراميل', price: 85, description: 'Buttery caramel swirled into cold creamy milk.', descriptionAr: 'كراميل زبدي ممزوج مع حليب بارد كريمي.' },
-      { id: 'static-shake-4', nameEn: 'Chocolate', nameAr: 'شوكولاتة', price: 80, description: 'Classic chocolate milkshake with premium cocoa.', descriptionAr: 'ميلك شيك شوكولاتة كلاسيكي بكاكاو ممتاز.' },
-      { id: 'static-shake-5', nameEn: 'Vanilla', nameAr: 'فانيليا', price: 80, description: 'Smooth vanilla bean milkshake.', descriptionAr: 'ميلك شيك فانيليا ناعم.' },
-      { id: 'static-shake-6', nameEn: 'KitKat', nameAr: 'كيت كات', price: 85, description: 'Crunchy KitKat pieces in a smooth creamy base.', descriptionAr: 'قطع كيت كات مقرمشة في قاعدة كريمية.' },
-      { id: 'static-shake-7', nameEn: 'Snickers', nameAr: 'سنيكرز', price: 85, description: 'Snickers-inspired shake with peanut and caramel.', descriptionAr: 'شيك بنكهة سنيكرز مع الفول السوداني والكراميل.' },
-      { id: 'static-shake-8', nameEn: 'Pistachio', nameAr: 'فستق', price: 90, description: 'Premium pistachio milkshake with a nutty finish.', descriptionAr: 'ميلك شيك فستق فاخر بنكهة مكسرات.' },
-      { id: 'static-shake-9', nameEn: 'Lotus', nameAr: 'لوتس', price: 80, description: 'Biscoff cookie spread blended with cold milk.', descriptionAr: 'بسكويت لوتس ممزوج مع الحليب البارد.' },
-      { id: 'static-shake-10', nameEn: 'Mix Berry', nameAr: 'مكس بيري', price: 85, description: 'A blend of mixed berries with creamy milk.', descriptionAr: 'مزيج توت مع حليب كريمي.' },
-      { id: 'static-shake-11', nameEn: 'Blueberry', nameAr: 'توت أزرق', price: 80, description: 'Fresh blueberry milkshake with a fruity kick.', descriptionAr: 'ميلك شيك توت أزرق طازج.' },
-      { id: 'static-shake-12', nameEn: 'Strawberry', nameAr: 'فراولة', price: 80, description: 'Sweet strawberry milkshake made with real fruit.', descriptionAr: 'ميلك شيك فراولة حلو بفواكه حقيقية.' },
-      { id: 'static-shake-13', nameEn: 'Peach', nameAr: 'خوخ', price: 80, description: 'Delicate peach milkshake with a summer vibe.', descriptionAr: 'ميلك شيك خوخ ناعم بنكهة صيفية.' },
-      { id: 'static-shake-14', nameEn: 'Mango', nameAr: 'مانجو', price: 80, description: 'Tropical mango milkshake, thick and creamy.', descriptionAr: 'ميلك شيك مانجو استوائي سميك وكريمي.' },
-    ],
-  },
-];
+/* All menu data now comes exclusively from the database via GET /api/menu.
+   No hardcoded items — prices, availability, and names are managed in the admin panel. */
 
 // --- Types ---
 type MenuItem = {
@@ -240,24 +206,7 @@ function MenuContent() {
           tags: d.tags ? (typeof d.tags === 'string' ? d.tags.split(',') : d.tags) : [],
         }));
 
-        // Merge static Cocktails & Milkshakes into the item list
-        const staticItems: MenuItem[] = STATIC_MENU_SECTIONS.flatMap(section =>
-          section.items.map(item => ({
-            id: item.id,
-            name: language === 'ar' ? item.nameAr : item.nameEn,
-            nameEn: item.nameEn,
-            nameAr: item.nameAr,
-            description: language === 'ar' ? item.descriptionAr : item.description,
-            price: item.price,
-            image: getItemImage(item.nameEn) || null,
-            category: language === 'ar' ? section.categoryAr : section.category,
-            available: true,
-            tags: [],
-            isAddition: false,
-          }))
-        );
-
-        setMenuItems([...enrichedData, ...staticItems]);
+        setMenuItems(enrichedData);
         setIsLoading(false);
       })
       .catch((err) => {

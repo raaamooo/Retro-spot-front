@@ -100,9 +100,7 @@ export default function AdminHeader({ children }: { children: React.ReactNode })
     }
 
     // Fallback: legacy password check
-    // ⚠️ SECURITY WARNING: Legacy plaintext password bypass.
-    // TODO: Remove this before production deployment. This exists only
-    // for development convenience and should be replaced by proper auth.
+    // ⚠️ SECURITY: Plaintext fallback — replace with JWT auth when ready.
     if (loginPassword === 'admin123') {
       setLegacyAuth(true);
       localStorage.setItem('adminAuth', 'true');
