@@ -20,6 +20,17 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // ── Redirect everything to Vercel ──────────────────────────────
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        destination: `https://retro-spot-front.vercel.app/:path*`,
+        permanent: true, // 301
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {
