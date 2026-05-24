@@ -17,6 +17,7 @@ interface Order {
   notes: string;
   paymentMethod: string;
   status: string;
+  orderType?: string;
   subtotal: number;
   total: number;
   tipAmount: number;
@@ -134,21 +135,47 @@ export default function CashierPage() {
     ? locations.filter(l => l && l.name).map(l => l.name)
     : [];
   
-  // Create a map of Location -> Orders
+  // Helper: detect if an order is takeaway
+  const isTakeawayOrder = (order: Order) =>
+    order.orderType === 'takeaway' ||
+    order.location?.type === 'takeaway' ||
+    order.location?.name?.toLowerCase() === 'takeaway';
+
+  // Helper: generate a unique display key for a takeaway order
+  const getTakeawayGroupKey = (order: Order) => {
+    const name = order.customerName || 'Guest';
+    const shortId = order.id.slice(-6).toUpperCase();
+    return `Takeaway — ${name} (#${shortId})`;
+  };
+
+  // Create a map of GroupKey -> Orders
+  // Dine-in orders group by location name (Table 1, Room, etc.)
+  // Takeaway orders group individually by orderId
   const groupedOrders: Record<string, Order[]> = {};
+  
+  // Pre-populate dine-in location slots (excluding takeaway)
   locationNames.forEach(loc => {
-    if (loc) groupedOrders[loc] = [];
+    if (loc && loc.toLowerCase() !== 'takeaway') groupedOrders[loc] = [];
   });
   
   cashierOrders.forEach(order => {
-    const locName = order?.location?.name || 'Unknown';
-    if (!groupedOrders[locName]) {
-      groupedOrders[locName] = [];
+    if (isTakeawayOrder(order)) {
+      // Each takeaway order gets its own unique group
+      const key = getTakeawayGroupKey(order);
+      groupedOrders[key] = [order];
+    } else {
+      // Dine-in orders group by location name
+      const locName = order?.location?.name || 'Unknown';
+      if (!groupedOrders[locName]) {
+        groupedOrders[locName] = [];
+      }
+      groupedOrders[locName].push(order);
     }
-    groupedOrders[locName].push(order);
   });
 
-  const displayLocations = Array.from(new Set([...locationNames, ...Object.keys(groupedOrders)]));
+  // Display: dine-in locations (with empty slots) + any active takeaway group keys
+  const dineInLocations = locationNames.filter(n => n.toLowerCase() !== 'takeaway');
+  const displayLocations = Array.from(new Set([...dineInLocations, ...Object.keys(groupedOrders)]));
 
   // --- ACTIONS ---
   const markDone = async (locationName: string) => {

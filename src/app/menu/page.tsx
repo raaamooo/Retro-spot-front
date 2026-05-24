@@ -284,16 +284,18 @@ function MenuContent() {
     }
   };
 
+  // Skip active-order polling for takeaway — the shared locationId would return
+  // stale orders from other customers, and the banner is hidden for takeaway anyway.
   useEffect(() => {
-    if (tableId) {
+    if (tableId && orderType !== 'takeaway') {
       checkActiveOrder(tableId);
       const interval = setInterval(() => checkActiveOrder(tableId), 10000);
       return () => clearInterval(interval);
     }
-  }, [tableId]);
+  }, [tableId, orderType]);
 
   useSocketEvent(EVENTS.ORDER_STATUS_UPDATED, (data: any) => {
-    if (data.locationId === tableId) checkActiveOrder(tableId);
+    if (orderType !== 'takeaway' && data.locationId === tableId) checkActiveOrder(tableId);
   });
 
   // Memoize derived data to prevent infinite useEffect loops (M5 fix)
