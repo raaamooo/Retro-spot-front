@@ -9,27 +9,49 @@ const backendProtocol = backendUrl.protocol.replace(':', '') as 'http' | 'https'
 const backendPort = backendUrl.port;
 
 const nextConfig: NextConfig = {
+  // Optimised self-hosting: generates a standalone output that can be run
+  // with `node .next/standalone/server.js` without the full node_modules.
   output: 'standalone',
-  allowedDevOrigins: ['*.trycloudflare.com', 'localhost', '127.0.0.1'],
-  eslint: { ignoreDuringBuilds: true },
 
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        destination: 'https://retro-spot-front.vercel.app/:path*',
-        permanent: true,
-      },
-    ];
+  // Allow cross-origin requests from tunnel domains during development
+  allowedDevOrigins: ['*.trycloudflare.com', 'localhost', '127.0.0.1'],
+
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 
   images: {
     remotePatterns: [
-      { protocol: backendProtocol, hostname: backendHostname, ...(backendPort ? { port: backendPort } : {}), pathname: '/uploads/**' },
-      { protocol: backendProtocol, hostname: backendHostname, ...(backendPort ? { port: backendPort } : {}), pathname: '/items/**' },
-      { protocol: 'http', hostname: 'localhost', port: '5000', pathname: '/uploads/**' },
-      { protocol: 'http', hostname: 'localhost', port: '5000', pathname: '/items/**' },
-      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      {
+        protocol: backendProtocol,
+        hostname: backendHostname,
+        ...(backendPort ? { port: backendPort } : {}),
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: backendProtocol,
+        hostname: backendHostname,
+        ...(backendPort ? { port: backendPort } : {}),
+        pathname: '/items/**',
+      },
+      // Also allow localhost fallback
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/items/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
   },
 };
