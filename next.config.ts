@@ -8,10 +8,11 @@ const backendHostname = backendUrl.hostname;
 const backendProtocol = backendUrl.protocol.replace(':', '') as 'http' | 'https';
 const backendPort = backendUrl.port;
 
+const IS_STATIC_EXPORT = process.env.STATIC_EXPORT === 'true';
+
 const nextConfig: NextConfig = {
-  // Optimised self-hosting: generates a standalone output that can be run
-  // with `node .next/standalone/server.js` without the full node_modules.
-  output: 'standalone',
+  // Use 'export' for Firebase static hosting, and 'standalone' for Railway dynamic hosting
+  output: IS_STATIC_EXPORT ? 'export' : 'standalone',
 
   // Allow cross-origin requests from tunnel domains during development
   allowedDevOrigins: ['*.trycloudflare.com', 'localhost', '127.0.0.1'],
@@ -21,6 +22,8 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    // Static exports do not support dynamic server-side image resizing
+    unoptimized: IS_STATIC_EXPORT ? true : false,
     remotePatterns: [
       {
         protocol: backendProtocol,

@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:firebase": "STATIC_EXPORT=true next build",
+    "deploy:firebase": "npm run build:firebase && npx firebase-tools deploy --only hosting",
     "start": "next start",
     "lint": "eslint"
   },
