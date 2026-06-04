@@ -10,3 +10,5 @@ restartPolicyType = "ON_FAILURE"
 watchPatterns = ["**"]
 
 
+[env]
+HOSTNAME = "0.0.0.0"
