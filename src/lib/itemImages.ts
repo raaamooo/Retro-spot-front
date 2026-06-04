@@ -158,4 +158,3 @@ export function getItemImage(nameEn: string, backendImageUrl?: string | null): s
   return bestMatch;
 }
 
-export default ITEM_IMAGE_MAP;

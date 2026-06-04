@@ -96,7 +96,6 @@ function MenuContent() {
   // Flavor modal states for Ice Cream
   const [flavorModalItem, setFlavorModalItem] = useState<MenuItem | null>(null);
   const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
-  const ICE_CREAM_FLAVORS = ['Vanilla', 'Chocolate', 'Mango', 'Strawberry'];
 
   /* ═══════════════════════════════════════════════════════════════
      PER-CATEGORY CUSTOMIZATION CONFIGS
@@ -108,27 +107,7 @@ function MenuContent() {
     return 'generic';
   };
 
-  const COCKTAIL_ADDONS = [
-    { label: 'Extra Fruit', value: 'extra_fruit', price: 10 },
-    { label: 'Mint Leaves', value: 'mint_leaves', price: 10 },
-    { label: 'Coconut Flakes', value: 'coconut_flakes', price: 10 },
-    { label: 'Whipped Cream', value: 'whipped_cream', price: 10 },
-  ];
-  const MILKSHAKE_TOPPINGS = [
-    { label: 'Whipped Cream', value: 'whipped_cream', price: 10 },
-    { label: 'Crushed Oreo', value: 'crushed_oreo', price: 10 },
-    { label: 'Caramel Drizzle', value: 'caramel_drizzle', price: 10 },
-    { label: 'Chocolate Drizzle', value: 'chocolate_drizzle', price: 10 },
-    { label: 'Sprinkles', value: 'sprinkles', price: 10 },
-    { label: 'Crushed Nuts', value: 'crushed_nuts', price: 10 },
-    { label: 'Lotus Crumble', value: 'lotus_crumble', price: 10 },
-    { label: 'Fresh Fruit', value: 'fresh_fruit', price: 10 },
-  ];
-  const MILKSHAKE_EXTRA_SHOTS = [
-    { label: 'Extra Nutella', value: 'extra_nutella', price: 15 },
-    { label: 'Extra Caramel', value: 'extra_caramel', price: 15 },
-    { label: 'Extra Chocolate Sauce', value: 'extra_chocolate', price: 15 },
-  ];
+
 
   const resetCustomizationDefaults = () => {
     setModalSize('regular');
@@ -253,6 +232,22 @@ function MenuContent() {
     [menuItems]
   );
   const additions = useMemo(() => menuItems.filter(i => i.isAddition), [menuItems]);
+
+  const ICE_CREAM_FLAVORS = useMemo(() => 
+    additions.filter(a => a.tags?.includes('ice_cream_flavor')).map(a => a.name), 
+  [additions]);
+
+  const COCKTAIL_ADDONS = useMemo(() => 
+    additions.filter(a => a.tags?.includes('cocktail_addon')).map(a => ({ label: a.name, value: a.nameEn?.toLowerCase().replace(/\s+/g, '_') || a.id, price: a.price })), 
+  [additions]);
+
+  const MILKSHAKE_TOPPINGS = useMemo(() => 
+    additions.filter(a => a.tags?.includes('milkshake_topping')).map(a => ({ label: a.name, value: a.nameEn?.toLowerCase().replace(/\s+/g, '_') || a.id, price: a.price })), 
+  [additions]);
+
+  const MILKSHAKE_EXTRA_SHOTS = useMemo(() => 
+    additions.filter(a => a.tags?.includes('milkshake_extra_shot')).map(a => ({ label: a.name, value: a.nameEn?.toLowerCase().replace(/\s+/g, '_') || a.id, price: a.price })), 
+  [additions]);
 
   // Set default active category once loaded
   useEffect(() => {

@@ -35,11 +35,3 @@ export function useSocketEvent<T = any>(eventName: string, handler: (data: T) =>
   }, [eventName]);
 }
 
-/**
- * Returns the raw socket instance for imperative use.
- * Prefer useSocketEvent for listening; use this only for
- * connection state checks.
- */
-export function useSocket() {
-  return socket;
-}

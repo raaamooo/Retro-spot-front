@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { API_URL } from "@/lib/constants";
 
 /* ═══════════════════════════════════════════════════════════════
    SEO — Metadata, Open Graph, Twitter Card, Structured Data
@@ -50,7 +51,7 @@ export const viewport: Viewport = {
 };
 
 /* ── JSON-LD Structured Data for Local Business ── */
-const jsonLd = {
+const baseJsonLd = {
   "@context": "https://schema.org",
   "@type": "CafeOrCoffeeShop",
   name: "Retro Spot",
@@ -67,48 +68,38 @@ const jsonLd = {
   },
   servesCuisine: "Coffee, Beverages, Light Bites",
   priceRange: "$$",
-  hasMenu: {
-    "@type": "Menu",
-    name: "Retro Spot Menu",
-    hasMenuSection: [
-      {
-        "@type": "MenuSection",
-        name: "Cocktails",
-        hasMenuItem: [
-          { "@type": "MenuItem", name: "Banana Strawberry", offers: { "@type": "Offer", price: "75", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Mango Kiwi", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Piña Colada", offers: { "@type": "Offer", price: "95", priceCurrency: "EGP" } },
-        ],
-      },
-      {
-        "@type": "MenuSection",
-        name: "Milkshakes",
-        hasMenuItem: [
-          { "@type": "MenuItem", name: "Nutella", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Oreo", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Caramel", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Chocolate", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Vanilla", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "KitKat", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Snickers", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Pistachio", offers: { "@type": "Offer", price: "90", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Lotus", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Mix Berry", offers: { "@type": "Offer", price: "85", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Blueberry", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Strawberry", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Peach", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-          { "@type": "MenuItem", name: "Mango", offers: { "@type": "Offer", price: "80", priceCurrency: "EGP" } },
-        ],
-      },
-    ],
-  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let jsonLd = { ...baseJsonLd };
+
+  try {
+    const res = await fetch(`${API_URL}/api/menu`, { next: { revalidate: 3600 } });
+    if (res.ok) {
+      const data = await res.json();
+      const menuSections = data.map((cat: any) => ({
+        "@type": "MenuSection",
+        name: cat.nameEn,
+        hasMenuItem: cat.items.map((item: any) => ({
+          "@type": "MenuItem",
+          name: item.nameEn,
+          offers: { "@type": "Offer", price: item.price.toString(), priceCurrency: "EGP" }
+        }))
+      }));
+      (jsonLd as any).hasMenu = {
+        "@type": "Menu",
+        name: "Retro Spot Menu",
+        hasMenuSection: menuSections
+      };
+    }
+  } catch (err) {
+    console.error('Failed to fetch menu for JSON-LD', err);
+  }
+
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
