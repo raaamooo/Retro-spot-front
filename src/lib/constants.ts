@@ -15,7 +15,12 @@ function getApiUrl(): string {
   if (typeof window !== 'undefined' && window.location.hostname.includes('railway.app')) {
     return 'https://retro-spot-back-production.up.railway.app';
   }
-  // 3. Fallback to localhost for local development
+  // 3. Fallback to local development
+  if (typeof window !== 'undefined') {
+    // If testing on a mobile device on the same network (e.g. 192.168.x.x), 
+    // we need to connect to that same IP, not 'localhost'.
+    return `http://${window.location.hostname}:5000`;
+  }
   return 'http://localhost:5000';
 }
 
