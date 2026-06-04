@@ -78,7 +78,16 @@ export default async function RootLayout({
   let jsonLd = { ...baseJsonLd };
 
   try {
-    const res = await fetch(`${API_URL}/api/menu`, { next: { revalidate: 3600 } });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(`${API_URL}/api/menu`, { 
+      next: { revalidate: 3600 },
+      signal: controller.signal 
+    });
+    
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       const data = await res.json();
       const menuSections = data.map((cat: any) => ({
