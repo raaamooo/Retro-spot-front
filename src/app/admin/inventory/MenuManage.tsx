@@ -1,10 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 
-import { Plus, X, Trash2, ChevronDown, ChevronUp, Edit2, Check, FlaskConical } from 'lucide-react';
+import { Plus, X, Trash2, ChevronDown, ChevronUp, Edit2, Check } from 'lucide-react';
 import { API_URL } from '@/lib/constants';
 import { getItemImage } from '@/lib/itemImages';
-import RecipeEditor from './RecipeEditor';
 
 interface Ingredient { id: string; nameEn: string; unit: string; quantityAvailable: number; lowStockThreshold: number; }
 interface Category { id: string; nameEn: string; nameAr: string; sortOrder: number; }
@@ -43,8 +42,6 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
   const [editForm, setEditForm] = useState({ nameEn: '', nameAr: '', price: '', descriptionEn: '', descriptionAr: '' });
   const [savingEdit, setSavingEdit] = useState(false);
 
-  const [recipeItem, setRecipeItem] = useState<MenuItemFlat | null>(null);
-
   const addCategory = async () => {
     if (!catForm.nameEn || !catForm.nameAr) return;
     setSavingCat(true);
@@ -79,8 +76,6 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
       setItemForm({ categoryId: '', nameEn: '', nameAr: '', descriptionEn: '', descriptionAr: '', price: '' });
       setItemImage(null);
       setShowAddItem(false);
-      // Auto-open recipe editor for new item
-      setRecipeItem(item);
     } catch(e) { console.error(e); }
     setSavingItem(false);
   };
@@ -114,21 +109,6 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
 
   return (
     <div className="space-y-4">
-      {/* Recipe editor modal */}
-      <>
-        {recipeItem && (
-          <RecipeEditor
-            menuItemId={recipeItem.id}
-            menuItemName={recipeItem.nameEn}
-            ingredients={ingredients}
-            onClose={() => setRecipeItem(null)}
-            onSaved={(available) => {
-              onItemUpdated({ ...recipeItem, available });
-              setRecipeItem(null);
-            }}
-          />
-        )}
-      </>
 
       {/* Header actions */}
       <div className="flex gap-2">
@@ -184,7 +164,6 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                   <input type="file" accept="image/*" className="hidden" onChange={e => setItemImage(e.target.files?.[0] || null)} />
                 </label>
               </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5"><FlaskConical size={12}/> After creating, you'll be prompted to link ingredients for inventory sync.</p>
               <div className="flex gap-2">
                 <button onClick={addItem} disabled={savingItem} className="flex-1 py-2 bg-accent text-white rounded-xl text-sm font-bold hover:bg-accent/90 disabled:opacity-50">
                   {savingItem ? 'Saving...' : 'Create Item'}
@@ -247,11 +226,6 @@ export default function MenuManage({ categories, menuItems, ingredients, onCateg
                               </div>
                             )}
                             <div className="flex gap-1 shrink-0">
-                              {/* Recipe / sync button */}
-                              <button onClick={() => setRecipeItem(item)} title="Edit ingredient recipe & sync inventory"
-                                className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                                <FlaskConical size={14}/>
-                              </button>
                               {isEditing ? (
                                 <>
                                   <button onClick={saveEdit} disabled={savingEdit} className="p-1.5 rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors"><Check size={14}/></button>

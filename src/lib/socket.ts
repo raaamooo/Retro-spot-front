@@ -28,11 +28,14 @@ export const EVENTS = {
   WAITER_CALL_NEW: 'waiter_call:new',
   WAITER_CALL_RESOLVED: 'waiter_call:resolved',
 
-  // ── Inventory ──
-  INVENTORY_UPDATED: 'inventory:updated',
+  // ── Inventory (v2) ──
   INVENTORY_LOW_STOCK: 'inventory:low_stock',
+  INVENTORY_OUT_OF_STOCK: 'inventory:out_of_stock',
+  INVENTORY_STOCK_UPDATED: 'inventory:stock_updated',
+  INVENTORY_RESTOCK_LOGGED: 'inventory:restock_logged',
+  MENU_ITEM_UNAVAILABLE: 'menu:item_unavailable',
+  MENU_ITEM_AVAILABLE: 'menu:item_available',
   MENU_AVAILABILITY: 'menu:availability',
-  STOCK_CHANGE_LOGGED: 'inventory:stock_change_logged',
 
   // ── Bookings ──
   BOOKING_NEW: 'booking:new',
@@ -44,4 +47,14 @@ export const EVENTS = {
 
   // ── Accounting ──
   ACCOUNTING_UPDATED: 'accounting:updated',
+
+  // ── System Configuration ──
+  CONFIG_UPDATED: 'config:updated',
+
+  // ── Shifts ──
+  SHIFT_STARTED: 'shift:started',
+  SHIFT_ENDED: 'shift:ended',
+
+  // ── Notifications ──
+  NOTIFICATION_NEW: 'notification:new',
 } as const;

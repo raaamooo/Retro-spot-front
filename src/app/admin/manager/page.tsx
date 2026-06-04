@@ -190,7 +190,7 @@ export default function ManagerPage() {
     setActiveCalls(prev => prev.filter(c => c.id !== call.id));
   });
 
-  useSocketEvent<any>(EVENTS.STOCK_CHANGE_LOGGED, (log) => {
+  useSocketEvent<any>(EVENTS.INVENTORY_STOCK_UPDATED, (log) => {
     setAuditLogs(prev => [log, ...prev]);
     // Refresh ingredients to reflect updated quantities
     fetch(`${API_URL}/api/ingredients`)
