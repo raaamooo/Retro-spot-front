@@ -39,10 +39,13 @@ export default function InventoryPage() {
   const [menuFilter, setMenuFilter] = useState<'all'|'available'|'unavailable'>('all');
 
   useEffect(() => {
-    fetch(`${API_URL}/api/ingredients`).then(r=>r.json()).catch(()=>[]).then((d:Ingredient[])=>{ setIngredients(d); setLoading(false); });
+    fetch(`${API_URL}/api/ingredients`)
+      .then(r => r.ok ? r.json() : [])
+      .catch(()=>[])
+      .then((d:Ingredient[])=>{ setIngredients(Array.isArray(d) ? d : []); setLoading(false); });
     Promise.all([
-      fetch(`${API_URL}/api/menu`).then(r=>r.json()).catch(()=>[]),
-      fetch(`${API_URL}/api/menu-items`).then(r=>r.json()).catch(()=>[]),
+      fetch(`${API_URL}/api/menu`).then(r => r.ok ? r.json() : []).catch(()=>[]),
+      fetch(`${API_URL}/api/menu-items`).then(r => r.ok ? r.json() : []).catch(()=>[]),
     ]).then(([cats, items]) => {
       setCategories(cats.map((c:any)=>({ id:c.id, nameEn:c.nameEn, nameAr:c.nameAr, sortOrder:c.sortOrder })));
       setMenuItems(items);

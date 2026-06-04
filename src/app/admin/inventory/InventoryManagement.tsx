@@ -75,13 +75,13 @@ export default function InventoryManagement() {
         fetch(`${API_URL}/api/inventory/logs`)
       ]);
       
-      const ing = await ingRes.json();
-      const sup = await supRes.json();
-      const logs = await logRes.json();
+      const ing = ingRes.ok ? await ingRes.json() : [];
+      const sup = supRes.ok ? await supRes.json() : [];
+      const logs = logRes.ok ? await logRes.json() : [];
       
-      setIngredients(ing || []);
-      setSuppliers(sup || []);
-      setStockLogs(logs || []);
+      setIngredients(Array.isArray(ing) ? ing : []);
+      setSuppliers(Array.isArray(sup) ? sup : []);
+      setStockLogs(Array.isArray(logs) ? logs : []);
     } catch (e) {
       console.error(e);
       addToast('Failed to load inventory data', 'error');
