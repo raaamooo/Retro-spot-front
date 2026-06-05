@@ -230,6 +230,27 @@ function MenuContent() {
     if (orderType !== 'takeaway' && data.locationId === tableId) checkActiveOrder(tableId);
   });
 
+  useSocketEvent<any>(EVENTS.MENU_AVAILABILITY, (items) => {
+    if (Array.isArray(items)) {
+      setMenuItems(prev => prev.map(item => {
+        const match = items.find(i => i.id === item.id);
+        return match ? { ...item, available: match.available } : item;
+      }));
+    }
+  });
+
+  useSocketEvent<{ menuItemId: string }>(EVENTS.MENU_ITEM_UNAVAILABLE, ({ menuItemId }) => {
+    setMenuItems(prev => prev.map(item =>
+      item.id === menuItemId ? { ...item, available: false } : item
+    ));
+  });
+
+  useSocketEvent<{ menuItemId: string }>(EVENTS.MENU_ITEM_AVAILABLE, ({ menuItemId }) => {
+    setMenuItems(prev => prev.map(item =>
+      item.id === menuItemId ? { ...item, available: true } : item
+    ));
+  });
+
   // Memoize derived data to prevent infinite useEffect loops (M5 fix)
   const categories = useMemo(
     () => Array.from(new Set(menuItems.filter(i => !i.isAddition).map(i => i.category))),

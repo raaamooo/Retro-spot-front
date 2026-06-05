@@ -37,6 +37,7 @@ interface MenuItem {
   nameEn: string;
   nameAr: string;
   price: number;
+  available?: boolean;
   category?: { nameEn: string; nameAr: string };
 }
 
@@ -126,6 +127,27 @@ export default function CashierPage() {
       // Order moved past cashier — remove it
       setOrders(prev => prev.filter(o => o.id !== order.id));
     }
+  });
+
+  useSocketEvent<any>(EVENTS.MENU_AVAILABILITY, (items) => {
+    if (Array.isArray(items)) {
+      setMenuItems(prev => prev.map(item => {
+        const match = items.find(i => i.id === item.id);
+        return match ? { ...item, available: match.available } : item;
+      }));
+    }
+  });
+
+  useSocketEvent<{ menuItemId: string }>(EVENTS.MENU_ITEM_UNAVAILABLE, ({ menuItemId }) => {
+    setMenuItems(prev => prev.map(item =>
+      item.id === menuItemId ? { ...item, available: false } : item
+    ));
+  });
+
+  useSocketEvent<{ menuItemId: string }>(EVENTS.MENU_ITEM_AVAILABLE, ({ menuItemId }) => {
+    setMenuItems(prev => prev.map(item =>
+      item.id === menuItemId ? { ...item, available: true } : item
+    ));
   });
 
   // --- GROUPING LOGIC ---
@@ -266,6 +288,10 @@ export default function CashierPage() {
   const handleAddItem = (orderId: string, menuItemId: string) => {
     const selectedMenu = menuItems.find(m => m.id === menuItemId);
     if (!selectedMenu) return;
+    if (selectedMenu.available === false) {
+      addToast(`${selectedMenu.nameEn} is out of stock!`, 'error');
+      return;
+    }
 
     setEditOrdersState(prev => prev.map(order => {
       if (order.id !== orderId) return order;
@@ -332,6 +358,10 @@ export default function CashierPage() {
 
   // --- POS CART HANDLERS ---
   const handleAddPosCartItem = (item: MenuItem) => {
+    if (item.available === false) {
+      addToast(`${item.nameEn} is out of stock!`, 'error');
+      return;
+    }
     setPosCart(prev => {
       const existing = prev.find(i => i.menuItemId === item.id);
       if (existing) {
@@ -624,11 +654,14 @@ export default function CashierPage() {
                             className="w-full bg-background text-sm text-foreground px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary"
                           >
                             <option value="" disabled>+ Select menu item to add...</option>
-                            {safeMenuItems.map(m => (
-                              <option key={m.id} value={m.id}>
-                                {m.nameEn} ({m.price} EGP)
-                              </option>
-                            ))}
+                            {safeMenuItems.map(m => {
+                              const isOOS = m.available === false;
+                              return (
+                                <option key={m.id} value={m.id} disabled={isOOS}>
+                                  {m.nameEn} ({m.price} EGP) {isOOS ? '— (OUT OF STOCK)' : ''}
+                                </option>
+                              );
+                            })}
                           </select>
                         </div>
                         <Button 
@@ -848,34 +881,53 @@ export default function CashierPage() {
                       <p className="font-bold">No items found</p>
                     </div>
                   ) : (
-                    filteredMenuItems.map(item => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => handleAddPosCartItem(item)}
-                        className="group text-left bg-background hover:bg-surface-elevated p-4 rounded-2xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-36 relative overflow-hidden"
-                      >
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500" />
-                        
-                        <div className="space-y-1 relative z-10">
-                          <h4 className="font-black text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-                            {item.nameEn}
-                          </h4>
-                          <span className="text-xs text-muted-foreground block">
-                            {item.category?.nameEn || 'Other'}
-                          </span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center w-full relative z-10 pt-2 border-t border-dashed border-border/80">
-                          <span className="font-black text-sm text-primary">
-                            {item.price.toFixed(2)} EGP
-                          </span>
-                          <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                            <Plus size={16} />
+                    filteredMenuItems.map(item => {
+                      const isOutOfStock = item.available === false;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          disabled={isOutOfStock}
+                          onClick={() => handleAddPosCartItem(item)}
+                          className={`group text-left bg-background hover:bg-surface-elevated p-4 rounded-2xl border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between h-36 relative overflow-hidden ${
+                            isOutOfStock ? 'opacity-50 cursor-not-allowed border-dashed' : ''
+                          }`}
+                        >
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 group-hover:scale-150 transition-transform duration-500" />
+                          
+                          <div className="space-y-1 relative z-10 w-full">
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="font-black text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                {item.nameEn}
+                              </h4>
+                              {isOutOfStock && (
+                                <span className="text-[9px] bg-danger/10 text-danger border border-danger/20 px-2 py-0.5 rounded-full font-black uppercase shrink-0">
+                                  Out of Stock
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground block">
+                              {item.category?.nameEn || 'Other'}
+                            </span>
                           </div>
-                        </div>
-                      </button>
-                    ))
+                          
+                          <div className="flex justify-between items-center w-full relative z-10 pt-2 border-t border-dashed border-border/80">
+                            <span className="font-black text-sm text-primary">
+                              {item.price.toFixed(2)} EGP
+                            </span>
+                            {isOutOfStock ? (
+                              <div className="w-7 h-7 bg-danger/10 rounded-lg flex items-center justify-center text-danger">
+                                <X size={16} />
+                              </div>
+                            ) : (
+                              <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                                <Plus size={16} />
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })
                   )}
                 </div>
               </div>
