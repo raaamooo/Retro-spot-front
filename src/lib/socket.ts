@@ -43,6 +43,7 @@ export const EVENTS = {
 
   // ── Arts & Bids ──
   BID_NEW: 'bid:new',
+  BID_DELETED: 'bid:deleted',
   ART_STATUS_UPDATED: 'art:status_updated',
 
   // ── Accounting ──

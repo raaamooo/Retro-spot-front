@@ -83,6 +83,13 @@ export default function OrganizerPage() {
     titleEn: '', titleAr: '', descriptionEn: '', descriptionAr: '', type: 'announcement', startDate: '', endDate: ''
   });
 
+  // Add Bid Modal
+  const [isAddingBid, setIsAddingBid] = useState(false);
+  const [activeArtId, setActiveArtId] = useState<string | null>(null);
+  const [bidForm, setBidForm] = useState({
+    bidderName: '', bidAmount: '', bidderContact: '', paymentMethod: 'cash'
+  });
+
   // Screenshot Viewer Modal
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
 
@@ -124,6 +131,15 @@ export default function OrganizerPage() {
     setArts(prev => prev.map(a => a.id === art.id ? { ...a, ...art } : a));
   });
 
+  useSocketEvent<{ id: string, artId: string }>(EVENTS.BID_DELETED, (data) => {
+    setArts(prev => prev.map(a => {
+      if (a.id === data.artId) {
+        return { ...a, bids: a.bids.filter(b => b.id !== data.id) };
+      }
+      return a;
+    }));
+  });
+
   // --- ACTIONS ---
   const updateBookingStatus = async (bookingId: string, status: string, paymentStatus?: string) => {
     setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status, paymentStatus: paymentStatus || b.paymentStatus } : b));
@@ -148,6 +164,46 @@ export default function OrganizerPage() {
       });
     } catch (err) {
       console.error('Failed to update art', err);
+    }
+  };
+
+  const submitBid = async () => {
+    if (!activeArtId) return;
+    try {
+      const res = await fetch(`${API_URL}/api/arts/${activeArtId}/bids`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bidForm),
+      });
+      if (res.ok) {
+        setIsAddingBid(false);
+        setActiveArtId(null);
+        setBidForm({ bidderName: '', bidAmount: '', bidderContact: '', paymentMethod: 'cash' });
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to submit bid');
+      }
+    } catch (err) {
+      console.error('Failed to add bid', err);
+    }
+  };
+
+  const deleteBid = async (artId: string, bidId: string) => {
+    if (!confirm('Are you sure you want to delete this bid?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/bids/${bidId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setArts(prev => prev.map(a => {
+          if (a.id === artId) {
+            return { ...a, bids: a.bids.filter(b => b.id !== bidId) };
+          }
+          return a;
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to delete bid', err);
     }
   };
 
@@ -397,12 +453,37 @@ export default function OrganizerPage() {
                         )}
                       </div>
                       <div className="p-4 bg-surface-elevated">
-                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Bids ({art.bids.length})</h4>
+                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
+                          Bids ({art.bids.length})
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 py-0 px-2 text-xs border-primary/20 text-primary hover:bg-primary/10"
+                            onClick={() => {
+                              setActiveArtId(art.id);
+                              setIsAddingBid(true);
+                            }}
+                          >
+                            <Plus size={14} className="mr-1" /> Add Bid
+                          </Button>
+                        </h4>
                         {art.bids.length === 0 ? <p className="text-sm text-muted-foreground/50">No bids yet</p> : (
                           <div className="space-y-3 max-h-60 overflow-y-auto">
                             {art.bids.map((bid, idx) => (
                               <div key={bid.id} className={`p-3 rounded-lg border ${idx === 0 ? 'bg-primary/5 border-primary/30' : 'bg-surface border-border'}`}>
-                                <div className="flex justify-between items-center"><span className="font-bold text-sm">{bid.bidderName}</span><span className={`font-black ${idx === 0 ? 'text-primary' : ''}`}>{bid.bidAmount} EGP</span></div>
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-sm">{bid.bidderName}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-black ${idx === 0 ? 'text-primary' : ''}`}>{bid.bidAmount} EGP</span>
+                                    <button 
+                                      onClick={() => deleteBid(art.id, bid.id)}
+                                      className="text-danger/70 hover:text-danger hover:bg-danger/10 p-1 rounded-md transition-colors"
+                                      title="Delete Bid"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </div>
                                 <div className="flex justify-between items-center mt-1">
                                   <p className="text-xs text-muted-foreground">{bid.bidderContact}</p>
                                   {bid.transactionScreenshotUrl && (
@@ -583,6 +664,52 @@ export default function OrganizerPage() {
           </div>
         )}
       </>
+
+      {/* Add Bid Modal */}
+      {isAddingBid && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-surface border border-border p-6 rounded-2xl max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold mb-4">Add Manual Bid</h3>
+            <div className="space-y-4 mb-6">
+              <FormInput 
+                label="Bidder Name" 
+                value={bidForm.bidderName} 
+                onChange={e => setBidForm({...bidForm, bidderName: e.target.value})} 
+              />
+              <FormInput 
+                label="Bid Amount (EGP)" 
+                type="number"
+                value={bidForm.bidAmount} 
+                onChange={e => setBidForm({...bidForm, bidAmount: e.target.value})} 
+              />
+              <FormInput 
+                label="Contact (Phone/Email)" 
+                value={bidForm.bidderContact} 
+                onChange={e => setBidForm({...bidForm, bidderContact: e.target.value})} 
+              />
+              <Select 
+                label="Payment Method"
+                value={bidForm.paymentMethod}
+                onChange={e => setBidForm({...bidForm, paymentMethod: e.target.value})}
+                options={[
+                  { value: 'cash', label: 'Cash' },
+                  { value: 'instapay', label: 'InstaPay' },
+                  { value: 'card', label: 'Card' }
+                ]}
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => { setIsAddingBid(false); setActiveArtId(null); }}>Cancel</Button>
+              <Button 
+                onClick={submitBid} 
+                disabled={!bidForm.bidderName || !bidForm.bidAmount}
+              >
+                Submit Bid
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
