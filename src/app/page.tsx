@@ -61,12 +61,10 @@ export default function Home() {
           
           <div className={styles.featureBox}>
             <div className={styles.featureCard}>
-              <div className={styles.vinylContainer}>
-                <div className={styles.vinyl}>
-                  <div className={styles.vinylLabel}>
-                    <div className={styles.vinylHole} />
-                  </div>
-                </div>
+              <div className={styles.particlesContainer}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className={styles.particle} />
+                ))}
               </div>
               <h3 className={styles.featureTitle}>The Listening Table</h3>
               <p className={styles.featureDesc}>

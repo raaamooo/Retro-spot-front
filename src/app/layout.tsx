@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import MobileNavBar from "@/components/layout/MobileNavBar";
 import { API_URL } from "@/lib/constants";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -116,7 +117,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Tajawal:wght@300;400;500;700&display=swap"
           rel="stylesheet"
         />
         {/* Structured Data */}
@@ -130,10 +131,11 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ToastProvider>
               <Header />
-              <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <main className="page-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {children}
               </main>
               <Footer />
+              <MobileNavBar />
             </ToastProvider>
           </ThemeProvider>
         </LanguageProvider>

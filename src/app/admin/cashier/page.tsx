@@ -6,7 +6,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
 import { Printer, CheckCircle2, Receipt, Coffee, Edit, Plus, Minus, Trash2, X, ShoppingCart, Send } from 'lucide-react';
-import { Button, PageContainer, ScrollReveal } from '@/components';
+import { Button } from '@/components';
 import { API_URL } from '@/lib/constants';
 
 // --- Types ---
@@ -507,11 +507,10 @@ export default function CashierPage() {
   }
 
   return (
-    <PageContainer>
-      <ScrollReveal>
-        {renderPrintReceipt()}
+    <div className="space-y-6 h-full flex flex-col pb-24">
+      {renderPrintReceipt()}
 
-        {/* EDIT MODAL */}
+      {/* EDIT MODAL */}
         {editingLocation && (
           <div className="bg-background/80 backdrop-blur-sm fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-foreground">
@@ -1019,7 +1018,6 @@ export default function CashierPage() {
             </div>
           </div>
         </div>
-      </ScrollReveal>
-    </PageContainer>
+      </div>
   );
 }

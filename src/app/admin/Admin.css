@@ -562,7 +562,9 @@ th, td {
 
 /* ---------- Colors & Opacity ---------- */
 .bg-primary\/5 { background-color: rgba(44,26,14,0.05) !important; }
+.bg-primary\/10 { background-color: rgba(44,26,14,0.1) !important; }
 .bg-primary\/15 { background-color: rgba(44,26,14,0.15) !important; }
+.bg-primary\/20 { background-color: rgba(44,26,14,0.2) !important; }
 .bg-primary-foreground\/10 { background-color: rgba(245,232,213,0.1) !important; }
 .bg-accent\/5 { background-color: rgba(196,153,63,0.05) !important; }
 .bg-surface\/20 { background-color: rgba(245,232,213,0.2) !important; }
@@ -772,7 +774,9 @@ th, td {
 
 /* ---------- Dark mode color overrides ---------- */
 .dark .bg-primary\/5 { background-color: rgba(237,217,192,0.05) !important; }
+.dark .bg-primary\/10 { background-color: rgba(237,217,192,0.1) !important; }
 .dark .bg-primary\/15 { background-color: rgba(237,217,192,0.15) !important; }
+.dark .bg-primary\/20 { background-color: rgba(237,217,192,0.2) !important; }
 .dark .bg-surface\/50 { background-color: rgba(44,26,14,0.5) !important; }
 .dark .bg-surface\/80 { background-color: rgba(44,26,14,0.8) !important; }
 .dark .bg-background\/50 { background-color: rgba(28,14,6,0.5) !important; }

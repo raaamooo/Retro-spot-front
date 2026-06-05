@@ -120,63 +120,34 @@
   background-color: rgba(58, 35, 19, 0.4);
 }
 
-.vinylContainer {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-bottom: var(--space-lg);
+.particlesContainer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  z-index: 0;
+  pointer-events: none;
 }
 
-.vinyl {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, #111 0%, #222 100%);
-  border: 6px solid #3D2010;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  animation: spin 15s linear infinite;
-}
-
-@media (min-width: 1024px) {
-  .vinyl {
-    width: 192px;
-    height: 192px;
-  }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vinylLabel {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: var(--background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(61, 32, 16, 0.4);
-}
-
-@media (min-width: 1024px) {
-  .vinylLabel {
-    width: 64px;
-    height: 64px;
-  }
-}
-
-.vinylHole {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.particle {
+  position: absolute;
   background-color: var(--accent);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 10s infinite linear;
+}
+
+.particle:nth-child(1) { width: 4px; height: 4px; left: 10%; bottom: -10%; animation-duration: 15s; }
+.particle:nth-child(2) { width: 6px; height: 6px; left: 30%; bottom: -10%; animation-duration: 25s; animation-delay: -5s; }
+.particle:nth-child(3) { width: 3px; height: 3px; left: 50%; bottom: -10%; animation-duration: 18s; animation-delay: -10s; }
+.particle:nth-child(4) { width: 8px; height: 8px; left: 70%; bottom: -10%; animation-duration: 22s; animation-delay: -2s; }
+.particle:nth-child(5) { width: 5px; height: 5px; left: 90%; bottom: -10%; animation-duration: 12s; animation-delay: -8s; }
+
+@keyframes float {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-500px) rotate(360deg); opacity: 0; }
 }
 
 .featureTitle {

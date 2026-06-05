@@ -1,22 +1,51 @@
 .card {
   background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-base);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
 }
 
-/* Padding variants */
-.paddingNone { padding: 0; }
-.paddingSm { padding: var(--space-sm); }
-.paddingMd { padding: var(--space-md); }
-.paddingLg { padding: var(--space-xl); }
+.paddingNone {
+  padding: 0;
+}
 
-/* Hoverable variant */
+.paddingSm {
+  padding: var(--space-sm);
+}
+
+.paddingMd {
+  padding: var(--space-md);
+}
+
+.paddingLg {
+  padding: var(--space-lg);
+}
+
 .hoverable {
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border);
+}
+
+.interactive {
   cursor: pointer;
 }
-.hoverable:hover {
-  background-color: var(--surface-elevated);
-  border-color: var(--border-subtle);
-  transform: translateY(-4px);
+
+.interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+}
+
+.interactive:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }

@@ -8,6 +8,8 @@ export { default as Footer } from './layout/Footer';
 export { default as Button } from './ui/Button';
 export { default as Card } from './ui/Card';
 export { default as Modal } from './ui/Modal';
+export { default as BottomSheet } from './ui/BottomSheet';
+export { default as SkeletonLoader } from './ui/SkeletonLoader';
 
 export { default as FormInput } from './ui/FormInput';
 export { default as Textarea } from './ui/Textarea';

@@ -7,6 +7,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
   hoverable?: boolean;
+  interactive?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
 }
@@ -22,16 +23,18 @@ export default function Card({
   children,
   className = '',
   hoverable = false,
+  interactive = false,
   padding = 'md',
   onClick,
   ...props
 }: CardProps) {
-  const isHoverable = hoverable || !!onClick;
+  const isHoverable = hoverable || interactive || !!onClick;
   
   const classNames = [
     styles.card,
     paddingClasses[padding],
     isHoverable ? styles.hoverable : '',
+    interactive ? styles.interactive : '',
     className
   ].filter(Boolean).join(' ');
 
@@ -39,8 +42,8 @@ export default function Card({
     <div
       onClick={onClick}
       className={classNames}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
+      role={onClick || interactive ? 'button' : undefined}
+      tabIndex={onClick || interactive ? 0 : undefined}
       {...props}
     >
       {children}

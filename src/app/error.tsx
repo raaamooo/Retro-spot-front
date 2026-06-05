@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Button } from '@/components';
 
 /**
  * Root Error Boundary — catches unhandled exceptions in any page
@@ -15,89 +16,27 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <div
-      style={{
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '48px 24px',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '50%',
-          backgroundColor: 'var(--danger-bg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '24px',
-          fontSize: '28px',
-        }}
-      >
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 md:p-12 text-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="w-16 h-16 rounded-full bg-danger/10 text-danger flex items-center justify-center mb-6 text-2xl shadow-inner border border-danger/20">
         ⚠
       </div>
 
-      <h2
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(28px, 4vw, 40px)',
-          fontWeight: 300,
-          color: 'var(--foreground)',
-          marginBottom: '12px',
-        }}
-      >
+      <h2 className="font-display text-[clamp(28px,4vw,40px)] font-light text-foreground mb-3">
         Something went wrong
       </h2>
 
-      <p
-        style={{
-          fontSize: '15px',
-          color: 'var(--muted)',
-          maxWidth: '420px',
-          lineHeight: 1.6,
-          marginBottom: '32px',
-        }}
-      >
+      <p className="text-muted-foreground max-w-[420px] leading-relaxed mb-8">
         We encountered an unexpected error. Please try again, or head back to the home page.
       </p>
 
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <button
-          onClick={reset}
-          style={{
-            padding: '12px 28px',
-            backgroundColor: 'var(--primary)',
-            color: 'var(--primary-foreground)',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            letterSpacing: '0.02em',
-            transition: 'background-color 200ms',
-          }}
-        >
+      <div className="flex gap-4 flex-wrap justify-center">
+        <Button onClick={reset} size="lg" className="px-8 shadow-lg shadow-primary/20">
           Try Again
-        </button>
-        <Link
-          href="/"
-          style={{
-            padding: '12px 28px',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            fontSize: '14px',
-            fontWeight: 600,
-            color: 'var(--foreground)',
-            textDecoration: 'none',
-            letterSpacing: '0.02em',
-          }}
-        >
-          Back to Home
+        </Button>
+        <Link href="/">
+          <Button variant="outline" size="lg" className="px-8 bg-surface">
+            Back to Home
+          </Button>
         </Link>
       </div>
     </div>

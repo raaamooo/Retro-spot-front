@@ -1,15 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
-
-/* ═══════════════════════════════════════════════════════════════
-   Toast Notification System
-   
-   Single source of truth for toast notifications.
-   Uses inline styles to match the editorial design system
-   (no Tailwind dependency).
-   ═══════════════════════════════════════════════════════════════ */
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -17,155 +9,158 @@ interface Toast {
   id: string;
   message: string;
   type: ToastType;
-  duration?: number;
+  duration: number;
+  createdAt: number;
 }
 
-interface ToastContextProps {
-  toasts: Toast[];
+interface ToastContextValue {
   addToast: (message: string, type?: ToastType, duration?: number) => void;
-  removeToast: (id: string) => void;
 }
 
-const ToastContext = createContext<ToastContextProps | undefined>(undefined);
+const ToastContext = createContext<ToastContextValue>({
+  addToast: () => {},
+});
+
+export const useToast = () => useContext(ToastContext);
 
 const TOAST_ICONS: Record<ToastType, React.ReactNode> = {
-  success: <CheckCircle size={18} />,
+  success: <CheckCircle2 size={18} />,
   error: <XCircle size={18} />,
   warning: <AlertTriangle size={18} />,
   info: <Info size={18} />,
 };
 
-const TOAST_COLORS: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: 'var(--success-bg)', border: 'var(--success)', icon: 'var(--success)' },
-  error: { bg: 'var(--danger-bg)', border: 'var(--danger)', icon: 'var(--danger)' },
-  warning: { bg: 'rgba(196, 153, 63, 0.12)', border: 'var(--accent)', icon: 'var(--accent)' },
-  info: { bg: 'rgba(54, 162, 235, 0.1)', border: '#2980b9', icon: '#2980b9' },
+const TOAST_COLORS: Record<ToastType, { border: string; icon: string; bg: string }> = {
+  success: { border: 'var(--success)', icon: 'var(--success)', bg: 'var(--success-bg)' },
+  error: { border: 'var(--danger)', icon: 'var(--danger)', bg: 'var(--danger-bg)' },
+  warning: { border: 'var(--warning)', icon: 'var(--warning)', bg: 'var(--warning-bg)' },
+  info: { border: 'var(--info)', icon: 'var(--info)', bg: 'var(--info-bg)' },
 };
+
+function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+  const [isExiting, setIsExiting] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const colors = TOAST_COLORS[toast.type];
+
+  const handleDismiss = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => onDismiss(toast.id), 300);
+  }, [toast.id, onDismiss]);
+
+  useEffect(() => {
+    timerRef.current = setTimeout(handleDismiss, toast.duration);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [toast.duration, handleDismiss]);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        padding: '14px 16px',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderLeft: `3px solid ${colors.border}`,
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+        minWidth: '320px',
+        maxWidth: '420px',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: isExiting
+          ? 'toastSlideOut 300ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards'
+          : 'toastSlideIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+      }}
+    >
+      {/* Icon */}
+      <span style={{
+        color: colors.icon,
+        flexShrink: 0,
+        marginTop: '1px',
+      }}>
+        {TOAST_ICONS[toast.type]}
+      </span>
+
+      {/* Message */}
+      <p style={{
+        flex: 1,
+        fontSize: '14px',
+        fontWeight: 500,
+        lineHeight: 1.4,
+        color: 'var(--foreground)',
+        margin: 0,
+      }}>
+        {toast.message}
+      </p>
+
+      {/* Close */}
+      <button
+        onClick={handleDismiss}
+        style={{
+          flexShrink: 0,
+          padding: '2px',
+          color: 'var(--muted)',
+          borderRadius: 'var(--radius-sm)',
+          transition: 'color 150ms',
+          cursor: 'pointer',
+        }}
+        aria-label="Dismiss notification"
+      >
+        <X size={14} />
+      </button>
+
+      {/* Progress bar */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '2px',
+        backgroundColor: colors.border,
+        opacity: 0.4,
+        animation: `progressBar ${toast.duration}ms linear forwards`,
+      }} />
+    </div>
+  );
+}
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const addToast = useCallback((message: string, type: ToastType = 'info', duration: number = 4000) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setToasts(prev => [...prev.slice(-4), { id, message, type, duration, createdAt: Date.now() }]);
   }, []);
 
-  const addToast = useCallback(
-    (message: string, type: ToastType = 'info', duration = 4000) => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      setToasts((prev) => [...prev, { id, message, type, duration }].slice(-5));
-    },
-    []
-  );
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={{ addToast }}>
       {children}
-      <ToastContainer toasts={toasts} onDismiss={removeToast} />
-    </ToastContext.Provider>
-  );
-}
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
-  return ctx;
-}
-
-/* ── Toast Container ── */
-function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: string) => void }) {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '80px',
-        right: '20px',
-        zIndex: 10000,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        pointerEvents: 'none',
-      }}
-    >
-      {toasts.map((toast) => (
-        <div key={toast.id} style={{ pointerEvents: 'auto' }}>
-          <ToastItem toast={toast} onDismiss={onDismiss} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ── Single Toast ── */
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
-  const [isExiting, setIsExiting] = useState(false);
-  const colors = TOAST_COLORS[toast.type];
-
-  useEffect(() => {
-    if (toast.duration && toast.duration > 0) {
-      const timer = setTimeout(() => {
-        setIsExiting(true);
-        setTimeout(() => onDismiss(toast.id), 200);
-      }, toast.duration);
-      return () => clearTimeout(timer);
-    }
-  }, [toast, onDismiss]);
-
-  return (
-    <div
-      role="alert"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '14px 16px',
-        backgroundColor: colors.bg,
-        border: `1px solid ${colors.border}`,
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-        minWidth: '300px',
-        maxWidth: '420px',
-        animation: isExiting
-          ? 'slideOutRight 200ms ease-in forwards'
-          : 'slideInRight 250ms ease-out',
-        transition: 'opacity 200ms',
-        opacity: isExiting ? 0 : 1,
-      }}
-    >
-      <span style={{ color: colors.icon, flexShrink: 0, display: 'flex' }}>
-        {TOAST_ICONS[toast.type]}
-      </span>
-      <span
+      {/* Toast container */}
+      <div
         style={{
-          flex: 1,
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'var(--foreground)',
-          lineHeight: 1.4,
-          fontFamily: 'var(--font-body)',
-        }}
-      >
-        {toast.message}
-      </span>
-      <button
-        onClick={() => {
-          setIsExiting(true);
-          setTimeout(() => onDismiss(toast.id), 200);
-        }}
-        style={{
-          flexShrink: 0,
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 'var(--z-toast)' as any,
           display: 'flex',
-          alignItems: 'center',
-          color: 'var(--muted)',
-          opacity: 0.6,
-          cursor: 'pointer',
-          background: 'none',
-          border: 'none',
-          padding: '4px',
+          flexDirection: 'column',
+          gap: '8px',
+          pointerEvents: 'none',
         }}
-        aria-label="Dismiss notification"
       >
-        <X size={16} />
-      </button>
-    </div>
+        {toasts.map((toast) => (
+          <div key={toast.id} style={{ pointerEvents: 'auto' }}>
+            <ToastItem toast={toast} onDismiss={removeToast} />
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
   );
 }

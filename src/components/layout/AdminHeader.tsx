@@ -142,11 +142,11 @@ export default function AdminHeader({ children }: { children: React.ReactNode })
             display: 'flex', justifyContent: 'center', marginBottom: '16px',
           }}>
             <div style={{
-              width: '56px', height: '56px', borderRadius: '50%',
-              backgroundColor: 'var(--primary)', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
+              width: '80px', height: '80px', borderRadius: '50%',
+              overflow: 'hidden', border: '2px solid var(--accent)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Coffee size={28} color="var(--primary-foreground)" />
+              <img src="/logo.jpeg" alt="Retro Spot" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
 

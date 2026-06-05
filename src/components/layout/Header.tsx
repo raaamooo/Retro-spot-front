@@ -64,7 +64,6 @@ export default function Header() {
                   className={`${styles.navLink} ${isActive(link.href) ? styles.navLinkActive : ''}`}
                 >
                   {link.label}
-                  {isActive(link.href) && <span className={styles.activeDot} />}
                 </Link>
               ))}
             </nav>

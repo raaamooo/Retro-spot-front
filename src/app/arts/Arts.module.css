@@ -57,18 +57,8 @@
 }
 
 .cardWrap {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background-color: var(--surface);
-  border-radius: var(--radius-sm);
   display: grid;
   grid-template-columns: 1fr;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-.cardWrap:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
 @media (min-width: 768px) {
@@ -373,22 +363,11 @@
 
 /* Submit Artist Form Section */
 .formCard {
-  padding: 32px;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-.formCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  /* Layout specific spacing */
 }
 
 @media (min-width: 768px) {
-  .formCard {
-    padding: 40px;
-  }
+  /* Keeping media query if needed later */
 }
 
 .formGrid {

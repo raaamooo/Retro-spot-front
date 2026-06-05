@@ -3,11 +3,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 
-/**
- * Modal — Accessible dialog component.
- * Uses inline styles matching the editorial design system (no Tailwind).
- */
-
 interface ModalProps {
   open: boolean;
   onClose: () => void;
@@ -57,7 +52,7 @@ export default function Modal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
+        zIndex: 'var(--z-modal)' as any,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -71,9 +66,11 @@ export default function Modal({
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(4px)',
-          animation: 'fadeIn 200ms ease-out',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          animation: 'fadeIn 250ms ease-out forwards',
+          zIndex: -1,
         }}
       />
 
@@ -89,11 +86,11 @@ export default function Modal({
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 'var(--shadow-xl)',
           maxHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
-          animation: 'modalIn 250ms ease-out',
+          animation: 'scaleIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
         }}
       >
         {/* Header */}
@@ -103,7 +100,7 @@ export default function Modal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '16px 24px',
+              padding: '20px 24px',
               borderBottom: '1px solid var(--border-subtle)',
               flexShrink: 0,
             }}
@@ -111,10 +108,12 @@ export default function Modal({
             {title && (
               <h2
                 style={{
-                  fontSize: '18px',
-                  fontWeight: 700,
+                  fontSize: '20px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-display)',
                   color: 'var(--foreground)',
                   margin: 0,
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {title}
@@ -125,8 +124,8 @@ export default function Modal({
                 onClick={onClose}
                 aria-label="Close"
                 style={{
-                  padding: '6px',
-                  borderRadius: 'var(--radius-md)',
+                  padding: '8px',
+                  borderRadius: 'var(--radius-full)',
                   color: 'var(--muted)',
                   display: 'flex',
                   alignItems: 'center',
@@ -135,7 +134,15 @@ export default function Modal({
                   background: 'none',
                   border: 'none',
                   marginLeft: 'auto',
-                  transition: 'color 150ms, background-color 150ms',
+                  transition: 'all var(--transition-fast)',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-elevated)';
+                  e.currentTarget.style.color = 'var(--foreground)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--muted)';
                 }}
               >
                 <X size={20} />
@@ -145,18 +152,15 @@ export default function Modal({
         )}
 
         {/* Body */}
-        <div style={{ overflowY: 'auto', padding: '20px 24px', flex: 1 }}>
+        <div style={{ 
+          overflowY: 'auto', 
+          padding: '24px', 
+          flex: 1,
+          transition: 'max-height var(--transition-base)'
+        }}>
           {children}
         </div>
       </div>
-
-      {/* Keyframe animations — defined in globals.css (fadeIn, modalIn) */}
-      <style>{`
-        @keyframes modalIn {
-          from { opacity: 0; transform: scale(0.95) translateY(8px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

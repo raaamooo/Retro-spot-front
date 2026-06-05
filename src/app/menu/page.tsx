@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
 import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles } from 'lucide-react';
-import { Button, FormInput, Textarea, Select, EmptyState, LoadingState } from '@/components';
+import { Button, Card, FormInput, Textarea, Select, EmptyState, LoadingState, BottomSheet, SkeletonLoader } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 
 import { API_URL } from '@/lib/constants';
@@ -590,12 +590,9 @@ function MenuContent() {
       <div className={styles.page}>
         <div className="container" style={{ marginTop: '100px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-            {[...Array(6)].map((_, i) => (
-              <div key={i} style={{ height: '300px', backgroundColor: 'var(--surface)', borderRadius: '16px', opacity: 0.5, animation: 'pulse 1.5s infinite ease-in-out' }} />
-            ))}
+            <SkeletonLoader variant="card" count={6} />
           </div>
         </div>
-        <style dangerouslySetInnerHTML={{ __html: `@keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }` }} />
       </div>
     );
   }
@@ -731,8 +728,10 @@ function MenuContent() {
             const renderItemCard = (item: MenuItem) => {
               const isComingSoon = item.tags?.includes('coming_soon');
               return (
-                <div
+                <Card
                   key={item.id}
+                  interactive={!isComingSoon}
+                  padding="md"
                   className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''}`}
                   onClick={() => {
                     if (isComingSoon) return;
@@ -771,21 +770,22 @@ function MenuContent() {
                       {isComingSoon ? (
                         <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
                       ) : item.available ? (
-                        <button
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleAddClick(item);
                           }}
-                          className={styles.addButton}
                         >
                           {t('add')}
-                        </button>
+                        </Button>
                       ) : (
                         <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
                       )}
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             };
 
@@ -1007,7 +1007,7 @@ function MenuContent() {
               <span>Total</span>
               <span>{finalTotal.toFixed(2)} EGP</span>
             </div>
-            <Button fullWidth onClick={submitOrder} loading={isSubmitting}>
+            <Button className="w-full" onClick={submitOrder} loading={isSubmitting}>
               {t('confirm_order')}
             </Button>
           </div>
@@ -1015,43 +1015,30 @@ function MenuContent() {
       </div>
 
       {/* ═══ Category-Aware Customization Modal / Bottom Drawer ═══ */}
-      <div
-        className={`${styles.modalOverlay} ${customizingItem ? styles.modalOverlayOpen : ''}`}
-        onClick={() => setCustomizingItem(null)}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Customize your drink"
+      <BottomSheet
+        isOpen={!!customizingItem}
+        onClose={() => setCustomizingItem(null)}
+        title="Customize"
       >
         {customizingItem && (
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            {/* Swipe handle (mobile) */}
-            <div className={styles.swipeHandle}><div className={styles.swipeBar} /></div>
-
-            <div className={styles.modalHeader}>
-              <h2 className={styles.cartTitle}>Customize</h2>
-              <button onClick={() => setCustomizingItem(null)} className={styles.closeButton} aria-label="Close">
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className={styles.modalBody}>
-              {/* Product Info Summary */}
-              <div className={styles.modalItemHeader}>
-                <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
-                  <Image
-                    src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
-                    alt={customizingItem.name}
-                    fill
-                    sizes="80px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div>
-                  <h3 className={styles.modalItemTitle}>{customizingItem.name}</h3>
-                  <p className={styles.modalItemDesc}>{customizingItem.description}</p>
-                  <p className={styles.modalItemPrice}>{customizingItem.price.toFixed(2)} EGP</p>
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Product Info Summary */}
+            <div className={styles.modalItemHeader}>
+              <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
+                <Image
+                  src={customizingItem.image || getItemImage(customizingItem.nameEn || customizingItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
+                  alt={customizingItem.name}
+                  fill
+                  sizes="80px"
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
+              <div>
+                <h3 className={styles.modalItemTitle}>{customizingItem.name}</h3>
+                <p className={styles.modalItemDesc}>{customizingItem.description}</p>
+                <p className={styles.modalItemPrice}>{customizingItem.price.toFixed(2)} EGP</p>
+              </div>
+            </div>
 
               {/* ──── COCKTAIL OPTIONS ──── */}
               {custType === 'cocktail' && (
@@ -1331,87 +1318,78 @@ function MenuContent() {
                   </button>
                 </div>
               </div>
-            </div>
 
             {/* Sticky footer with live price */}
-            <div className={styles.modalFooter}>
+            <div className={styles.modalFooter} style={{ margin: '0 -20px -32px', borderTop: '1px solid var(--border-subtle)', padding: '16px 20px', backgroundColor: 'var(--surface)' }}>
               <div className={styles.modalPriceLine}>
                 <span>{modalQuantity}x {customizingItem.name}</span>
                 <span className={styles.modalLivePrice}>{customizingItemSubtotal.toFixed(2)} EGP</span>
               </div>
-              <Button fullWidth onClick={confirmCustomization}>
+              <Button className="w-full" onClick={confirmCustomization}>
                 Add to Order — {customizingItemSubtotal.toFixed(2)} EGP
               </Button>
             </div>
           </div>
         )}
-      </div>
+      </BottomSheet>
 
       {/* Premium Refactored Ice Cream Flavor Modal */}
-      <div
-        className={`${styles.modalOverlay} ${flavorModalItem ? styles.modalOverlayOpen : ''}`}
-        onClick={() => setFlavorModalItem(null)}
+      <BottomSheet
+        isOpen={!!flavorModalItem}
+        onClose={() => setFlavorModalItem(null)}
+        title="Select Flavors"
       >
         {flavorModalItem && (
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2 className={styles.cartTitle}>Select Flavors</h2>
-              <button onClick={() => setFlavorModalItem(null)} className={styles.closeButton}>
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className={styles.modalBody}>
-              <div className={styles.modalItemHeader}>
-                <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
-                  <Image
-                    src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
-                    alt={flavorModalItem.name}
-                    fill
-                    sizes="80px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <div>
-                  <h3 className={styles.modalItemTitle}>
-                    {flavorModalItem.name}
-                  </h3>
-                  <p className={styles.modalItemDesc}>
-                    Choose your ice cream scoop options below.
-                  </p>
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className={styles.modalItemHeader}>
+              <div className={styles.modalItemImageWrap} style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden' }}>
+                <Image
+                  src={flavorModalItem.image || getItemImage(flavorModalItem.nameEn || flavorModalItem.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
+                  alt={flavorModalItem.name}
+                  fill
+                  sizes="80px"
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
-
-              <div className={`${styles.optionGroup} ${styles.cartNotesWrap}`}>
-                <span className={styles.optionLabel}>Ice Cream Flavors</span>
-                <div className={styles.optionGrid}>
-                  {ICE_CREAM_FLAVORS.map(f => {
-                    const isSelected = selectedFlavors.includes(f);
-                    return (
-                      <button
-                        key={f}
-                        onClick={() => toggleFlavor(f)}
-                        className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}
-                      >
-                        {f}
-                      </button>
-                    );
-                  })}
-                </div>
+              <div>
+                <h3 className={styles.modalItemTitle}>
+                  {flavorModalItem.name}
+                </h3>
+                <p className={styles.modalItemDesc}>
+                  Choose your ice cream scoop options below.
+                </p>
               </div>
             </div>
 
-            <div className={styles.modalFooter}>
-              <Button variant="ghost" fullWidth onClick={() => setFlavorModalItem(null)}>
+            <div className={`${styles.optionGroup} ${styles.cartNotesWrap}`}>
+              <span className={styles.optionLabel}>Ice Cream Flavors</span>
+              <div className={styles.optionGrid}>
+                {ICE_CREAM_FLAVORS.map(f => {
+                  const isSelected = selectedFlavors.includes(f);
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => toggleFlavor(f)}
+                      className={`${styles.customizationPill} ${isSelected ? styles.customizationPillActive : ''}`}
+                    >
+                      {f}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter} style={{ margin: '0 -20px -32px', borderTop: '1px solid var(--border-subtle)', padding: '16px 20px', backgroundColor: 'var(--surface)', display: 'flex', gap: '12px', flexDirection: 'row' }}>
+              <Button variant="ghost" className="w-full" onClick={() => setFlavorModalItem(null)}>
                 Cancel
               </Button>
-              <Button fullWidth onClick={addIceCreamToCart}>
+              <Button className="w-full" onClick={addIceCreamToCart}>
                 Confirm Flavors
               </Button>
             </div>
           </div>
         )}
-      </div>
+      </BottomSheet>
     </div>
   );
 }

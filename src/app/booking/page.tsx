@@ -313,6 +313,7 @@ export default function BookingPage() {
               <div className={styles.bookingGrid}>
                 {/* Table Booking */}
                 <Card
+                  interactive
                   onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
                   className={styles.optionCard}
                 >
@@ -329,6 +330,7 @@ export default function BookingPage() {
 
                 {/* Room Booking */}
                 <Card
+                  interactive
                   onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
                   className={styles.optionCard}
                 >
@@ -357,10 +359,10 @@ export default function BookingPage() {
                 <p className={styles.subtitle}>{t('tell_us_more')}</p>
               </div>
 
-              <Card className="p-8 space-y-8 border border-border bg-surface rounded-sm">
+              <Card padding="lg" className={styles.formCard}>
                 {/* Table selection — only for table booking */}
                 {formData.bookingType === 'table' && (
-                  <div className="space-y-4">
+                  <div className={styles.formGroup}>
                     <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('select_your_tables')}</label>
                     <div className={styles.detailGrid}>
                       {TABLE_OPTIONS.map((tbl) => {
@@ -397,7 +399,7 @@ export default function BookingPage() {
 
                 {/* Room selection — only for room booking */}
                 {formData.bookingType === 'room' && (
-                  <div className="space-y-4">
+                  <div className={styles.formGroup}>
                     <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('select_your_room')}</label>
                     <div className={styles.detailGrid}>
                       {ROOM_OPTIONS.map((room) => {
@@ -433,7 +435,7 @@ export default function BookingPage() {
                 )}
 
                 {/* Event Purpose */}
-                <div className="space-y-4 pt-6 border-t border-border-subtle">
+                <div className={`${styles.formGroup} ${styles.dividerTop}`}>
                   <label className="block text-xs uppercase tracking-widest font-bold text-accent mb-4">{t('event_purpose')}</label>
                   <div className={styles.purposeGrid}>
                     {EVENT_PURPOSES.map(purpose => {
@@ -473,7 +475,7 @@ export default function BookingPage() {
                 <p className={styles.subtitle}>{t('your_info_and_timing')}</p>
               </div>
 
-              <Card className="p-8 space-y-6 border border-border bg-surface rounded-sm">
+              <Card padding="lg" className={styles.formCard}>
                 <FormInput
                   label={t('your_name')}
                   value={formData.name}
@@ -491,7 +493,7 @@ export default function BookingPage() {
                   placeholder="01xxxxxxxxx"
                 />
 
-                <hr className="border-border/20 my-6" />
+                <div className={styles.dividerTop} />
 
                 <FormInput
                   label={t('date')}
@@ -501,7 +503,7 @@ export default function BookingPage() {
                   required
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className={styles.grid2}>
                   <FormInput
                     label={t('start_time')}
                     type="time"
@@ -582,15 +584,15 @@ export default function BookingPage() {
                 ))}
               </div>
 
-              <Card className="p-8 border border-border bg-surface rounded-sm">
+              <Card padding="lg" className={styles.formCard}>
                 {calculatedPrices.deposit > 0 && (
-                  <div className="w-full mb-8 text-center bg-accent/5 text-accent py-4 rounded-sm font-bold border border-accent/20 uppercase tracking-wider text-xs">
+                  <div className={styles.depositAlert}>
                     {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
                   </div>
                 )}
                 
                 {formData.paymentMethod === 'Instapay' && (
-                  <div className="space-y-6">
+                  <div className={styles.formGroupLarge}>
                     <p className={styles.transferNotice}>
                       {t('transfer_via_instapay')}
                     </p>
@@ -605,7 +607,7 @@ export default function BookingPage() {
                       </button>
                     </div>
 
-                    <div className="w-full pt-6 border-t border-border/20">
+                    <div className={styles.dividerTop}>
                       <UploadInput
                         label={t('upload_transaction')}
                         onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
@@ -615,7 +617,7 @@ export default function BookingPage() {
                 )}
 
                 {formData.paymentMethod === 'Mobile wallet' && (
-                  <div className="space-y-6">
+                  <div className={styles.formGroupLarge}>
                     <p className={styles.transferNotice}>
                       {t('transfer_via_wallet')}
                     </p>
@@ -630,7 +632,7 @@ export default function BookingPage() {
                       </button>
                     </div>
 
-                    <div className="w-full pt-6 border-t border-border/20">
+                    <div className={styles.dividerTop}>
                       <UploadInput
                         label={t('upload_transaction')}
                         onFileSelect={(file) => setFormData({ ...formData, transactionImage: file })}
@@ -640,7 +642,7 @@ export default function BookingPage() {
                 )}
 
                 {!formData.paymentMethod && (
-                  <div className="text-center py-12 text-xs uppercase tracking-widest text-muted">
+                  <div className={styles.emptyAlert}>
                     {t('select_payment_method')}
                   </div>
                 )}

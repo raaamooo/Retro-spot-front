@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ImageIcon, Copy, Check, UploadCloud, Heart, Clock, CheckCircle2 } from 'lucide-react';
-import { Button, FormInput, Textarea, UploadInput } from '@/components';
+import { Button, Card, FormInput, Textarea, UploadInput } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 import { API_URL } from '@/lib/constants';
 import styles from './Arts.module.css';
@@ -143,7 +143,7 @@ export default function ArtsPage() {
             </div>
           </div>
 
-          <div className={styles.cardWrap}>
+          <Card className={styles.cardWrap}>
             {/* Photo Display */}
             <div className={styles.photoDisplay}>
               <div className={styles.photoTint} />
@@ -271,7 +271,7 @@ export default function ArtsPage() {
                 )}
               </div>
             </div>
-          </div>
+          </Card>
         </section>
 
         {/* =========================================
@@ -288,7 +288,7 @@ export default function ArtsPage() {
             </div>
           </div>
 
-          <div className={styles.formCard}>
+          <Card padding="lg" className={styles.formCard}>
             {artistSuccess ? (
               <div className={styles.successState}>
                 <div className={styles.successIconWrap}>
@@ -328,7 +328,7 @@ export default function ArtsPage() {
                 </Button>
               </div>
             )}
-          </div>
+          </Card>
         </section>
 
       </main>
