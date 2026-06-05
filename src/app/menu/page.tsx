@@ -145,7 +145,11 @@ function MenuContent() {
 
         let foundLoc = null;
         if (table) {
-          foundLoc = data.find((l: any) => l.id === table);
+          const normalizedTable = table.replace(/\s+/g, '').toLowerCase();
+          foundLoc = data.find((l: any) => 
+            l.id === table || 
+            l.name.replace(/\s+/g, '').toLowerCase() === normalizedTable
+          );
         }
 
         if (foundLoc) {
