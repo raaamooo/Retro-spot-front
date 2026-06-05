@@ -127,7 +127,7 @@ function MenuContent() {
 
   useEffect(() => {
     setMounted(true);
-    const table = searchParams.get('locationId');
+    const table = searchParams.get('locationId') || searchParams.get('location');
     if (table) {
       setHasTableQR(true);
     }
