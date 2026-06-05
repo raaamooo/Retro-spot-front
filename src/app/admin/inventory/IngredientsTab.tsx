@@ -15,7 +15,7 @@ interface Ingredient {
   minimumStock: number;
   costPerUnit: number;
   category: string | null;
-  ingredientSupplier: { supplierId: string; supplier: { name: string } }[];
+  ingredientSupplier: { supplierId: string; supplier: { name: string } } | null;
 }
 
 export default function IngredientsTab() {
@@ -115,7 +115,7 @@ export default function IngredientsTab() {
                     <td className="px-4 py-3 text-muted-foreground">{i.minimumStock} {i.unit}</td>
                     <td className="px-4 py-3">{i.costPerUnit} EGP</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {i.ingredientSupplier[0]?.supplier.name || '-'}
+                      {i.ingredientSupplier?.supplier.name || '-'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
