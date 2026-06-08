@@ -99,7 +99,7 @@ export default function Home() {
                   return (
                     <ScrollRevealThreeD delay={index * 100}>
                       <div key={item.id} className={`${styles.newsCard} ${isEven ? styles.staggered : ''}`}>
-                        <div className={styles.newsCardInner card-3d-tilt}>
+                        <div className={`${styles.newsCardInner} card-3d-tilt`}>
                           <div className={styles.newsMeta}>
                             <span className={styles.newsType}>{item.type.replace('_', ' ')}</span>
                             {item.startDate && (
