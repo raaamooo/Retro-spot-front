@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
 import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles } from 'lucide-react';
-import { Button, Card, FormInput, Textarea, Select, EmptyState, LoadingState, BottomSheet, SkeletonLoader } from '@/components';
+import { Button, Card, FormInput, Textarea, Select, EmptyState, LoadingState, BottomSheet, SkeletonLoader, ScrollRevealThreeD } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
 
 import { API_URL } from '@/lib/constants';
@@ -749,64 +749,66 @@ function MenuContent() {
             const renderItemCard = (item: MenuItem) => {
               const isComingSoon = item.tags?.includes('coming_soon');
               return (
-                <Card
-                  key={item.id}
-                  interactive={!isComingSoon}
-                  padding="md"
-                  className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''}`}
-                  onClick={() => {
-                    if (isComingSoon) return;
-                    handleAddClick(item);
-                  }}
-                >
-                  <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
-                    <Image
-                      src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
-                      alt={item.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      style={{ objectFit: 'cover' }}
-                      className={styles.itemImage}
-                    />
-                    {isComingSoon && (
-                      <div className={styles.comingSoonOverlay}>
-                        <span>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className={styles.itemContent}>
-                    <div>
-                      <h4 className={styles.itemName}>{item.name}</h4>
-                      <p className={styles.itemDesc}>{item.description}</p>
-                      {item.tags && item.tags.filter(t => t !== 'coming_soon').length > 0 && (
-                        <div className={styles.itemTags}>
-                          {item.tags.filter(t => t !== 'coming_soon').map(t => (
-                            <span key={t} className={styles.tag}>{t}</span>
-                          ))}
+                <ScrollRevealThreeD>
+                  <Card
+                    key={item.id}
+                    interactive={!isComingSoon}
+                    padding="md"
+                    className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''} card-3d-tilt`}
+                    onClick={() => {
+                      if (isComingSoon) return;
+                      handleAddClick(item);
+                    }}
+                  >
+                    <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
+                      <Image
+                        src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
+                        alt={item.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                        className={styles.itemImage}
+                      />
+                      {isComingSoon && (
+                        <div className={styles.comingSoonOverlay}>
+                          <span>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
                         </div>
                       )}
                     </div>
-                    <div className={styles.itemFooter}>
-                      <span className={styles.itemPrice}>{Math.round(item.price)} EGP</span>
-                      {isComingSoon ? (
-                        <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
-                      ) : item.available ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddClick(item);
-                          }}
-                        >
-                          {t('add')}
-                        </Button>
-                      ) : (
-                        <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
-                      )}
+                    <div className={styles.itemContent}>
+                      <div>
+                        <h4 className={styles.itemName}>{item.name}</h4>
+                        <p className={styles.itemDesc}>{item.description}</p>
+                        {item.tags && item.tags.filter(t => t !== 'coming_soon').length > 0 && (
+                          <div className={styles.itemTags}>
+                            {item.tags.filter(t => t !== 'coming_soon').map(t => (
+                              <span key={t} className={styles.tag}>{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.itemFooter}>
+                        <span className={styles.itemPrice}>{Math.round(item.price)} EGP</span>
+                        {isComingSoon ? (
+                          <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                        ) : item.available ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddClick(item);
+                            }}
+                          >
+                            {t('add')}
+                          </Button>
+                        ) : (
+                          <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </ScrollRevealThreeD>
               );
             };
 

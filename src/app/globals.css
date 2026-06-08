@@ -751,6 +751,165 @@ p, .body-text {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   3D TRANSFORMS & ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --perspective: 1000px;
+  --transition-3d: var(--transition-base);
+}
+
+/* Grain texture overlay for retro tactility */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+/* Reduce motion fallback - disable 3D transforms */
+@media (prefers-reduced-motion: reduce) {
+  .no-3d,
+  .no-3d * {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Perspective container for 3D transforms */
+.perspective-3d {
+  perspective: var(--perspective);
+}
+
+/* 3D Animation Classes */
+
+/* Hero section: 3D flip-in from Y-axis */
+.hero-3d-flip {
+  perspective: var(--perspective);
+}
+.hero-3d-flip.visible > * {
+  opacity: 1;
+  transform: rotateY(0deg);
+  transition: opacity var(--transition-3d) ease, transform var(--transition-3d) ease;
+}
+.hero-3d-flip > * {
+  opacity: 0;
+  transform: rotateY(-90deg);
+  transform-origin: left;
+  will-change: transform, opacity;
+}
+
+/* Staggered delay for hero children */
+.hero-3d-flip.visible > :nth-child(1) { transition-delay: 0ms; }
+.hero-3d-flip.visible > :nth-child(2) { transition-delay: 120ms; }
+.hero-3d-flip.visible > :nth-child(3) { transition-delay: 240ms; }
+.hero-3d-flip.visible > :nth-child(4) { transition-delay: 360ms; }
+.hero-3d-flip.visible > :nth-child(5) { transition-delay: 480ms; }
+
+/* Cards / product tiles: perspective tilt reveal */
+.card-3d-tilt {
+  opacity: 0;
+  transform: rotateX(-15deg) translateY(20px);
+  will-change: transform, opacity;
+}
+.card-3d-tilt.visible {
+  opacity: 1;
+  transform: rotateX(0deg) translateY(0);
+  transition: opacity var(--transition-3d) ease, transform var(--transition-3d) ease;
+}
+
+/* Section headings: 3D letter-by-letter drop-in */
+.heading-3d-drop {
+  perspective: var(--perspective);
+  overflow: hidden;
+}
+.heading-3d-drop span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateZ(-50px) translateY(20px);
+  will-change: transform, opacity;
+}
+.heading-3d-drop span.visible {
+  opacity: 1;
+  transform: translateZ(0) translateY(0);
+  transition: opacity var(--transition-3d) ease, transform var(--transition-3d) ease;
+}
+
+/* Feature rows / columns: alternating left/right rotateY */
+.feature-3d-rotate {
+  perspective: var(--perspective);
+}
+.feature-3d-rotate > * {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.feature-3d-rotate > *.visible:nth-child(odd) {
+  transform: rotateY(45deg);
+}
+.feature-3d-rotate > *.visible:nth-child(even) {
+  transform: rotateY(-45deg);
+}
+.feature-3d-rotate > *.visible {
+  opacity: 1;
+  transform: rotateY(0);
+  transition: opacity var(--transition-3d) ease, transform var(--transition-3d) ease;
+}
+
+/* Footer: floor-rise effect */
+.footer-3d-rise {
+  perspective: var(--perspective);
+}
+.footer-3d-rise > * {
+  opacity: 0;
+  transform: translateY(60px) rotateX(20deg);
+  will-change: transform, opacity;
+}
+.footer-3d-rise > *.visible {
+  opacity: 1;
+  transform: translateY(0) rotateX(0);
+  transition: opacity var(--transition-3d) ease, transform var(--transition-3d) ease;
+}
+
+/* Hover states on interactive elements: subtle 3D tilt */
+.hover-3d-tilt {
+  position: relative;
+}
+.hover-3d-tilt:hover {
+  transform-style: preserve-3d;
+}
+.hover-3d-tilt:hover::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  border-radius: inherit;
+  transform: translateZ(-10px);
+  transition: transform var(--transition-fast) ease;
+}
+.hover-3d-tilt:hover {
+  transform: translateZ(10px);
+  transition: transform var(--transition-fast) ease;
+}
+
+/* Add will-change to interactive elements for performance */
+button,
+a,
+[role="button"] {
+  will-change: transform;
+}
+
+/* ══════════════════════════════════════════════════════════════
    SCROLLBAR STYLING
    ═══════════════════════════════════════════════════════════════ */
 
