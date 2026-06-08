@@ -24,7 +24,7 @@
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 3px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -72,6 +72,7 @@
 .filled:hover {
   background-color: var(--primary-hover);
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .ghost {
@@ -83,6 +84,7 @@
   background-color: var(--surface);
   border-color: var(--accent);
   color: var(--accent);
+  transform: translateY(-2px);
 }
 
 .outline {
@@ -93,6 +95,7 @@
 .outline:hover {
   background-color: var(--surface-elevated);
   border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 /* ── Gold Gradient (Premium CTA) ── */
@@ -116,6 +119,7 @@
 }
 .gold:hover {
   box-shadow: 0 0 24px rgba(196, 153, 63, 0.35);
+  transform: translateY(-2px);
 }
 
 /* ── Danger ── */

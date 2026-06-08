@@ -100,21 +100,23 @@ export default function Home() {
                 {newsItems.slice(0, 3).map((item, index) => {
                   const isEven = index % 2 === 1;
                   return (
-                    <div key={item.id} className={`${styles.newsCard} ${isEven ? styles.staggered : ''}`}>
-                      <div className={styles.newsCardInner}>
-                        <div className={styles.newsMeta}>
-                          <span className={styles.newsType}>{item.type.replace('_', ' ')}</span>
-                          {item.startDate && (
-                            <span className={styles.newsDate}>
-                              <CalendarDays size={12} />
-                              {new Date(item.startDate).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
-                            </span>
-                          )}
+                    <ScrollReveal delay={index * 100}>
+                      <div key={item.id} className={`${styles.newsCard} ${isEven ? styles.staggered : ''}`}>
+                        <div className={styles.newsCardInner}>
+                          <div className={styles.newsMeta}>
+                            <span className={styles.newsType}>{item.type.replace('_', ' ')}</span>
+                            {item.startDate && (
+                              <span className={styles.newsDate}>
+                                <CalendarDays size={12} />
+                                {new Date(item.startDate).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className={styles.newsTitle}>{isRtl ? item.titleAr : item.titleEn}</h3>
+                          <p className={styles.newsDesc}>{isRtl ? item.descriptionAr : item.descriptionEn}</p>
                         </div>
-                        <h3 className={styles.newsTitle}>{isRtl ? item.titleAr : item.titleEn}</h3>
-                        <p className={styles.newsDesc}>{isRtl ? item.descriptionAr : item.descriptionEn}</p>
                       </div>
-                    </div>
+                    </ScrollReveal>
                   );
                 })}
               </div>
@@ -171,13 +173,15 @@ export default function Home() {
                 { icon: Music, title: t('music'), desc: isRtl ? 'أجواء موسيقية هادئة للعمل.' : 'Curated playlists and vinyl records.' },
                 { icon: Palette, title: t('art_gallery'), desc: isRtl ? 'معرض فني محلي ومتجدد.' : 'Local art gallery and creative space.' }
               ].map((feature, i) => (
-                <div key={i} className={styles.featureItem}>
-                  <div className={styles.featureIcon}>
-                    <feature.icon size={24} />
+                <ScrollReveal delay={i * 100}>
+                  <div key={i} className={styles.featureItem}>
+                    <div className={styles.featureIcon}>
+                      <feature.icon size={24} />
+                    </div>
+                    <h3 className="h3" style={{ marginBottom: 0 }}>{feature.title}</h3>
+                    <p className="body-text">{feature.desc}</p>
                   </div>
-                  <h3 className="h3" style={{ marginBottom: 0 }}>{feature.title}</h3>
-                  <p className="body-text">{feature.desc}</p>
-                </div>
+                </ScrollReveal>
               ))}
             </div>
           </ScrollReveal>
