@@ -23,3 +23,4 @@ export { default as ScrollReveal } from './ui/ScrollReveal';
 export { default as DrinkQuiz } from './ui/DrinkQuiz';
 export { default as Drawer } from './ui/Drawer';
 export { default as StatusStepper } from './ui/StatusStepper';
+export { default as ScrollRevealThreeD } from './ui/ScrollRevealThreeD';
