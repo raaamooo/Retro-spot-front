@@ -26,3 +26,5 @@ export { default as StatusStepper } from './ui/StatusStepper';
 export { default as ScrollRevealThreeD } from './ui/ScrollRevealThreeD';
 export { default as DecorativeLine } from './ui/DecorativeLine';
 export { default as MorphingAccent } from './ui/MorphingAccent';
+export { default as CustomCursor } from './ui/CustomCursor';
+export { default as SplashLoader } from './ui/SplashLoader';

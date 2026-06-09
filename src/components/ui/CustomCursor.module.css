@@ -1,0 +1,35 @@
+.cursorWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.cursorRing {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(220, 183, 115, 0.6); /* Brand gold */
+  border-radius: 50%;
+  opacity: 0; /* Animated in */
+  will-change: transform, opacity, scale;
+  mix-blend-mode: exclusion;
+}
+
+.cursorDot {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 6px;
+  height: 6px;
+  background-color: #dcb773;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  box-shadow: 0 0 10px rgba(220, 183, 115, 0.8);
+}
+
+

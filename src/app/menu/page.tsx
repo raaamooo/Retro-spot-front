@@ -26,7 +26,8 @@ import {
   animateSuccessCheckmark,
   useOrderStatusTimeline,
   useActiveStepPulse,
-  useProgressLine
+  useProgressLine,
+  useGlobal3DTilt
 } from '@/animations';
 
 import { API_URL } from '@/lib/constants';

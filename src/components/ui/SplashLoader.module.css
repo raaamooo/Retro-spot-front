@@ -1,0 +1,52 @@
+.splashContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1C0E06; /* Dark wood base */
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.splashContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.splashLogo {
+  width: 80px;
+  height: 80px;
+  stroke: #dcb773; /* Gold */
+  stroke-width: 1.5;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  fill: none;
+}
+
+.splashText {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: #f7f3eb;
+  letter-spacing: 0.2em;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.splashSubtext {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgba(220, 183, 115, 0.7);
+  opacity: 0;
+  transform: translateY(10px);
+}

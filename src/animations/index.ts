@@ -29,6 +29,8 @@ export { useTabIndicator } from './useTabIndicator';
 export { useCardHover3D } from './useCardHover3D';
 export { useImageFadeIn } from './useImageFadeIn';
 export { useHeroTimeline } from './useHeroTimeline';
+export { useGlobal3DTilt } from './useGlobal3DTilt';
+export { useParallax } from './useParallax';
 export { useCartItemEntrance, animateCartItemRemoval, pulseCartQuantity, flashOrderTotal } from './useCartItemAnimations';
 export { useCheckoutStagger, useStepIndicator, animateSuccessCheckmark } from './useCheckoutAnimations';
 export { useOrderStatusTimeline, useActiveStepPulse, useProgressLine } from './useOrderStatusAnimations';

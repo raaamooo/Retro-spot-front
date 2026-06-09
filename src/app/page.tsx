@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { MapPin, Newspaper, CalendarDays, Coffee, Music, Palette } from 'lucide-react';
 import { Button, Card, EmptyState, PageContainer, DecorativeLine, MorphingAccent } from '@/components';
 import TakeawayCupAnimation from '@/components/ui/TakeawayCupAnimation';
-import { useHeroTimeline, useSectionTimeline } from '@/animations';
+import { useHeroTimeline, useSectionTimeline, useGlobal3DTilt, useParallax } from '@/animations';
 import { API_URL } from '@/lib/constants';
 import styles from './Home.module.css';
 
@@ -53,6 +53,11 @@ export default function Home() {
   useSectionTimeline(storySectionRef);
   useSectionTimeline(featuresSectionRef);
   useSectionTimeline(footerSectionRef);
+
+  // Apply premium interactive 3D tilts globally to items with .card-3d-tilt class
+  useGlobal3DTilt('.card-3d-tilt', 12);
+  // Apply smooth scrolling parallax to the story image
+  useParallax('.parallax-image', -0.12);
 
   return (
     <PageContainer>
@@ -153,7 +158,7 @@ export default function Home() {
             </div>
             <div className={`${styles.storyImageContainer} animated-card`}>
                 <div className={styles.storyImageWrapper}>
-                  <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2071&auto=format&fit=crop" alt="Coffee pouring" className={styles.storyImage} />
+                  <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2071&auto=format&fit=crop" alt="Coffee pouring" className={`${styles.storyImage} ${styles.parallaxBg} parallax-image`} />
                 </div>
             </div>
           </div>
