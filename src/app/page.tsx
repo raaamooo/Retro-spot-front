@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { MapPin, Newspaper, CalendarDays, Coffee, Music, Palette } from 'lucide-react';
 import { Button, Card, EmptyState, ScrollReveal, PageContainer, ScrollRevealThreeD } from '@/components';
-import { CupLidAnimation } from '@/components/ui/CupLidAnimation';
+import CupLidAnimation from '@/components/ui/CupLidAnimation';
 import { API_URL } from '@/lib/constants';
 import styles from './Home.module.css';
 
