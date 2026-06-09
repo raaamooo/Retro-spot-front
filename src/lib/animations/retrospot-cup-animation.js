@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 
 /**
  * Custom hook to track scroll progress for cup lid animation
- * @returns {Object} Object containing scroll progress and animation values
+ * @returns {{ scrollProgress: number, isAnimating: boolean, lidRotation: number, lidTranslationY: number, lidOpacity: number, revealOpacity: number }} Object containing scroll progress and animation values
  */
 export function useCupLidScrollAnimation() {
   const [scrollProgress, setScrollProgress] = useState(0);
