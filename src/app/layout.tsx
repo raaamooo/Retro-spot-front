@@ -9,7 +9,6 @@ import Footer from "@/components/layout/Footer";
 import MobileNavBar from "@/components/layout/MobileNavBar";
 import { API_URL } from "@/lib/constants";
 import ClientTransition from "@/components/layout/ClientTransition";
-import { CustomCursor, SplashLoader } from "@/components";
 
 /* ═══════════════════════════════════════════════════════════════
    SEO — Metadata, Open Graph, Twitter Card, Structured Data
@@ -138,8 +137,6 @@ export default async function RootLayout({
               </main>
               <Footer />
               <MobileNavBar />
-              <CustomCursor />
-              <SplashLoader />
             </ToastProvider>
           </ThemeProvider>
         </LanguageProvider>

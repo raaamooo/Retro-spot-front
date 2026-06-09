@@ -341,15 +341,6 @@
   mix-blend-mode: luminosity;
 }
 
-.parallaxBg {
-  height: 125% !important;
-  width: 100% !important;
-  object-fit: cover;
-  position: absolute;
-  top: -12%;
-  will-change: transform;
-}
-
 .featuresGrid {
   display: grid;
   grid-template-columns: 1fr;

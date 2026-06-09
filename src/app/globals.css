@@ -920,9 +920,3 @@ a,
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
-
-/* Global class to hide default cursor when using custom cursor */
-.has-custom-cursor,
-.has-custom-cursor * {
-  cursor: none !important;
-}

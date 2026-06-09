@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { useCardHover3D } from '@/animations/useCardHover3D';
+import React from 'react';
 import styles from './Card.module.css';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -11,7 +10,6 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
-  tilt?: boolean;
 }
 
 const paddingClasses = {
@@ -29,15 +27,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     interactive = false,
     padding = 'md',
     onClick,
-    tilt = false,
     ...props
   }, ref) => {
-    const internalRef = useRef<HTMLDivElement>(null);
-    const resolvedRef = (ref || internalRef) as React.RefObject<HTMLDivElement | null>;
-
-    // Apply 3D Tilt hook conditionally
-    useCardHover3D(resolvedRef, tilt ? 12 : 0);
-
     const isHoverable = hoverable || interactive || !!onClick;
     
     const classNames = [
@@ -45,13 +36,12 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       paddingClasses[padding],
       isHoverable ? styles.hoverable : '',
       interactive ? styles.interactive : '',
-      tilt ? 'card-3d-tilt' : '',
       className
     ].filter(Boolean).join(' ');
 
     return (
       <div
-        ref={resolvedRef}
+        ref={ref}
         onClick={onClick}
         className={classNames}
         role={onClick || interactive ? 'button' : undefined}

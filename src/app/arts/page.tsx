@@ -143,7 +143,7 @@ export default function ArtsPage() {
             </div>
           </div>
 
-          <Card className={styles.cardWrap} tilt={true}>
+          <Card className={styles.cardWrap}>
             {/* Photo Display */}
             <div className={styles.photoDisplay}>
               <div className={styles.photoTint} />
@@ -287,7 +287,7 @@ export default function ArtsPage() {
             </div>
           </div>
 
-          <Card padding="lg" className={styles.formCard} tilt={true}>
+          <Card padding="lg" className={styles.formCard}>
             {artistSuccess ? (
               <div className={styles.successState}>
                 <div className={styles.successIconWrap}>

@@ -314,7 +314,6 @@ export default function BookingPage() {
                 {/* Table Booking */}
                 <Card
                   interactive
-                  tilt={true}
                   onClick={() => { setFormData({ ...formData, bookingType: 'table' }); handleNext(); }}
                   className={styles.optionCard}
                 >
@@ -332,7 +331,6 @@ export default function BookingPage() {
                 {/* Room Booking */}
                 <Card
                   interactive
-                  tilt={true}
                   onClick={() => { setFormData({ ...formData, bookingType: 'room' }); handleNext(); }}
                   className={styles.optionCard}
                 >
@@ -361,7 +359,7 @@ export default function BookingPage() {
                 <p className={styles.subtitle}>{t('tell_us_more')}</p>
               </div>
 
-              <Card padding="lg" className={styles.formCard} tilt={true}>
+              <Card padding="lg" className={styles.formCard}>
                 {/* Table selection — only for table booking */}
                 {formData.bookingType === 'table' && (
                   <div className={styles.formGroup}>
@@ -477,7 +475,7 @@ export default function BookingPage() {
                 <p className={styles.subtitle}>{t('your_info_and_timing')}</p>
               </div>
 
-              <Card padding="lg" className={styles.formCard} tilt={true}>
+              <Card padding="lg" className={styles.formCard}>
                 <FormInput
                   label={t('your_name')}
                   value={formData.name}
@@ -586,7 +584,7 @@ export default function BookingPage() {
                 ))}
               </div>
 
-              <Card padding="lg" className={styles.formCard} tilt={true}>
+              <Card padding="lg" className={styles.formCard}>
                 {calculatedPrices.deposit > 0 && (
                   <div className={styles.depositAlert}>
                     {language === 'ar' ? 'المبلغ المطلوب تحويله (المقدم):' : 'Deposit amount to transfer:'} {calculatedPrices.deposit} EGP
