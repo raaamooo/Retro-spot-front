@@ -21,11 +21,11 @@ export default function CupLidAnimation({ className = '' }: CupLidAnimationProps
     <div
       className={`cup-lid-animation-container ${className}`}
       style={{
-        '--liarRotation': `${lidRotation}deg`,
+        '--lidRotation': `${lidRotation}deg`,
         '--lidTranslationY': `${lidTranslationY}px`,
         '--lidOpacity': `${lidOpacity}`,
         '--revealOpacity': `${revealOpacity}`
-      }}
+      } as React.CSSProperties}
     >
       {/* Cafe scene revealed under the lid */}
       <div className="cafe-scene">

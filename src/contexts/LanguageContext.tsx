@@ -214,10 +214,7 @@ const translations: Record<string, { en: string; ar: string }> = {
   bidding_ends_in: { en: 'Ends in 3 Days', ar: 'تنتهي خلال ٣ أيام' },
   for_the_artists: { en: 'For the Artists', ar: 'هل أنت فنان؟ شارك إبداعك' },
   submit_request: { en: 'Submit Request', ar: 'قدم الطلب' },
-  the_exhibition: { en: 'The Exhibition', ar: 'المعرض الفني والأعمال الأسبوعية' },
-  midnight_jazz_canvas: { en: 'Midnight Jazz Canvas', ar: 'صورة اللوحة' },
   ends_in_days: { en: 'Ends in {days} Days', ar: 'تنتهي خلال {days} أيام' },
-  for_the_artists: { en: 'For the Artists', ar: 'هل أنت فنان؟ شارك إبداعك' },
 
   // Admin Flow specific
   new: { en: 'New', ar: 'جديد' },
