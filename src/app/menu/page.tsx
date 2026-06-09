@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
@@ -8,9 +8,26 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { EVENTS } from '@/lib/socket';
 import { useSocketEvent } from '@/hooks/useSocket';
-import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles } from 'lucide-react';
-import { Button, Card, FormInput, Textarea, Select, EmptyState, LoadingState, BottomSheet, SkeletonLoader, ScrollRevealThreeD } from '@/components';
+import { Sun, Moon, Trash2, X, ShoppingBag, Plus, Minus, Sparkles, Check, Clock, CookingPot, UtensilsCrossed } from 'lucide-react';
+import { Button, Card, FormInput, Textarea, Select, EmptyState, LoadingState, BottomSheet, SkeletonLoader, DecorativeLine, MorphingAccent } from '@/components';
 import { useToast } from '@/contexts/ToastContext';
+import {
+  useStaggeredEntrance,
+  useParticleBurst,
+  useTabIndicator,
+  useCardHover3D,
+  useImageFadeIn,
+  useCartItemEntrance,
+  animateCartItemRemoval,
+  pulseCartQuantity,
+  flashOrderTotal,
+  useCheckoutStagger,
+  useStepIndicator,
+  animateSuccessCheckmark,
+  useOrderStatusTimeline,
+  useActiveStepPulse,
+  useProgressLine
+} from '@/animations';
 
 import { API_URL } from '@/lib/constants';
 import { getItemImage } from '@/lib/itemImages';
@@ -74,6 +91,12 @@ function MenuContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [hasActiveOrder, setHasActiveOrder] = useState(false);
+  
+  // New UI states
+  const [checkoutStep, setCheckoutStep] = useState<number>(1);
+  const [isCheckoutSuccess, setIsCheckoutSuccess] = useState(false);
+  const [activeOrderObj, setActiveOrderObj] = useState<any>(null);
+  const [isOrderStatusOpen, setIsOrderStatusOpen] = useState(false);
 
   // Customization modal states
   const [customizingItem, setCustomizingItem] = useState<MenuItem | null>(null);
@@ -209,8 +232,14 @@ function MenuContent() {
       const res = await fetch(`${API_URL}/api/orders?locationId=${tid}`);
       if (!res.ok) return;
       const data = await res.json();
-      const active = data.some((o: any) => o.status !== 'completed');
-      setHasActiveOrder(active);
+      const activeOrders = data.filter((o: any) => o.status !== 'completed');
+      if (activeOrders.length > 0) {
+        setHasActiveOrder(true);
+        setActiveOrderObj(activeOrders[0]); // store the first active order
+      } else {
+        setHasActiveOrder(false);
+        setActiveOrderObj(null);
+      }
     } catch (err) {
       console.error('Error checking active order:', err);
     }
@@ -501,14 +530,57 @@ function MenuContent() {
     setSelectedFlavors(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   };
 
-  const updateQuantity = (index: number, delta: number) => {
-    setCart(prev => {
-      const newCart = [...prev];
-      newCart[index].cartQuantity += delta;
-      if (newCart[index].cartQuantity <= 0) newCart.splice(index, 1);
-      return newCart;
-    });
-  };
+  const reducedMotion = (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) || false;
+
+  const updateQuantity = useCallback((index: number, delta: number, element?: HTMLElement | null) => {
+    const newQty = cart[index]?.cartQuantity + delta;
+    if (newQty <= 0 && element) {
+      // Animated removal
+      animateCartItemRemoval(element, reducedMotion, () => {
+        setCart(prev => {
+          const newCart = [...prev];
+          newCart.splice(index, 1);
+          return newCart;
+        });
+      });
+    } else {
+      setCart(prev => {
+        const newCart = [...prev];
+        newCart[index].cartQuantity += delta;
+        if (newCart[index].cartQuantity <= 0) newCart.splice(index, 1);
+        return newCart;
+      });
+      // Pulse the quantity badge
+      if (element) {
+        const qtyEl = element.querySelector('.cartQtyBadge') as HTMLElement;
+        pulseCartQuantity(qtyEl, reducedMotion);
+      }
+      // Flash the total
+      flashOrderTotal(totalRef.current, reducedMotion);
+    }
+  }, [cart, reducedMotion]);
+
+  // Nav scroll ref for tab indicator
+  const navScrollRef = React.useRef<HTMLDivElement>(null);
+  const coffeeTabsRef = React.useRef<HTMLDivElement>(null);
+
+  useTabIndicator(navScrollRef, `#pill-${activeCategory.replace(/\s+/g, '\\$&')}`, styles.tabIndicator);
+  useTabIndicator(coffeeTabsRef, `#coffee-tab-${coffeeTypeTab}`, styles.coffeeTabIndicator);
+
+  // ── Animation refs ──
+  const cartListRef = useRef<HTMLDivElement>(null);
+  const checkoutFormRef = useRef<HTMLDivElement>(null);
+  const stepBarRef = useRef<HTMLDivElement>(null);
+  const successPathRef = useRef<SVGPathElement>(null);
+  const successCardRef = useRef<HTMLDivElement>(null);
+  const orderStatusRef = useRef<HTMLDivElement>(null);
+  const totalRef = useRef<HTMLSpanElement>(null);
+
+
+  useCartItemEntrance(cartListRef, isCartOpen);
+  useCheckoutStagger(checkoutFormRef, checkoutStep);
+  useStepIndicator(stepBarRef, checkoutStep === 1 ? 0 : 100);
+  useOrderStatusTimeline(orderStatusRef, isOrderStatusOpen);
 
   const cartTotal = cart.reduce((sum, item) => {
     let itemTotal = item.price;
@@ -578,10 +650,17 @@ function MenuContent() {
       });
 
       if (!res.ok) throw new Error('Order failed');
-      addToast(t('order_placed'), 'success');
-      setCart([]);
-      setIsCartOpen(false);
+      // Show success state with animated checkmark
+      setIsCheckoutSuccess(true);
+      animateSuccessCheckmark(successPathRef, successCardRef, reducedMotion);
       setHasActiveOrder(true);
+      // Auto-close after 2.5s
+      setTimeout(() => {
+        setCart([]);
+        setIsCartOpen(false);
+        setIsCheckoutSuccess(false);
+        setCheckoutStep(1);
+      }, 2500);
       setTip(0);
       setTipPct(0);
       setCustomTipVal('');
@@ -671,10 +750,14 @@ function MenuContent() {
         </div>
       </header>
 
+      <div style={{ padding: '0 24px', maxWidth: '300px', margin: '0 auto' }}>
+        <DecorativeLine />
+      </div>
+
       {/* Sticky Category Scroll Navigation Bar */}
       {categories.length > 0 && (
         <nav className={styles.categoryNav}>
-          <div className={styles.categoryNavScroll}>
+          <div className={styles.categoryNavScroll} ref={navScrollRef}>
             {categories.map(category => (
               <button
                 key={category}
@@ -746,70 +829,87 @@ function MenuContent() {
 
             const sortedItems = sortItems(activeFilteredItems);
 
-            const renderItemCard = (item: MenuItem) => {
+            const MenuItemCard = ({ item }: { item: MenuItem }) => {
               const isComingSoon = item.tags?.includes('coming_soon');
+              const cardRef = React.useRef<HTMLDivElement>(null);
+              useCardHover3D(cardRef, 8); // subtle 8deg tilt
+              const handleImageLoad = useImageFadeIn();
+              const particleBurst = useParticleBurst();
+
               return (
-                <ScrollRevealThreeD>
-                  <Card
-                    key={item.id}
-                    interactive={!isComingSoon}
-                    padding="md"
-                    className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''} card-3d-tilt`}
-                    onClick={() => {
-                      if (isComingSoon) return;
-                      handleAddClick(item);
-                    }}
-                  >
-                    <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
-                      <Image
-                        src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
-                        alt={item.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        style={{ objectFit: 'cover' }}
-                        className={styles.itemImage}
-                      />
-                      {isComingSoon && (
-                        <div className={styles.comingSoonOverlay}>
-                          <span>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                <Card
+                  ref={cardRef}
+                  interactive={!isComingSoon}
+                  padding="md"
+                  className={`${styles.menuItem} ${isComingSoon ? styles.comingSoonItem : ''}`}
+                  onClick={() => {
+                    if (isComingSoon) return;
+                    handleAddClick(item);
+                  }}
+                >
+                  <div className={styles.itemImageWrap} style={{ position: 'relative' }}>
+                    <Image
+                      src={item.image || getItemImage(item.nameEn || item.name) || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400&auto=format&fit=crop'}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
+                      className={styles.itemImage}
+                      onLoad={handleImageLoad}
+                    />
+                    {isComingSoon && (
+                      <div className={styles.comingSoonOverlay}>
+                        <span>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.itemContent}>
+                    <div>
+                      <h4 className={styles.itemName}>{item.name}</h4>
+                      <p className={styles.itemDesc}>{item.description}</p>
+                      {item.tags && item.tags.filter(t => t !== 'coming_soon').length > 0 && (
+                        <div className={styles.itemTags}>
+                          {item.tags.filter(t => t !== 'coming_soon').map(t => (
+                            <span key={t} className={styles.tag}>{t}</span>
+                          ))}
                         </div>
                       )}
                     </div>
-                    <div className={styles.itemContent}>
-                      <div>
-                        <h4 className={styles.itemName}>{item.name}</h4>
-                        <p className={styles.itemDesc}>{item.description}</p>
-                        {item.tags && item.tags.filter(t => t !== 'coming_soon').length > 0 && (
-                          <div className={styles.itemTags}>
-                            {item.tags.filter(t => t !== 'coming_soon').map(t => (
-                              <span key={t} className={styles.tag}>{t}</span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className={styles.itemFooter}>
-                        <span className={styles.itemPrice}>{Math.round(item.price)} EGP</span>
-                        {isComingSoon ? (
-                          <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
-                        ) : item.available ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddClick(item);
-                            }}
-                          >
-                            {t('add')}
-                          </Button>
-                        ) : (
-                          <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
-                        )}
-                      </div>
+                    <div className={styles.itemFooter}>
+                      <span className={styles.itemPrice}>{Math.round(item.price)} EGP</span>
+                      {isComingSoon ? (
+                        <span className={styles.comingSoonText}>{language === 'ar' ? 'قريباً' : 'Coming Soon'}</span>
+                      ) : item.available ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            particleBurst(e);
+                            handleAddClick(item);
+                          }}
+                        >
+                          {t('add')}
+                        </Button>
+                      ) : (
+                        <span className={styles.outOfStockBadge}>{t('out_of_stock')}</span>
+                      )}
                     </div>
-                  </Card>
-                </ScrollRevealThreeD>
+                  </div>
+                </Card>
               );
+            };
+
+            const AnimatedSection = ({ children }: { children: React.ReactNode }) => {
+              const sectionRef = React.useRef<HTMLDivElement>(null);
+              useStaggeredEntrance(sectionRef, [sortedItems], '.menuItem');
+              return <div ref={sectionRef} className={styles.gridList}>{children}</div>;
+            };
+
+            const AnimatedSweetGroup = ({ groupItems, children }: { groupItems: MenuItem[], children: React.ReactNode }) => {
+              const groupRef = React.useRef<HTMLDivElement>(null);
+              useStaggeredEntrance(groupRef, [groupItems], '.menuItem');
+              return <div ref={groupRef} className={styles.gridList}>{children}</div>;
             };
 
             return (
@@ -822,6 +922,7 @@ function MenuContent() {
                   <h2 className={styles.categoryTitle}>
                     {category}
                     <span className={styles.categoryCountBadge}>{catItems.length}</span>
+                    <MorphingAccent />
                   </h2>
                   <p className={styles.categoryDesc}>
                     {getCategoryDescription(category)}
@@ -829,9 +930,10 @@ function MenuContent() {
 
                   {/* Hot / Iced tab switcher for Coffee */}
                   {isCoffee && (
-                    <div className={styles.coffeeTabs}>
+                    <div className={styles.coffeeTabs} ref={coffeeTabsRef}>
                       <button
                         type="button"
+                        id="coffee-tab-hot"
                         className={`${styles.coffeeTab} ${coffeeTypeTab === 'hot' ? styles.coffeeTabActive : ''}`}
                         onClick={() => setCoffeeTypeTab('hot')}
                       >
@@ -839,6 +941,7 @@ function MenuContent() {
                       </button>
                       <button
                         type="button"
+                        id="coffee-tab-iced"
                         className={`${styles.coffeeTab} ${coffeeTypeTab === 'iced' ? styles.coffeeTabActive : ''}`}
                         onClick={() => setCoffeeTypeTab('iced')}
                       >
@@ -862,17 +965,17 @@ function MenuContent() {
                           <h3 className={styles.sweetGroupTitle}>
                             {language === 'ar' ? group.labelAr : group.labelEn}
                           </h3>
-                          <div className={styles.gridList}>
-                            {groupItems.map(item => renderItemCard(item))}
-                          </div>
+                          <AnimatedSweetGroup groupItems={groupItems}>
+                            {groupItems.map(item => <MenuItemCard key={item.id} item={item} />)}
+                          </AnimatedSweetGroup>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <div className={styles.gridList}>
-                    {sortedItems.map(item => renderItemCard(item))}
-                  </div>
+                  <AnimatedSection>
+                    {sortedItems.map(item => <MenuItemCard key={item.id} item={item} />)}
+                  </AnimatedSection>
                 )}
               </section>
             );
@@ -894,17 +997,60 @@ function MenuContent() {
         </button>
       )}
 
-      {/* Staff Check request alert */}
+      {/* Active Order Status Tracker */}
       {hasActiveOrder && cart.length === 0 && !isCartOpen && orderType !== 'takeaway' && (
-        <div className={styles.requestCheckBar}>
+        <div className={styles.requestCheckBar} onClick={() => setIsOrderStatusOpen(true)} style={{ cursor: 'pointer' }}>
           <span style={{ fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {t('active_order')}
+            {t('active_order')} — Tap to track
           </span>
-          <Button variant="ghost" size="sm" onClick={requestCheck} style={{ borderColor: 'var(--primary-foreground)', color: 'var(--primary-foreground)' }}>
+          <Button variant="ghost" size="sm" onClick={(e: React.MouseEvent) => { e.stopPropagation(); requestCheck(); }} style={{ borderColor: 'var(--primary-foreground)', color: 'var(--primary-foreground)' }}>
             {t('request_check')}
           </Button>
         </div>
       )}
+
+      {/* Order Status Timeline Bottom Sheet */}
+      <BottomSheet
+        isOpen={isOrderStatusOpen}
+        onClose={() => setIsOrderStatusOpen(false)}
+        title="Order Status"
+      >
+        <div ref={orderStatusRef} className={styles.statusTracker}>
+          {[
+            { key: 'placed', label: 'Order Placed', desc: 'Your order has been received', icon: <Check size={16} /> },
+            { key: 'barista', label: 'Preparing', desc: 'Your items are being prepared', icon: <CookingPot size={16} /> },
+            { key: 'waiter', label: 'Ready to Serve', desc: 'Your order is on its way', icon: <UtensilsCrossed size={16} /> },
+          ].map((step, i, arr) => {
+            const orderStatus = activeOrderObj?.status || 'placed';
+            const statusOrder = ['placed', 'barista', 'waiter', 'cashier', 'completed'];
+            const currentIdx = statusOrder.indexOf(orderStatus);
+            const stepIdx = statusOrder.indexOf(step.key);
+            const isCompleted = stepIdx < currentIdx;
+            const isActive = stepIdx === currentIdx;
+            return (
+              <div key={step.key} className={`${styles.statusStep} statusNodeAnim`}>
+                <div className={styles.statusIconCol}>
+                  <div className={`${styles.statusNode} ${isCompleted ? styles.statusNodeCompleted : ''} ${isActive ? styles.statusNodeActive : ''}`}>
+                    {isCompleted ? <Check size={14} /> : step.icon}
+                  </div>
+                  {i < arr.length - 1 && (
+                    <>
+                      <div className={styles.statusLine} />
+                      <div className={styles.statusLineFill} style={isCompleted ? { transform: 'scaleY(1)' } : {}} />
+                    </>
+                  )}
+                </div>
+                <div className={styles.statusTextCol}>
+                  <div className={`${styles.statusTitle} ${!isCompleted && !isActive ? styles.statusTitleMuted : ''}`}>
+                    {step.label}
+                  </div>
+                  <div className={styles.statusDesc}>{step.desc}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </BottomSheet>
 
       {/* Dual Layout Cart Sheet Drawer */}
       <div className={`${styles.cartOverlay} ${isCartOpen ? styles.cartOverlayOpen : ''}`} onClick={() => setIsCartOpen(false)} />
@@ -917,104 +1063,151 @@ function MenuContent() {
         </div>
 
         <div className={styles.cartContent}>
-          {cart.length === 0 ? (
+          {isCheckoutSuccess ? (
+            /* ═══ Success State with Animated Checkmark ═══ */
+            <div className={styles.successContainer}>
+              <svg className={styles.checkmarkSvg} viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="24" fill="none" stroke="var(--success)" strokeWidth="2" opacity="0.3" />
+                <path ref={successPathRef} d="M14 27l7 7 16-16" />
+              </svg>
+              <div ref={successCardRef} style={{ opacity: 0 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', marginBottom: '8px' }}>Order Confirmed!</h3>
+                <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Your order is being prepared.</p>
+              </div>
+            </div>
+          ) : cart.length === 0 ? (
             <EmptyState title="Cart is empty" description="Add some items from the menu" />
           ) : (
             <>
-              <div>
-                {cart.map((item, idx) => (
-                  <div key={idx} className={styles.cartItem}>
-                    <div className={styles.cartItemDetails}>
-                      <div className={styles.cartItemName}>{item.cartQuantity}x {item.name}</div>
-                      {item.customizations && (
-                        <div className={styles.cartItemOption}>{item.customizations}</div>
-                      )}
-                      {item.selectedAdditions && item.selectedAdditions.map(a => (
-                        <div key={a.id} className={styles.cartItemOption}>
-                          + {a.name} ({a.price.toFixed(2)} EGP)
-                        </div>
-                      ))}
-                      <div className={styles.cartItemPrice}>
-                        {(item.price * item.cartQuantity).toFixed(2)} EGP
-                      </div>
-                    </div>
-                    <div className={styles.cartItemControls}>
-                      <button onClick={() => updateQuantity(idx, -1)} className={styles.quantityBtn}>-</button>
-                      <span className={styles.cartItemQty}>{item.cartQuantity}</span>
-                      <button onClick={() => updateQuantity(idx, 1)} className={styles.quantityBtn}>+</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Checkout Details */}
-              <div className={styles.cartItemsList}>
-                <Select
-                  label="Dining Option"
-                  value={orderType}
-                  onChange={e => setOrderType(e.target.value as 'dine_in' | 'takeaway')}
-                  options={
-                    hasTableQR
-                      ? [
-                        { label: 'Dine In (Eat Here)', value: 'dine_in' },
-                        { label: 'Takeaway (Pickup)', value: 'takeaway' }
-                      ]
-                      : [
-                        { label: 'Takeaway (Pickup)', value: 'takeaway' }
-                      ]
-                  }
-                />
-                <FormInput
-                  label={orderType === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"}
-                  value={customerName}
-                  onChange={e => setCustomerName(e.target.value)}
-                />
-                <Textarea
-                  label="Order Notes"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="Allergies, customization details..."
-                  rows={2}
-                />
-                <Select
-                  label="Payment Method"
-                  value={paymentMethod}
-                  onChange={e => setPaymentMethod(e.target.value)}
-                  options={[
-                    { label: 'Cash / Pay at Counter', value: 'cash' },
-                    { label: 'Instapay / Mobile Wallet', value: 'transfer' },
-                  ]}
-                />
-
-                {/* Quick Tips Section */}
-                <div className={styles.tipSection}>
-                  <label className={styles.optionLabel}>Add Tip for Service</label>
-                  <div className={styles.tipGrid}>
-                    {[0, 10, 15, 20].map((pct) => (
-                      <button
-                        key={pct}
-                        type="button"
-                        onClick={() => handleTipPctSelect(pct)}
-                        className={`${styles.tipBtn} ${tipType === 'percent' && tipPct === pct ? styles.tipBtnActive : ''}`}
-                      >
-                        {pct === 0 ? 'No Tip' : `${pct}%`}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.cartNotesWrap}>
-                    <FormInput
-                      placeholder="Custom Tip Amount (EGP)"
-                      value={customTipVal}
-                      onChange={(e) => handleCustomTipChange(e.target.value)}
-                    />
-                  </div>
+              {/* Step Indicator */}
+              <div className={styles.stepIndicator}>
+                <div className={styles.stepLineBg} />
+                <div ref={stepBarRef} className={styles.stepLineProgress} />
+                <div className={`${styles.stepNode} ${checkoutStep >= 1 ? (checkoutStep > 1 ? styles.stepNodeCompleted : styles.stepNodeActive) : ''}`}>
+                  {checkoutStep > 1 ? <Check size={12} /> : '1'}
+                </div>
+                <div className={`${styles.stepNode} ${checkoutStep >= 2 ? styles.stepNodeActive : ''}`}>
+                  2
                 </div>
               </div>
+
+              {checkoutStep === 1 ? (
+                /* Step 1: Cart Items */
+                <div ref={cartListRef}>
+                  {cart.map((item, idx) => (
+                    <div key={`${item.id}-${idx}`} className={`${styles.cartItem} cartItemAnim`} style={{ overflow: 'hidden' }}>
+                      <div className={styles.cartItemDetails}>
+                        <div className={styles.cartItemName}>{item.cartQuantity}x {item.name}</div>
+                        {item.customizations && (
+                          <div className={styles.cartItemOption}>{item.customizations}</div>
+                        )}
+                        {item.selectedAdditions && item.selectedAdditions.map(a => (
+                          <div key={a.id} className={styles.cartItemOption}>
+                            + {a.name} ({a.price.toFixed(2)} EGP)
+                          </div>
+                        ))}
+                        <div className={styles.cartItemPrice}>
+                          {(item.price * item.cartQuantity).toFixed(2)} EGP
+                        </div>
+                      </div>
+                      <div className={styles.cartItemControls}>
+                        <button
+                          onClick={(e) => updateQuantity(idx, -1, (e.target as HTMLElement).closest(`.${styles.cartItem}`) as HTMLElement)}
+                          className={styles.quantityBtn}
+                        >-</button>
+                        <span className={`${styles.cartItemQty} cartQtyBadge`}>{item.cartQuantity}</span>
+                        <button
+                          onClick={(e) => updateQuantity(idx, 1, (e.target as HTMLElement).closest(`.${styles.cartItem}`) as HTMLElement)}
+                          className={styles.quantityBtn}
+                        >+</button>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 'var(--space-lg)', textAlign: 'center' }}>
+                    <Button variant="filled" onClick={() => setCheckoutStep(2)}>Proceed to Checkout</Button>
+                  </div>
+                </div>
+              ) : (
+                /* Step 2: Checkout Details */
+                <div ref={checkoutFormRef}>
+                  <div className="checkoutFieldAnim">
+                    <Select
+                      label="Dining Option"
+                      value={orderType}
+                      onChange={e => setOrderType(e.target.value as 'dine_in' | 'takeaway')}
+                      options={
+                        hasTableQR
+                          ? [
+                            { label: 'Dine In (Eat Here)', value: 'dine_in' },
+                            { label: 'Takeaway (Pickup)', value: 'takeaway' }
+                          ]
+                          : [
+                            { label: 'Takeaway (Pickup)', value: 'takeaway' }
+                          ]
+                      }
+                    />
+                  </div>
+                  <div className="checkoutFieldAnim">
+                    <FormInput
+                      label={orderType === 'takeaway' ? "Your Name (Required for Takeaway)" : "Customer Name (Optional)"}
+                      value={customerName}
+                      onChange={e => setCustomerName(e.target.value)}
+                    />
+                  </div>
+                  <div className="checkoutFieldAnim">
+                    <Textarea
+                      label="Order Notes"
+                      value={notes}
+                      onChange={e => setNotes(e.target.value)}
+                      placeholder="Allergies, customization details..."
+                      rows={2}
+                    />
+                  </div>
+                  <div className="checkoutFieldAnim">
+                    <Select
+                      label="Payment Method"
+                      value={paymentMethod}
+                      onChange={e => setPaymentMethod(e.target.value)}
+                      options={[
+                        { label: 'Cash / Pay at Counter', value: 'cash' },
+                        { label: 'Instapay / Mobile Wallet', value: 'transfer' },
+                      ]}
+                    />
+                  </div>
+
+                  {/* Quick Tips Section */}
+                  <div className={`${styles.tipSection} checkoutFieldAnim`}>
+                    <label className={styles.optionLabel}>Add Tip for Service</label>
+                    <div className={styles.tipGrid}>
+                      {[0, 10, 15, 20].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => handleTipPctSelect(pct)}
+                          className={`${styles.tipBtn} ${tipType === 'percent' && tipPct === pct ? styles.tipBtnActive : ''}`}
+                        >
+                          {pct === 0 ? 'No Tip' : `${pct}%`}
+                        </button>
+                      ))}
+                    </div>
+                    <div className={styles.cartNotesWrap}>
+                      <FormInput
+                        placeholder="Custom Tip Amount (EGP)"
+                        value={customTipVal}
+                        onChange={(e) => handleCustomTipChange(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 'var(--space-md)', textAlign: 'left' }}>
+                    <Button variant="ghost" size="sm" onClick={() => setCheckoutStep(1)}>← Back to Cart</Button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
 
-        {cart.length > 0 && (
+        {cart.length > 0 && !isCheckoutSuccess && (
           <div className={styles.cartFooter}>
             <div className={styles.cartTotalRow}>
               <span>Subtotal</span>
@@ -1028,11 +1221,13 @@ function MenuContent() {
             )}
             <div className={`${styles.cartTotalRow} ${styles.cartGrandTotalRow}`}>
               <span>Total</span>
-              <span>{finalTotal.toFixed(2)} EGP</span>
+              <span ref={totalRef}>{finalTotal.toFixed(2)} EGP</span>
             </div>
-            <Button className="w-full" onClick={submitOrder} loading={isSubmitting}>
-              {t('confirm_order')}
-            </Button>
+            {checkoutStep === 2 && (
+              <Button className="w-full" onClick={submitOrder} loading={isSubmitting}>
+                {t('confirm_order')}
+              </Button>
+            )}
           </div>
         )}
       </div>

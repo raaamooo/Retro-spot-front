@@ -1,0 +1,35 @@
+.decorativeLineContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-md) 0;
+  overflow: hidden;
+}
+
+.decorativeLine {
+  width: 100%;
+  max-width: 300px;
+  height: 2px;
+  background-color: var(--accent); /* Antique gold */
+  transform-origin: center;
+  transform: scaleX(0); /* Default for animation */
+  opacity: 0.8;
+  border-radius: 2px;
+}
+
+.morphingAccent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--space-sm);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.morphingAccent svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  transform-origin: center;
+}

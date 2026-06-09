@@ -24,3 +24,5 @@ export { default as DrinkQuiz } from './ui/DrinkQuiz';
 export { default as Drawer } from './ui/Drawer';
 export { default as StatusStepper } from './ui/StatusStepper';
 export { default as ScrollRevealThreeD } from './ui/ScrollRevealThreeD';
+export { default as DecorativeLine } from './ui/DecorativeLine';
+export { default as MorphingAccent } from './ui/MorphingAccent';

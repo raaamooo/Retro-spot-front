@@ -1,13 +1,92 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Sun, Moon, Menu, X } from 'lucide-react';
+import anime from 'animejs';
+import { useReducedMotion, DURATION_SHORT, EASE_OUT } from '@/animations';
 import styles from './Header.module.css';
+
+/**
+ * Attaches anime.js hover underline animation to a single nav link element.
+ */
+function useNavLinkHover(reducedMotion: boolean) {
+  const linkRef = useRef<HTMLAnchorElement | null>(null);
+  const underlineRef = useRef<HTMLSpanElement | null>(null);
+  const animInstance = useRef<anime.AnimeInstance | null>(null);
+
+  const setRefs = useCallback(
+    (node: HTMLAnchorElement | null) => {
+      linkRef.current = node;
+      if (!node) return;
+
+      // Find or create underline span
+      let underline = node.querySelector<HTMLSpanElement>('.nav-underline-el');
+      if (!underline) {
+        underline = document.createElement('span');
+        underline.className = 'nav-underline-el';
+        Object.assign(underline.style, {
+          position: 'absolute',
+          bottom: '0',
+          left: '0',
+          width: '100%',
+          height: '2px',
+          backgroundColor: 'var(--accent)',
+          transformOrigin: 'left',
+          transform: 'scaleX(0)',
+          pointerEvents: 'none',
+        });
+        node.appendChild(underline);
+      }
+      underlineRef.current = underline;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const el = linkRef.current;
+    if (!el || reducedMotion) return;
+
+    const handleEnter = () => {
+      const ul = underlineRef.current;
+      if (!ul) return;
+      ul.style.transformOrigin = 'left';
+      animInstance.current?.pause();
+      animInstance.current = anime({
+        targets: ul,
+        scaleX: [0, 1],
+        duration: DURATION_SHORT,
+        easing: EASE_OUT,
+      });
+    };
+
+    const handleLeave = () => {
+      const ul = underlineRef.current;
+      if (!ul) return;
+      ul.style.transformOrigin = 'right';
+      animInstance.current?.pause();
+      animInstance.current = anime({
+        targets: ul,
+        scaleX: [1, 0],
+        duration: DURATION_SHORT,
+        easing: EASE_OUT,
+      });
+    };
+
+    el.addEventListener('mouseenter', handleEnter);
+    el.addEventListener('mouseleave', handleLeave);
+    return () => {
+      el.removeEventListener('mouseenter', handleEnter);
+      el.removeEventListener('mouseleave', handleLeave);
+    };
+  }, [reducedMotion]);
+
+  return setRefs;
+}
 
 export default function Header() {
   const { theme, setTheme } = useTheme();
@@ -16,6 +95,13 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const reducedMotion = useReducedMotion();
+
+  // One hook per nav link (stable count)
+  const homeRef = useNavLinkHover(reducedMotion);
+  const menuRef = useNavLinkHover(reducedMotion);
+  const bookingRef = useNavLinkHover(reducedMotion);
+  const artsRef = useNavLinkHover(reducedMotion);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => setMobileOpen(false), [pathname]);
@@ -36,10 +122,10 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: '/', label: t('home') },
-    { href: '/menu', label: t('menu') },
-    { href: '/booking', label: t('booking') },
-    { href: '/arts', label: t('arts') },
+    { href: '/', label: t('home'), ref: homeRef },
+    { href: '/menu', label: t('menu'), ref: menuRef },
+    { href: '/booking', label: t('booking'), ref: bookingRef },
+    { href: '/arts', label: t('arts'), ref: artsRef },
   ];
 
   const isActive = (href: string) =>
@@ -61,6 +147,7 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  ref={link.ref}
                   className={`${styles.navLink} ${isActive(link.href) ? styles.navLinkActive : ''}`}
                 >
                   {link.label}

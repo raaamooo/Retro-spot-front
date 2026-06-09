@@ -19,34 +19,41 @@ const paddingClasses = {
   lg: styles.paddingLg,
 };
 
-export default function Card({
-  children,
-  className = '',
-  hoverable = false,
-  interactive = false,
-  padding = 'md',
-  onClick,
-  ...props
-}: CardProps) {
-  const isHoverable = hoverable || interactive || !!onClick;
-  
-  const classNames = [
-    styles.card,
-    paddingClasses[padding],
-    isHoverable ? styles.hoverable : '',
-    interactive ? styles.interactive : '',
-    className
-  ].filter(Boolean).join(' ');
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({
+    children,
+    className = '',
+    hoverable = false,
+    interactive = false,
+    padding = 'md',
+    onClick,
+    ...props
+  }, ref) => {
+    const isHoverable = hoverable || interactive || !!onClick;
+    
+    const classNames = [
+      styles.card,
+      paddingClasses[padding],
+      isHoverable ? styles.hoverable : '',
+      interactive ? styles.interactive : '',
+      className
+    ].filter(Boolean).join(' ');
 
-  return (
-    <div
-      onClick={onClick}
-      className={classNames}
-      role={onClick || interactive ? 'button' : undefined}
-      tabIndex={onClick || interactive ? 0 : undefined}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
+    return (
+      <div
+        ref={ref}
+        onClick={onClick}
+        className={classNames}
+        role={onClick || interactive ? 'button' : undefined}
+        tabIndex={onClick || interactive ? 0 : undefined}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+Card.displayName = 'Card';
+
+export default Card;

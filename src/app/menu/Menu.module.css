@@ -102,13 +102,19 @@
 }
 
 .categoryPillActive {
-  background-color: var(--primary) !important;
   color: var(--primary-foreground) !important;
-  border-color: var(--primary) !important;
-  box-shadow: 0 4px 10px rgba(44, 26, 14, 0.15);
+  /* background, border and shadow are handled by .tabIndicator now */
 }
 
-:global(.dark) .categoryPillActive {
+.tabIndicator {
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 10px rgba(44, 26, 14, 0.15);
+  transition: opacity var(--transition-fast);
+}
+
+:global(.dark) .tabIndicator {
   box-shadow: 0 4px 10px rgba(237, 217, 192, 0.15);
 }
 
@@ -929,9 +935,14 @@
 }
 
 .coffeeTabActive {
-  background-color: var(--primary) !important;
   color: var(--primary-foreground) !important;
+}
+
+.coffeeTabIndicator {
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
   box-shadow: 0 2px 6px rgba(44, 26, 14, 0.12);
+  transition: opacity var(--transition-fast);
 }
 
 /* ---------- Coming Soon Items Styling ---------- */
@@ -993,4 +1004,177 @@
   padding-bottom: 6px;
   border-bottom: 1px dashed var(--border-subtle);
   width: fit-content;
+}
+
+/* Checkout Step Indicator */
+.stepIndicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xl);
+  position: relative;
+}
+
+.stepLineBg {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--border);
+  z-index: 0;
+  transform: translateY(-50%);
+}
+
+.stepLineProgress {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  background-color: var(--accent);
+  z-index: 1;
+  transform: translateY(-50%);
+  width: 0%; /* Animated via JS */
+}
+
+.stepNode {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--surface);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--muted);
+  transition: all var(--transition-base);
+}
+
+.stepNodeActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stepNodeCompleted {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+/* Success State Checkmark */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) 0;
+  text-align: center;
+}
+
+.checkmarkSvg {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--space-lg);
+  stroke: var(--success);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Order Status Tracker */
+.statusTracker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--space-xl);
+  background-color: var(--surface-elevated);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.statusStep {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  min-height: 80px;
+}
+
+.statusIconCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: var(--space-lg);
+  position: relative;
+  height: 100%;
+}
+
+.statusNode {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--surface);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  color: var(--muted);
+}
+
+.statusNodeActive {
+  border-color: var(--accent);
+  color: var(--accent);
+  background-color: var(--surface);
+}
+
+.statusNodeCompleted {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+.statusLine {
+  width: 2px;
+  height: calc(100% - 32px);
+  background-color: var(--border);
+  position: absolute;
+  top: 32px;
+  z-index: 1;
+}
+
+.statusLineFill {
+  width: 2px;
+  height: calc(100% - 32px);
+  background-color: var(--accent);
+  position: absolute;
+  top: 32px;
+  z-index: 1;
+  transform-origin: top;
+  transform: scaleY(0); /* Animated via JS */
+}
+
+.statusTextCol {
+  padding-top: 4px;
+}
+
+.statusTitle {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+.statusTitleMuted {
+  color: var(--muted);
+}
+
+.statusDesc {
+  font-size: 12px;
+  color: var(--muted);
 }

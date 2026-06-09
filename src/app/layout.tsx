@@ -8,6 +8,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileNavBar from "@/components/layout/MobileNavBar";
 import { API_URL } from "@/lib/constants";
+import ClientTransition from "@/components/layout/ClientTransition";
 
 /* ═══════════════════════════════════════════════════════════════
    SEO — Metadata, Open Graph, Twitter Card, Structured Data
@@ -131,8 +132,8 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <ToastProvider>
               <Header />
-              <main className="page-enter" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                {children}
+              <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <ClientTransition>{children}</ClientTransition>
               </main>
               <Footer />
               <MobileNavBar />

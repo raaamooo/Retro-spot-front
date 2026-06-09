@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { usePageEntrance } from '@/animations';
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -23,8 +24,11 @@ export default function PageContainer({
   maxWidth = 'xl',
   padding = true,
 }: PageContainerProps) {
+  const entranceRef = usePageEntrance<HTMLDivElement>();
+
   return (
     <div
+      ref={entranceRef}
       className={`
         mx-auto w-full
         ${maxWidthClasses[maxWidth]}

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useAnimeScrollReveal } from '@/animations';
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -12,37 +12,33 @@ interface ScrollRevealProps {
   duration?: number; // in ms
 }
 
+/**
+ * Scroll-reveal wrapper powered by Anime.js.
+ *
+ * Child content fades + slides into view when the element crosses
+ * the viewport threshold (15 %). Respects `prefers-reduced-motion`.
+ */
 export default function ScrollReveal({
   children,
   className = '',
   delay = 0,
   direction = 'up',
-  distance = 20,
-  duration = 500,
+  distance = 24,
+  duration = 520,
 }: ScrollRevealProps) {
-  const [ref, isVisible] = useScrollReveal<HTMLDivElement>();
-
-  const getTransform = () => {
-    if (!isVisible) {
-      switch (direction) {
-        case 'up': return `translateY(${distance}px)`;
-        case 'down': return `translateY(-${distance}px)`;
-        case 'left': return `translateX(${distance}px)`;
-        case 'right': return `translateX(-${distance}px)`;
-        case 'none': return 'none';
-      }
-    }
-    return 'translateY(0) translateX(0)';
-  };
+  const [ref] = useAnimeScrollReveal<HTMLDivElement>({
+    delay,
+    direction,
+    distance,
+    duration,
+  });
 
   return (
     <div
       ref={ref}
       className={className}
       style={{
-        opacity: isVisible ? 1 : 0,
-        transform: getTransform(),
-        transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
+        opacity: 0,
         willChange: 'opacity, transform',
       }}
     >
