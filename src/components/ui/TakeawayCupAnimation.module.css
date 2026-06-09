@@ -1,0 +1,83 @@
+/*
+ * Takeaway Cup Animation Styles
+ * Basic layout for the takeaway coffee cup animation
+ */
+
+/* Container for the cup lid animation */
+.takeaway-cup-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+/* Cup lid - the animated part */
+.takeaway-cup-container .cup-lid {
+  position: absolute;
+  top: 20px; /* adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 40px;
+  background: linear-gradient(
+    to bottom,
+    var(--accent) 0%,
+    var(--accent-hover) 100%
+  );
+  border-radius: 50% 50% 0 0;
+  transform-origin: bottom center;
+  z-index: 10;
+}
+
+/* Cup body */
+.takeaway-cup-container .cup-body {
+  position: absolute;
+  top: 60px; /* below lid */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  background: var(--surface-elevated);
+  border: 2px solid var(--border);
+  border-radius: 0 0 50% 50%;
+  overflow: hidden;
+  z-index: 5;
+}
+
+/* Content under lid (buttons) */
+.takeaway-cup-container .cup-content {
+  position: absolute;
+  top: 100px; /* inside cup, adjust */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  pointer-events: none; /* let clicks pass through to links? we'll set on links */
+  z-index: 8;
+}
+
+/* Ensure buttons are clickable */
+.takeaway-cup-container .cup-content a {
+  pointer-events: all;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .takeaway-cup-container .cup-lid {
+    width: 150px;
+    height: 30px;
+  }
+
+  .takeaway-cup-container .cup-body {
+    width: 150px;
+    height: 150px;
+  }
+
+  .takeaway-cup-container .cup-content {
+    top: 80px;
+    gap: 8px;
+  }
+}
