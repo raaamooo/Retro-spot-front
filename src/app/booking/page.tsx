@@ -304,7 +304,7 @@ export default function BookingPage() {
             <div key="step-1" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
-                  {isRtl ? 'حجز مساحة أو طاولة' : 'Reservations'}
+                  {t('space_table_booking')}
                 </span>
                 <h1 className={styles.title}>{t('what_are_you_booking')}</h1>
                 <p className={styles.subtitle}>{t('select_booking_type')}</p>
@@ -469,7 +469,7 @@ export default function BookingPage() {
             <div key="step-3" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
-                  {isRtl ? 'بيانات الحجز' : 'Details'}
+                  {t('booking_details')}
                 </span>
                 <h1 className={styles.title}>{t('contact_and_date')}</h1>
                 <p className={styles.subtitle}>{t('your_info_and_timing')}</p>
@@ -566,7 +566,7 @@ export default function BookingPage() {
             <div key="step-4" className={styles.stepWrapper}>
               <div className={styles.headerBlock}>
                 <span className={styles.kicker}>
-                  {isRtl ? 'تأكيد الحجز والدفع' : 'Deposit'}
+                  {t('deposit')}
                 </span>
                 <h1 className={styles.title}>{t('payment')}</h1>
                 <p className={styles.subtitle}>{t('secure_your_booking')}</p>

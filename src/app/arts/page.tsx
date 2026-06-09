@@ -135,7 +135,7 @@ export default function ArtsPage() {
         <section>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionSubtitle}>
-              {isRtl ? 'المعرض الفني والأعمال الأسبوعية' : 'The Exhibition'}
+              {t('the_exhibition')}
             </span>
             <div className={styles.titleRow}>
               <Heart size={24} className={styles.titleIcon} />
@@ -148,10 +148,9 @@ export default function ArtsPage() {
             <div className={styles.photoDisplay}>
               <div className={styles.photoTint} />
               <ImageIcon size={48} className={styles.photoIcon} />
-              <span className={styles.photoLabel}>{isRtl ? 'صورة اللوحة' : 'Midnight Jazz Canvas'}</span>
+              <span className={styles.photoLabel}>{t('midnight_jazz_canvas')}</span>
               <div className={styles.timerBadge}>
-                <Clock size={12} /> {isRtl ? 'تنتهي خلال ٣ أيام' : 'Ends in 3 Days'}
-              </div>
+                <Clock size={12} /> {t('bidding_ends_in')}</div>
             </div>
 
             {/* Bidding Information */}
@@ -280,11 +279,11 @@ export default function ArtsPage() {
         <section>
           <div className={`${styles.sectionHeader} ${styles.marginTopLg}`}>
             <span className={styles.sectionSubtitle}>
-              {isRtl ? 'هل أنت فنان؟ شارك إبداعك' : 'For the Artists'}
+              {t('for_the_artists')}
             </span>
             <div className={styles.titleRow}>
               <UploadCloud size={24} className={styles.titleIcon} />
-              <h2 className={styles.sectionTitle}>{t('submit_your_art')}</h2>
+              <h2 className={styles.sectionTitle}>{t('submit_art')}</h2>
             </div>
           </div>
 

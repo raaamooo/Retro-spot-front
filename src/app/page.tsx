@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { MapPin, Newspaper, CalendarDays, Coffee, Music, Palette } from 'lucide-react';
 import { Button, Card, EmptyState, ScrollReveal, PageContainer, ScrollRevealThreeD } from '@/components';
-import { useThreeDReveal } from '@/hooks/useThreeDReveal';
+import { CupLidAnimation } from '@/components/ui/CupLidAnimation';
 import { API_URL } from '@/lib/constants';
 import styles from './Home.module.css';
 
@@ -35,35 +35,12 @@ export default function Home() {
       .catch(() => setLoading(false));
   }, []);
 
-  const [heroNarrativeRef, isHeroVisible] = useThreeDReveal({ once: true });
 
   return (
     <PageContainer>
-      {/* HERO SECTION */}
+      {/* HERO SECTION - Premium Cup Lid Scroll Animation */}
       <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <div className={`hero-3d-flip ${isHeroVisible ? 'visible' : ''}`}>
-            <div className={styles.heroNarrative} ref={heroNarrativeRef}>
-              <span className={styles.kicker}>
-                {isRtl ? 'القهوة • العمل • الفن' : 'Specialty Coffee • Crafted Workspace • Art Gallery'}
-              </span>
-              <h1 className={styles.title}>
-                Retro <br />
-                <span className={styles.titleAccent}>Spot</span>
-              </h1>
-              <div className={styles.divider} />
-              <p className={styles.subtitle}>{t('subtitle')}</p>
-              <div className={styles.actions}>
-                <Link href="/menu">
-                  <Button variant="filled" size="lg">{t('order_now')}</Button>
-                </Link>
-                <Link href="/booking">
-                  <Button variant="ghost" size="lg">{t('book_table')}</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CupLidAnimation className="cup-lid-hero" />
       </section>
 
       <div className="container"><div className="golden-divider" /></div>
@@ -75,7 +52,7 @@ export default function Home() {
             <div className={styles.sectionHeader}>
               <div className="heading-3d-drop">
                 <span className={styles.kicker}>
-                  {isRtl ? 'الأخبار والأحداث' : 'The Gazette'}
+                  {t('gazette')}
                 </span>
                 <h2 className="h2">
                   {[...t('latest_news')].map((letter, index) => (
@@ -84,7 +61,7 @@ export default function Home() {
                 </h2>
               </div>
               <p className={styles.sectionDesc}>
-                {isRtl ? 'كن على اطلاع دائم بآخر المستجدات.' : 'Artisan workshops, music listings, and seasonal coffee updates from our baristas.'}
+                {t('gazette_desc')}
               </p>
             </div>
           </ScrollRevealThreeD>
@@ -134,7 +111,7 @@ export default function Home() {
               <ScrollReveal>
                 <div className="heading-3d-drop">
                   <span className={styles.kicker}>
-                    {isRtl ? 'قصتنا' : 'Our Story'}
+                    {t('about_us')}
                   </span>
                   <h2 className="h2">
                     {[...t('about_us')].map((letter, index) => (
@@ -180,9 +157,9 @@ export default function Home() {
           <ScrollRevealThreeD delay={200}>
             <div className={`${styles.featuresGrid} feature-3d-rotate`}>
               {[
-                { icon: Coffee, title: t('coffee'), desc: isRtl ? 'حبوب قهوة مختصة، محمصة بعناية.' : 'Specialty beans, expertly roasted.' },
-                { icon: Music, title: t('music'), desc: isRtl ? 'أجواء موسيقية هادئة للعمل.' : 'Curated playlists and vinyl records.' },
-                { icon: Palette, title: t('art_gallery'), desc: isRtl ? 'معرض فني محلي ومتجدد.' : 'Local art gallery and creative space.' }
+                { icon: Coffee, title: t('coffee'), desc: t('coffee_desc') },
+                { icon: Music, title: t('music'), desc: t('music_desc') },
+                { icon: Palette, title: t('art_gallery'), desc: t('art_gallery_desc') }
               ].map((feature, i) => (
                 <div key={i} className={styles.featureItem}>
                   <div className={styles.featureIcon}>
@@ -202,7 +179,7 @@ export default function Home() {
         <ScrollRevealThreeD>
           <div className="heading-3d-drop">
             <h2 className="h2" style={{ margin: '0 auto 24px', maxWidth: '800px' }}>
-              {[...t('Ready to experience Retro Spot?')].map((letter, index) => (
+              {[...t('ready_to_experience')].map((letter, index) => (
                 <span key={index}>{letter}</span>
               ))}
             </h2>

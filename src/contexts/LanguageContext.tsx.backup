@@ -20,8 +20,6 @@ const translations: Record<string, { en: string; ar: string }> = {
   subtitle: { en: 'Your cozy space for coffee, work, and art.', ar: 'مساحتك الدافئة للقهوة والعمل والفن.' },
   order_now: { en: 'Order Now', ar: 'اطلب الآن' },
   book_table: { en: 'Book a Table', ar: 'احجز طاولة' },
-  kicker: { en: 'Specialty Coffee • Crafted Workspace • Art Gallery', ar: 'القهوة • العمل • الفن' },
-  gazette: { en: 'The Gazette', ar: 'الأخبار والأحداث' },
 
   // Menu
   add_to_cart: { en: 'Add to Cart', ar: 'أضف للسلة' },
@@ -121,7 +119,6 @@ const translations: Record<string, { en: string; ar: string }> = {
   event: { en: 'Event', ar: 'فعالية' },
   discount: { en: 'Discount', ar: 'خصم' },
   announcement: { en: 'Announcement', ar: 'إعلان' },
-  gazette_desc: { en: 'Artisan workshops, music listings, and seasonal coffee updates from our baristas.', ar: 'كن على اطلاع دائم بآخر المستجدات.' },
 
   // Misc
   play_with_us: { en: 'Play With Us', ar: 'العب معنا' },
@@ -163,8 +160,6 @@ const translations: Record<string, { en: string; ar: string }> = {
   submit_booking: { en: 'Submit Booking', ar: 'تأكيد الحجز' },
   booking_success: { en: 'Booking Confirmed!', ar: 'تم تأكيد الحجز!' },
   enjoy_event: { en: 'Thank you for choosing Retro, enjoy your', ar: 'شكراً لاختيارك ريترو، استمتع بـ' },
-  space_table_booking: { en: 'Space or Table Booking', ar: 'حجز مساحة أو طاولة' },
-  deposit: { en: 'Deposit', ar: 'مبلغ الحجز' },
   copy: { en: 'Copy', ar: 'نسخ' },
   copied: { en: 'Copied!', ar: 'تم النسخ!' },
 
@@ -209,15 +204,6 @@ const translations: Record<string, { en: string; ar: string }> = {
   painting_name: { en: 'Painting Name', ar: 'اسم اللوحة' },
   artist_name: { en: 'Artist Name', ar: 'اسم الفنان' },
   bid_amount: { en: 'Your Bid Amount', ar: 'قيمة مزايدتك' },
-  the_exhibition: { en: 'The Exhibition', ar: 'المعرض الفني والأعمال الأسبوعية' },
-  midnight_jazz_canvas: { en: 'Midnight Jazz Canvas', ar: 'صورة اللوحة' },
-  bidding_ends_in: { en: 'Ends in 3 Days', ar: 'تنتهي خلال ٣ أيام' },
-  for_the_artists: { en: 'For the Artists', ar: 'هل أنت فنان؟ شارك إبداعك' },
-  submit_request: { en: 'Submit Request', ar: 'قدم الطلب' },
-  the_exhibition: { en: 'The Exhibition', ar: 'المعرض الفني والأعمال الأسبوعية' },
-  midnight_jazz_canvas: { en: 'Midnight Jazz Canvas', ar: 'صورة اللوحة' },
-  ends_in_days: { en: 'Ends in {days} Days', ar: 'تنتهي خلال {days} أيام' },
-  for_the_artists: { en: 'For the Artists', ar: 'هل أنت فنان؟ شارك إبداعك' },
 
   // Admin Flow specific
   new: { en: 'New', ar: 'جديد' },
@@ -298,12 +284,8 @@ const translations: Record<string, { en: string; ar: string }> = {
   about_us: { en: 'Our Story', ar: 'قصتنا' },
   about_desc: { en: 'We are a unique space combining a cozy retro cafe with a productive workspace and an inspiring art gallery. Experience the perfect blend of nostalgia and creativity.', ar: 'نحن مساحة فريدة تجمع بين مقهى دافئ بتصميم كلاسيكي، ومساحة عمل مثمرة، ومعرض فني ملهم. اختبر المزيج المثالي بين الحنين والإبداع.' },
   coffee: { en: 'Specialty Coffee', ar: 'قهوة مختصة' },
-  coffee_desc: { en: 'Specialty beans, expertly roasted.', ar: 'حبوب قهوة مختصة، محمصة بعناية.' },
   music: { en: 'Music & Vibes', ar: 'موسيقى وأجواء' },
-  music_desc: { en: 'Curated playlists and vinyl records.', ar: 'أجواء موسيقية هادئة للعمل.' },
   art_gallery: { en: 'Art Gallery', ar: 'معرض فني' },
-  art_gallery_desc: { en: 'Local art gallery and creative space.', ar: 'معرض فني محلي ومتجدد.' },
-  ready_to_experience: { en: 'Ready to experience Retro Spot?', ar: 'جاهز لتجربة ريترو سبوت؟' },
 
   // Empty / Error states  
   no_results: { en: 'No results found', ar: 'لم يتم العثور على نتائج' },
