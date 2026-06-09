@@ -21,7 +21,7 @@ export default function TakeawayCupAnimation({ className = '' }: TakeawayCupAnim
       {/* Scene under lid (menu + booking buttons) */}
       <div ref={buttonsRef} className="cup-content">
         <Link href="/menu">
-          <Button variant="outlined">{t('menu')}</Button>
+          <Button variant="outline">{t('menu')}</Button>
         </Link>
         <Link href="/booking">
           <Button variant="filled">{t('book_table')}</Button>
